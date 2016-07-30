@@ -145,8 +145,8 @@ public class test {
         String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
-        if( commandLine.hasOption('F') ) {
-            DirPath=commandLine.getOptionValue('F');
+        if( commandLine.hasOption('D') ) {
+            DirPath=commandLine.getOptionValue('D');
         }
         if( commandLine.hasOption('T') ) {
             TraceFilet = commandLine.getOptionValue('T');

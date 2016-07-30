@@ -6,28 +6,4 @@ LIBS=LIB_DIR+"commons-collections-3.2.1.jar:"+LIB_DIR+"commons-cli-1.3.1.jar:"+L
 ENTRY_POINT = "demo.test"
 path=sys.argv[1]
 Tracefile=sys.argv[2]
-filelist=[]
-print path
-
-def getFilelist(path):
-    global filelist
-    files = os.listdir(path)
-    for f in files:
-        if(os.path.isdir(path + '/' + f)):
-            if(f[0] == '.'):
-                pass
-            else:
-                getFilelist(path + '/' + f)
-        if(os.path.isfile(path + '/' + f)):
-            if(f.endswith(".java")):
-                filelist.append(path + '/' + f)
-
-getFilelist(path)
-length=len(filelist)
-i=0
-for f in filelist:
-	print i,
-	print "/",
-	print length
-	i=i+1
-	os.system("java -cp bin/:"+LIBS+" "+ENTRY_POINT +" -F "+f+" -T "+Tracefile)
+os.system("java -cp bin/:"+LIBS+" "+ENTRY_POINT +" -D "+path+" -T "+Tracefile)
