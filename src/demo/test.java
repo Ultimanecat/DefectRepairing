@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -130,6 +131,8 @@ public class test {
     
     
     public static void main(String args[]) throws IOException, ParseException{
+        boolean verboset=false;
+        
         // Create a Parser
         CommandLineParser cmdlparser = new BasicParser( );
         Options options = new Options( );
@@ -141,7 +144,7 @@ public class test {
         // Set the appropriate variables based on supplied options
         String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
-        boolean verboset=false;
+        
         if( commandLine.hasOption('F') ) {
             DirPath=commandLine.getOptionValue('F');
         }
@@ -153,19 +156,26 @@ public class test {
         }
         final String TraceFile=TraceFilet;
         final boolean verbose=verboset;
-        
-        List<String> filelist=new ArrayList<String> ();
-        getFilelist(DirPath,filelist);
+        List<String> filelist=new ArrayList<String> ();;
+        if(verbose)
+            filelist.add(new String("/Users/liuxinyuan/DefectRepairing/Math1b/src/main/java/org/apache/commons/math3/optim/nonlinear/scalar/noderiv/AbstractSimplex.java"));
+        else
+            getFilelist(DirPath,filelist);
         
         
         ASTParser parser = ASTParser.newParser(AST.JLS3);
+        final AST ast = AST.newAST(AST.JLS3);
         
         int TotalNum=filelist.size();
         int CurNum=0;
         
+        
+        
         for(String FilePath:filelist)
+            
         {
             source = readFileToString(FilePath);
+            //else source="public class A{\nvoid foo(){\nfor(int i=0;i<5;i++)\ni++;\n}\n}";
             curLine = 1;
             curChar = 0;
             outputBuffer=new String();
@@ -188,15 +198,18 @@ public class test {
                 
                 public void insertprint(String printMSG)
                 {
-                    outputBuffer += "\ntry {\n"
-                    +"RandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
-                    +"long fileLength = randomFile.length();\n"
-                    +"randomFile.seek(fileLength);\n"
-                    +"randomFile.writeBytes("+ printMSG +"+ \"\\n\");\n"
-                    +"randomFile.close();\n"
-                    +"} catch (IOException e__e__e) {\n"
-                    +"e__e__e.printStackTrace();\n"
-                    +"}\n";
+                    if(verbose)
+                        outputBuffer += "\ndebug\n";
+                    else
+                        outputBuffer += "\ntry {\n"
+                        +"RandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
+                        +"long fileLength = randomFile.length();\n"
+                        +"randomFile.seek(fileLength);\n"
+                        +"randomFile.writeBytes("+ printMSG +"+ \"\\n\");\n"
+                        +"randomFile.close();\n"
+                        +"} catch (IOException e__e__e) {\n"
+                        +"e__e__e.printStackTrace();\n"
+                        +"}\n";
                 }
                 
                 //变量声明
@@ -206,14 +219,6 @@ public class test {
                 //				System.out.println("Declaration of '"+name+"' at line"+cu.getLineNumber(name.getStartPosition()));
                 //				return true; // do not continue to avoid usage info
                 //			}
-                
-                //			public boolean visit(SimpleName node) {
-                //				if (this.names.contains(node.getIdentifier())) {
-                //				System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
-                //				}
-                //				return true;
-                //			}
-                
                 
                 //			public boolean visit(Assert node) {
                 //			Todo
@@ -291,56 +296,104 @@ public class test {
                 public boolean visit(ForStatement node) {
                     int line=cu.getLineNumber(node.getStartPosition());
                     if(verbose)System.out.print("ForStatement:"+"line " + line);
-                    //				String printStatement="\"ForStatement:Line "+line+"\"";
-                    //				List<Expression> l=node.updaters();
-                    //				for(Expression e:l)
-                    //				{
-                    //					//System.out.print(e.toString());
-                    //					if(e instanceof Assignment)
-                    //					{
-                    //						String name=((Assignment) e).getLeftHandSide().toString();
-                    //						System.out.print(","+name);
-                    //						printStatement += "+\",update:"+name+"=\"+"+name;
-                    //					}
-                    //					else if(e instanceof PostfixExpression)
-                    //					{
-                    //						String name=((PostfixExpression) e).getOperand().toString();
-                    //						System.out.print(","+ name);
-                    //						printStatement += "+\",update:"+name+"=\"+"+name;
-                    //						
-                    //					}
-                    //					else if(e instanceof PrefixExpression)
-                    //					{
-                    //						if( (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.INCREMENT 
-                    //							|| (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.DECREMENT)
-                    //						{
-                    //							String name=((PrefixExpression) e).getOperand().toString();
-                    //							System.out.print(","+name);
-                    //							printStatement += "+\",update:"+name+"=\"+"+name;
-                    //						}
-                    //						
-                    //					}
-                    //					
-                    //				}
-                    //				System.out.println();
-                    //				
-                    //				copyLines(line);
-                    //				insertprint(printStatement);
                     
-                    return true;		
+                    String printMSG="\"ForStatement:Line "+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    List<Expression> l=node.updaters();
+                    for(Expression e:l)
+                    {
+                        if(e instanceof Assignment)
+                        {
+                            String name=((Assignment) e).getLeftHandSide().toString();
+                            if(verbose)System.out.print(","+name);
+                            printMSG += "+\",update:"+name+"=\"+"+name;
+                        }
+                        else if(e instanceof PostfixExpression)
+                        {
+                            String name=((PostfixExpression) e).getOperand().toString();
+                            if(verbose)System.out.print(","+ name);
+                            printMSG += "+\",update:"+name+"=\"+"+name;
+                            
+                        }
+                        else if(e instanceof PrefixExpression)
+                        {
+                            if( (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.INCREMENT
+                               || (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.DECREMENT)
+                            {
+                                String name=((PrefixExpression) e).getOperand().toString();
+                                if(verbose)System.out.print(","+name);
+                                printMSG += "+\",update:"+name+"=\"+"+name;
+                            }
+                            
+                        }
+                        
+                    }
+                    if(verbose)System.out.println();
+                    Statement body=node.getBody();
+                    if(body instanceof Block)
+                    {
+                        copyto(body.getStartPosition()+1);
+                        insertprint(printMSG);
+                        return true;
+                    }
+                    else
+                    {
+                        copyto(body.getStartPosition());
+                        outputBuffer+="{\n";
+                        insertprint(printMSG);
+                        copyto(body.getStartPosition()+body.getLength());
+                        //TODO
+                        outputBuffer+="\n}";
+                        return false;
+                    }
+                    
+                    
                 }
                 
                 public boolean visit(DoStatement node) {
                     if(verbose)System.out.println( "DoStatement:line "+cu.getLineNumber(node.getStartPosition()) +","+ cu.getLineNumber((node.getStartPosition()+node.getLength())));
+                    Statement body=node.getBody();
+                    String printMSG="\"DoStatement:Line "+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    if(body instanceof Block)
+                    {
+                        copyto(body.getStartPosition()+1);
+                        insertprint(printMSG);
+                        return true;
+                    }
+                    else
+                    {
+                        copyto(body.getStartPosition());
+                        outputBuffer+="{\n";
+                        insertprint(printMSG);
+                        copyto(body.getStartPosition()+body.getLength());
+                        //TODO
+                        outputBuffer+="\n}";
+                        return false;
+                    }
                     
-                    return true;
                     
                 }
                 
                 public boolean visit(WhileStatement node) {
                     if(verbose)System.out.println("WhileStatement:line " + cu.getLineNumber(node.getStartPosition()));
+                    Statement body=node.getBody();
+                    String printMSG="\"WhileStatement:Line "+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    if(body instanceof Block)
+                    {
+                        copyto(body.getStartPosition()+1);
+                        insertprint(printMSG);
+                        return true;
+                    }
+                    else
+                    {
+                        copyto(body.getStartPosition());
+                        outputBuffer+="{\n";
+                        insertprint(printMSG);
+                        copyto(body.getStartPosition()+body.getLength());
+                        //TODO
+                        outputBuffer+="\n}";
+                        return false;
+                    }
                     
-                    return true;
                 }
                 
                 public boolean visit(IfStatement node) {
@@ -351,8 +404,40 @@ public class test {
                     }
                     else if(verbose)System.out.println("null");
                     
-                    return true;
+                    Statement body=node.getThenStatement();
+                    String printMSG="\"IfStatement:Line "+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    //TODO
+                    if(body instanceof Block)
+                    {
+                        copyto(body.getStartPosition()+1);
+                        insertprint(printMSG);
+                        return true;
+                    }
+                    else
+                    {
+                        copyto(body.getStartPosition());
+                        outputBuffer+="{\n";
+                        insertprint(printMSG);
+                        copyto(body.getStartPosition()+body.getLength());
+                        //TODO
+                        outputBuffer+="\n}";
+                        return false;
+                    }
+                    
                 }
+                
+                
+                //				public boolean visit(ReturnStatement node) {
+                //					int line=cu.getLineNumber(node.getStartPosition());
+                //					if(verbose)System.out.print("ReturnStatement:line "+line);
+                //					
+                //					System.out.println("a"+node.getStartPosition());
+                //					copyto(node.getStartPosition());
+                //					System.out.println("b");
+                //					String printMSG = "\"ReturnStatement:value=\"+"+node.getExpression()+"+\",Line "+line+"\"";
+                //					insertprint(printMSG);
+                //					return false;
+                //				}
                 
                 
                 
@@ -361,13 +446,15 @@ public class test {
             copytoEnd();
             if(verbose)System.out.print(outputBuffer);
             
-            
-            FileWriter fw= new FileWriter(FilePath);
-            fw.write(outputBuffer);
-            fw.close();
-            CurNum++;
-            System.out.println(FilePath);
-            System.out.println(CurNum+"/"+TotalNum);
+            if(!verbose)
+            {
+                FileWriter fw= new FileWriter(FilePath);
+                fw.write(outputBuffer);
+                fw.close();
+                CurNum++;
+                System.out.println(FilePath);
+                System.out.println(CurNum+"/"+TotalNum);
+            }
         }
     }
     
