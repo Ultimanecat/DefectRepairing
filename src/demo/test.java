@@ -12,9 +12,12 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -27,6 +30,8 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+
 import java.io.PrintStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -102,6 +107,7 @@ public class test {
             }
         }
         curChar=pos;
+        //System.out.println(preChar+","+pos);
         outputBuffer+=source.substring(preChar, pos);
     }
     
@@ -142,7 +148,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Time9b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -158,7 +164,7 @@ public class test {
         final boolean verbose=verboset;
         List<String> filelist=new ArrayList<String> ();;
         if(verbose)
-            filelist.add(new String("/Users/liuxinyuan/DefectRepairing/Math1b/src/main/java/org/apache/commons/math3/optim/nonlinear/scalar/noderiv/AbstractSimplex.java"));
+            filelist.add(new String("/Users/liuxinyuan/DefectRepairing/Math1b/src/main/java/org/apache/commons/math3/linear/SparseRealVector.java"));
         else
             getFilelist(DirPath,filelist);
         
@@ -171,9 +177,10 @@ public class test {
         
         
         
-        for(String FilePath:filelist)
+        for(final String FilePath:filelist)
             
         {
+            System.out.println(FilePath);
             source = readFileToString(FilePath);
             //else source="public class A{\nvoid foo(){\nfor(int i=0;i<5;i++)\ni++;\n}\n}";
             curLine = 1;
@@ -196,33 +203,134 @@ public class test {
                     return node;
                 }
                 
+                public boolean isinMethod(ASTNode node)
+                {
+                    while(node!=null)
+                    {
+                        node=node.getParent();
+                        if(node instanceof MethodDeclaration)
+                            return true;
+                    }
+                    return false;
+                }
+                
                 public void insertprint(String printMSG)
                 {
                     if(verbose)
-                        outputBuffer += "\ndebug\n";
+                        outputBuffer += "\ndebug:"+printMSG+"\n";
                     else
-                        outputBuffer += "\ntry {\n"
-                        +"RandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
-                        +"long fileLength = randomFile.length();\n"
-                        +"randomFile.seek(fileLength);\n"
-                        +"randomFile.writeBytes("+ printMSG +"+ \"\\n\");\n"
-                        +"randomFile.close();\n"
-                        +"} catch (IOException e__e__e) {\n"
-                        +"e__e__e.printStackTrace();\n"
-                        +"}\n";
+                        //						outputBuffer += "\ntry {\n"
+                        //							+"RandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
+                        //							+"long fileLength = randomFile.length();\n"
+                        //							+"randomFile.seek(fileLength);\n"
+                        //							+"randomFile.writeBytes("+ printMSG +"+\","+FilePath+"\""+"+ \"\\n\");\n"
+                        //							+"randomFile.close();\n"
+                        //							+"} catch (IOException e__e__e) {\n"
+                        //							+"e__e__e.printStackTrace();\n"
+                        //							+"}\n";
+                        outputBuffer += "\nprintRuntimeMSG("+ printMSG +");\n";
                 }
                 
-                //变量声明
-                //			public boolean visit(VariableDeclarationFragment node) {
-                //				SimpleName name = node.getName();
-                //				this.names.add(name.getIdentifier());
-                //				System.out.println("Declaration of '"+name+"' at line"+cu.getLineNumber(name.getStartPosition()));
-                //				return true; // do not continue to avoid usage info
-                //			}
                 
-                //			public boolean visit(Assert node) {
-                //			Todo
-                //		}
+                
+                
+                //变量声明
+                public void endVisit(VariableDeclarationFragment node) {
+                    String name=node.getName().toString();
+                    if(node.getInitializer()!=null)
+                    {
+                        if(!isinMethod(node))return;
+                        ASTNode ParentStatement=getparentstatement(node);
+                        if(ParentStatement instanceof WhileStatement||
+                           ParentStatement instanceof DoStatement||
+                           ParentStatement instanceof ForStatement||
+                           ParentStatement instanceof IfStatement||
+                           ParentStatement instanceof ReturnStatement)
+                            return;
+                        int line=cu.getLineNumber(node.getStartPosition());
+                        
+                        if(verbose)System.out.println("VariableDeclaration:"+"line " + line + ","+name);
+                        copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
+                        String printMSG = "\"VariableDeclaration:"+name+"=\"+"+name+"+\",Line "+line+"\"";
+                        insertprint(printMSG);
+                        return;
+                    }
+                    if(verbose)System.out.println("Declaration of '"+name+"' at line"+cu.getLineNumber(node.getStartPosition()));
+                    return;
+                }
+                
+                public boolean visit(MethodDeclaration node)
+                {
+                    if(node.isConstructor())//
+                        return true;
+                    Block body=node.getBody();
+                    if(body==null)
+                        return true;
+                    
+                    int line=cu.getLineNumber(node.getStartPosition());
+                    if(verbose)System.out.println("MethodDeclaration:"+node.getName().toString()+",Line "+line);
+                    
+                    
+                    List<SingleVariableDeclaration> parameters=node.parameters();
+                    copyto(body.getStartPosition()+1);
+                    
+                    String printMSG="\"Method invoked:"+node.getName().toString()+"\"";
+                    for(SingleVariableDeclaration FormalParameter:parameters)
+                    {
+                        String name=FormalParameter.getName().toString();
+                        if(verbose)System.out.println(name);
+                        printMSG+="+\","+name+"=\"+"+name;
+                    }
+                    
+                    printMSG+="+\","+"Line: "+line+"\"";
+                    insertprint(printMSG);
+                    
+                    
+                    
+                    
+                    return true;
+                }
+                
+                public boolean isInnerClass(ASTNode node)
+                {
+                    while(node!=null)
+                    {
+                        node=node.getParent();
+                        if(node instanceof TypeDeclaration)
+                            if(((TypeDeclaration) node).isInterface()==false)
+                                return true;
+                    }
+                    return false;
+                }
+                
+                public boolean visit (TypeDeclaration node)
+                {
+                    if(verbose)System.out.println("TypeDeclaration:Line "+cu.getLineNumber(node.getStartPosition()));
+                    if(node.isInterface())
+                        return false;
+                    else
+                    {
+                        if(isInnerClass(node))return true;
+                        if(node.bodyDeclarations().isEmpty())return false;
+                        
+                        
+                        copyto(((BodyDeclaration)(node.bodyDeclarations().get(0))).getStartPosition());
+                        outputBuffer+="\nstatic public void printRuntimeMSG (String printMSG)\n"
+                        +"{\n"
+                        +"\ttry {\n"
+                        +"\tRandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
+                        +"\tlong fileLength = randomFile.length();\n"
+                        +"\trandomFile.seek(fileLength);\n"
+                        +"\trandomFile.writeBytes(printMSG"  +"+\","+FilePath+"\""+"+ \"\\n\");\n"
+                        +"\trandomFile.close();\n"
+                        +"\t} catch (IOException e__e__e) {\n"
+                        +"\te__e__e.printStackTrace();\n"
+                        +"\t}\n"
+                        +"}\n";
+                        
+                        return true;
+                    }
+                }
                 
                 public boolean visit (PackageDeclaration node)
                 {
@@ -233,14 +341,15 @@ public class test {
                     
                 }
                 
-                public boolean visit(Assignment node) {
+                public void endVisit(Assignment node) {
+                    if(!isinMethod(node))return;
                     ASTNode ParentStatement=getparentstatement(node);
                     if(ParentStatement instanceof WhileStatement||
                        ParentStatement instanceof DoStatement||
                        ParentStatement instanceof ForStatement||
                        ParentStatement instanceof IfStatement||
                        ParentStatement instanceof ReturnStatement)
-                        return true;
+                        return;
                     
                     int line=cu.getLineNumber(node.getStartPosition());
                     
@@ -250,16 +359,18 @@ public class test {
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
                     String printMSG = "\"Assignment:"+name+"=\"+"+name+"+\",Line "+line+"\"";
                     insertprint(printMSG);
-                    return true;
+                    return;
                 }
-                public boolean visit(PostfixExpression node) {
+                
+                public void endVisit(PostfixExpression node) {
+                    if(!isinMethod(node))return;
                     ASTNode ParentStatement=getparentstatement(node);
                     if(ParentStatement instanceof WhileStatement||
                        ParentStatement instanceof DoStatement||
                        ParentStatement instanceof ForStatement||
                        ParentStatement instanceof IfStatement||
                        ParentStatement instanceof ReturnStatement)
-                        return true;
+                        return;
                     int line=cu.getLineNumber(node.getStartPosition());
                     
                     String name=node.getOperand().toString();
@@ -267,10 +378,11 @@ public class test {
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
                     String printMSG = "\"Assignment:"+name+"=\"+"+name+"+\",Line "+line+"\"";
                     insertprint(printMSG);
-                    //
-                    return true;
+                    
+                    return;
                 }
-                public boolean visit(PrefixExpression node) {
+                public void endVisit(PrefixExpression node) {
+                    if(!isinMethod(node))return;
                     if( (((PrefixExpression) node).getOperator()) == PrefixExpression.Operator.INCREMENT
                        || (((PrefixExpression) node).getOperator()) == PrefixExpression.Operator.DECREMENT)
                     {
@@ -280,7 +392,7 @@ public class test {
                            ParentStatement instanceof ForStatement||
                            ParentStatement instanceof IfStatement||
                            ParentStatement instanceof ReturnStatement)
-                            return true;
+                            return;
                         int line=cu.getLineNumber(node.getStartPosition());
                         
                         String name=node.getOperand().toString();
@@ -289,7 +401,7 @@ public class test {
                         String printMSG = "\"Assignment:"+name+"=\"+"+name+"+\",Line "+line+"\"";
                         insertprint(printMSG);
                     }
-                    return true;
+                    return;
                 }
                 
                 
@@ -316,7 +428,7 @@ public class test {
                         }
                         else if(e instanceof PrefixExpression)
                         {
-                            if( (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.INCREMENT
+                            if( (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.INCREMENT 
                                || (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.DECREMENT)
                             {
                                 String name=((PrefixExpression) e).getOperand().toString();
@@ -448,14 +560,21 @@ public class test {
             
             if(!verbose)
             {
-                FileWriter fw= new FileWriter(FilePath);
+                FileWriter fw = new FileWriter(FilePath);
                 fw.write(outputBuffer);
                 fw.close();
                 CurNum++;
-                System.out.println(FilePath);
+                
+                
                 System.out.println(CurNum+"/"+TotalNum);
+                //if(CurNum==16)
+                //	break;
             }
         }
     }
     
 }
+// return
+// if
+// SQL
+// every-line
