@@ -342,7 +342,7 @@ public class test {
                         +"\tRandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
                         +"\tlong fileLength = randomFile.length();\n"
                         +"\trandomFile.seek(fileLength);\n"
-                        +"\trandomFile.writeBytes(printMSG"  +"+\","+FilePath+"\""+"+ \"\\n\");\n"
+                        +"\trandomFile.writeBytes(printMSG"  +"+\",File:"+FilePath+"\""+"+ \"\\n\");\n"
                         +"\trandomFile.close();\n"
                         +"\t} catch (IOException e__e__e) {\n"
                         +"\te__e__e.printStackTrace();\n"
