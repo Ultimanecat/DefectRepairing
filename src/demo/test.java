@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import java.io.PrintStream;
@@ -316,6 +317,13 @@ public class test {
                     return false;
                 }
                 
+                public void CopytoLabel(ASTNode node)
+                {
+                    if(node.getParent() instanceof LabeledStatement)
+                        node=node.getParent();
+                    copyto(node.getStartPosition());
+                }
+                
                 public boolean visit (TypeDeclaration node)
                 {
                     if(verbose)System.out.println("TypeDeclaration:Line "+cu.getLineNumber(node.getStartPosition()));
@@ -437,8 +445,8 @@ public class test {
                     if(verbose)System.out.print("ForStatement:"+"line " + line);
                     
                     String printMSG="\"<ForStatement> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
-                    //					copyto(node.getStartPosition());
-                    //					insertprint(printMSG);
+                    CopytoLabel(node);
+                    insertprint(printMSG);
                     List<Expression> l=node.updaters();
                     for(Expression e:l)
                     {
@@ -494,7 +502,7 @@ public class test {
                     if(verbose)System.out.println( "DoStatement:line "+cu.getLineNumber(node.getStartPosition()) +","+ cu.getLineNumber((node.getStartPosition()+node.getLength())));
                     Statement body=node.getBody();
                     String printMSG="\"<DoStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
-                    copyto(node.getStartPosition());
+                    CopytoLabel(node);
                     insertprint(printMSG);
                     if(body instanceof Block)
                     {
@@ -520,7 +528,7 @@ public class test {
                     if(verbose)System.out.println("WhileStatement:line " + cu.getLineNumber(node.getStartPosition()));
                     Statement body=node.getBody();
                     String printMSG="\"<WhileStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
-                    copyto(node.getStartPosition());
+                    CopytoLabel(node);
                     insertprint(printMSG);
                     if(body instanceof Block)
                     {
@@ -541,6 +549,12 @@ public class test {
                     
                 }
                 
+                public void endVisit(IfStatement node)
+                {
+                    copyto(node.getStartPosition()+node.getLength());
+                    outputBuffer+='}';
+                }
+                
                 public boolean visit(IfStatement node) {
                     if(verbose)System.out.print("IfStatement:line " + cu.getLineNumber(node.getStartPosition())+",else: ");
                     String ElseMSG="\",else:";
@@ -554,8 +568,9 @@ public class test {
                     String printMSG="\"<IfStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     
                     
-                    //					copyto(node.getStartPosition());
-                    //					insertprint(printMSG);
+                    copyto(node.getStartPosition());
+                    outputBuffer+='{';
+                    insertprint(printMSG);
                     
                     if(body instanceof Block)
                     {
