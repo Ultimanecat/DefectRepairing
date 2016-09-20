@@ -148,7 +148,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math1b_2/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('F') ) {
@@ -437,8 +437,8 @@ public class test {
                     if(verbose)System.out.print("ForStatement:"+"line " + line);
                     
                     String printMSG="\"<ForStatement> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
-                    copyto(node.getStartPosition());
-                    insertprint(printMSG);
+                    //					copyto(node.getStartPosition());
+                    //					insertprint(printMSG);
                     List<Expression> l=node.updaters();
                     for(Expression e:l)
                     {
@@ -554,9 +554,8 @@ public class test {
                     String printMSG="\"<IfStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     
                     
-                    copyto(node.getStartPosition());
-                    
-                    insertprint(printMSG);
+                    //					copyto(node.getStartPosition());
+                    //					insertprint(printMSG);
                     
                     if(body instanceof Block)
                     {
