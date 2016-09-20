@@ -454,13 +454,13 @@ public class test {
                         {
                             String name=((Assignment) e).getLeftHandSide().toString();
                             if(verbose)System.out.print(","+name);
-                            printMSG += "+\",update:"+name+"=\"+"+name;
+                            printMSG += "+\",assign:"+name+"=\"+"+name;
                         }
                         else if(e instanceof PostfixExpression)
                         {
                             String name=((PostfixExpression) e).getOperand().toString();
                             if(verbose)System.out.print(","+ name);
-                            printMSG += "+\",update:"+name+"=\"+"+name;
+                            printMSG += "+\",assign:"+name+"=\"+"+name;
                             
                         }
                         else if(e instanceof PrefixExpression)
@@ -470,7 +470,7 @@ public class test {
                             {
                                 String name=((PrefixExpression) e).getOperand().toString();
                                 if(verbose)System.out.print(","+name);
-                                printMSG += "+\",update:"+name+"=\"+"+name;
+                                printMSG += "+\",assign:"+name+"=\"+"+name;
                             }
                             
                         }
