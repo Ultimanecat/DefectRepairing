@@ -149,11 +149,11 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math1b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
-        if( commandLine.hasOption('F') ) {
-            DirPath=commandLine.getOptionValue('F');
+        if( commandLine.hasOption('D') ) {
+            DirPath=commandLine.getOptionValue('D');
         }
         if( commandLine.hasOption('T') ) {
             TraceFilet = commandLine.getOptionValue('T');
@@ -264,7 +264,7 @@ public class test {
                         
                         if(verbose)System.out.println("VariableDeclaration:"+"line " + line + ","+name);
                         copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                        String printMSG = "\"VariableDeclaration:"+name+"=\"+"+name+"+\",Line "+line+"\"";
+                        String printMSG = "\"<VariableDeclaration," + name + "=\"+" + name + "+\"> Line " + line + "\"";
                         insertprint(printMSG);
                         return;
                     }
@@ -283,20 +283,25 @@ public class test {
                     int line=cu.getLineNumber(node.getStartPosition());
                     if(verbose)System.out.println("MethodDeclaration:"+node.getName().toString()+",Line "+line);
                     
-                    
                     List<SingleVariableDeclaration> parameters=node.parameters();
                     copyto(body.getStartPosition()+1);
                     
-                    String printMSG="\"Method invoked:"+node.getName().toString()+"\"";
-                    if(!judgePrint(node))
+                    String printMSG="\"<Method_invoked,"+node.getName().toString()+"> \"";
+                    boolean firstVar=true;
+					if(!judgePrint(node))
                         for(SingleVariableDeclaration FormalParameter:parameters)
                         {
                             String name=FormalParameter.getName().toString();
                             if(verbose)System.out.println(name);
-                            printMSG+="+\","+name+"=\"+"+name;
+                            if(firstVar)
+							{
+								printMSG+="+\""+name+"=\"+"+name;
+								firstVar=false;
+							}
+							else printMSG+="+\","+name+"=\"+"+name;
                         }
                     
-                    printMSG+="+\","+"Line: "+line+"\"";
+                    printMSG+="+\","+"Line:"+line+"\"";
                     insertprint(printMSG);
                     
                     
@@ -444,9 +449,9 @@ public class test {
                     int line=cu.getLineNumber(node.getStartPosition());
                     if(verbose)System.out.print("ForStatement:"+"line " + line);
                     
-                    String printMSG="\"<ForStatement> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    String printMSG="\"<ForStatement,taken> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     CopytoLabel(node);
-                    insertprint("\"<ForStatement,executed> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
+                    insertprint("\"<ForStatement,reached> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     List<Expression> l=node.updaters();
                     for(Expression e:l)
                     {
@@ -501,9 +506,9 @@ public class test {
                 public boolean visit(DoStatement node) {
                     if(verbose)System.out.println( "DoStatement:line "+cu.getLineNumber(node.getStartPosition()) +","+ cu.getLineNumber((node.getStartPosition()+node.getLength())));
                     Statement body=node.getBody();
-                    String printMSG="\"<DoStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    String printMSG="\"<DoStatement,taken> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     CopytoLabel(node);
-                    insertprint("\"<DoStatement,executed> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
+                    insertprint("\"<DoStatement,reached> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     if(body instanceof Block)
                     {
                         copyto(body.getStartPosition()+1);
@@ -527,9 +532,9 @@ public class test {
                 public boolean visit(WhileStatement node) {
                     if(verbose)System.out.println("WhileStatement:line " + cu.getLineNumber(node.getStartPosition()));
                     Statement body=node.getBody();
-                    String printMSG="\"<WhileStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    String printMSG="\"<WhileStatement,taken> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     CopytoLabel(node);
-                    insertprint("\"<WhileStatement,executed> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
+                    insertprint("\"<WhileStatement,reached> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     if(body instanceof Block)
                     {
                         copyto(body.getStartPosition()+1);
@@ -565,12 +570,12 @@ public class test {
                     else ElseMSG+="null";
                     
                     Statement body=node.getThenStatement();
-                    String printMSG="\"<IfStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    String printMSG="\"<IfStatement,taken> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     
                     
                     copyto(node.getStartPosition());
                     outputBuffer+='{';
-                    insertprint("\"<IfStatement,executed> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
+                    insertprint("\"<IfStatement,reached> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     
                     if(body instanceof Block)
                     {
@@ -592,17 +597,19 @@ public class test {
                 }
                 
                 
-                //				public boolean visit(ReturnStatement node) {
-                //					int line=cu.getLineNumber(node.getStartPosition());
-                //					if(verbose)System.out.print("ReturnStatement:line "+line);
-                //					
-                //					System.out.println("a"+node.getStartPosition());
-                //					copyto(node.getStartPosition());
-                //					System.out.println("b");
-                //					String printMSG = "\"ReturnStatement:value=\"+"+node.getExpression()+"+\",Line "+line+"\"";
-                //					insertprint(printMSG);
-                //					return false;
-                //				}
+				public boolean visit(ReturnStatement node) {
+					int line=cu.getLineNumber(node.getStartPosition());
+					if(verbose)System.out.print("ReturnStatement:line "+line);
+					
+					
+					copyto(node.getStartPosition());
+					outputBuffer+="{";
+					String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",Line "+line+"\"";
+					insertprint(printMSG);
+					copyto(node.getStartPosition()+node.getLength());
+					outputBuffer+="}";
+					return false;
+				}
                 
                 
                 
