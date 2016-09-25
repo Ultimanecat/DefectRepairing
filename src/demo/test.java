@@ -446,7 +446,7 @@ public class test {
                     
                     String printMSG="\"<ForStatement> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     CopytoLabel(node);
-                    insertprint(printMSG);
+                    insertprint("\"<ForStatement,executed> Line:"+line+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     List<Expression> l=node.updaters();
                     for(Expression e:l)
                     {
@@ -503,7 +503,7 @@ public class test {
                     Statement body=node.getBody();
                     String printMSG="\"<DoStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     CopytoLabel(node);
-                    insertprint(printMSG);
+                    insertprint("\"<DoStatement,executed> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     if(body instanceof Block)
                     {
                         copyto(body.getStartPosition()+1);
@@ -529,7 +529,7 @@ public class test {
                     Statement body=node.getBody();
                     String printMSG="\"<WhileStatement> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     CopytoLabel(node);
-                    insertprint(printMSG);
+                    insertprint("\"<WhileStatement,executed> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     if(body instanceof Block)
                     {
                         copyto(body.getStartPosition()+1);
@@ -570,7 +570,7 @@ public class test {
                     
                     copyto(node.getStartPosition());
                     outputBuffer+='{';
-                    insertprint(printMSG);
+                    insertprint("\"<IfStatement,executed> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     
                     if(body instanceof Block)
                     {
