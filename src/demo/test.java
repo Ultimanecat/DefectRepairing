@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -40,6 +41,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.apache.commons.cli.CommandLineParser;
@@ -171,7 +174,7 @@ public class test {
         final boolean verbose=verboset;
         List<String> filelist=new ArrayList<String> ();;
         if(verbose)
-            filelist.add(new String("/Users/liuxinyuan/DefectRepairing/Math1b/src/main/java/org/apache/commons/math3/linear/SparseRealVector.java"));
+            filelist.add(new String("/Users/liuxinyuan/DefectRepairing/Time9b/src/main/java/org/joda/time/chrono/AssembledChronology.java"));
         else
             getFilelist(DirPath,filelist);
         
@@ -227,6 +230,7 @@ public class test {
                         {
                             if(judgePrint((MethodDeclaration) node))
                                 return false;
+                            
                             return true;
                         }
                     }
@@ -281,10 +285,17 @@ public class test {
                 public boolean visit(MethodDeclaration node)
                 {
                     if(node.isConstructor())//
-                        return true;
+                        return false;
                     Block body=node.getBody();
                     if(body==null)
                         return true;
+                    
+                    List<IExtendedModifier> ls=node.modifiers();
+    				for(IExtendedModifier modifier : ls)
+    				{
+    					if(modifier.toString().equals("final"));
+    					return false;
+    				}
                     
                     int line=cu.getLineNumber(node.getStartPosition());
                     if(verbose)System.out.println("MethodDeclaration:"+node.getName().toString()+",Line "+line);
@@ -304,7 +315,7 @@ public class test {
 								printMSG+="+\""+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
 								firstVar=false;
 							}
-							else printMSG+="+\","+name+"=\"+"+name;
+							else printMSG+="+\","+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
                         }
                     
                     printMSG+="+\","+"Line:"+line+"\"";
@@ -418,7 +429,7 @@ public class test {
                     String name=node.getLeftHandSide().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line + ","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")"+"+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     return;
                 }
@@ -437,7 +448,7 @@ public class test {
                     String name=node.getOperand().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line +","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")"+"+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     
                     return;
@@ -459,7 +470,7 @@ public class test {
                         String name=node.getOperand().toString();
                         if(verbose)System.out.println("Assignment:"+"line " + line +","+name);
                         copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                        String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
+                        String printMSG = "\"<Assignment> assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")"+"+\",Line:"+line+"\"";
                         insertprint(printMSG);
                     }
                     return;
@@ -480,13 +491,13 @@ public class test {
                         {
                             String name=((Assignment) e).getLeftHandSide().toString();
                             if(verbose)System.out.print(","+name);
-                            printMSG += "+\",assign:"+name+"=\"+"+name;
+                            printMSG += "+\",assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
                         }
                         else if(e instanceof PostfixExpression)
                         {
                             String name=((PostfixExpression) e).getOperand().toString();
                             if(verbose)System.out.print(","+ name);
-                            printMSG += "+\",assign:"+name+"=\"+"+name;
+                            printMSG += "+\",assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
                             
                         }
                         else if(e instanceof PrefixExpression)
@@ -496,7 +507,7 @@ public class test {
                             {
                                 String name=((PrefixExpression) e).getOperand().toString();
                                 if(verbose)System.out.print(","+name);
-                                printMSG += "+\",assign:"+name+"=\"+"+name;
+                                printMSG += "+\",assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
                             }
                             
                         }
@@ -625,7 +636,9 @@ public class test {
 					
 					copyto(node.getStartPosition());
 					outputBuffer+="{";
-					String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",Line "+line+"\"";
+					//String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",Line "+line+"\"";
+					String printMSG = "\"<ReturnStatement> ReturnValue=\"+(isObject_("+node.getExpression()+") ? \"Object\" : (" + node.getExpression() +"))+\",Line "+line+"\"";
+					
 					insertprint(printMSG);
 					copyto(node.getStartPosition()+node.getLength());
 					outputBuffer+="}";
@@ -637,7 +650,7 @@ public class test {
                 
             });
             copytoEnd();
-            if(verbose)System.out.print(outputBuffer);
+            //if(verbose)System.out.print(outputBuffer);
             
             if(!verbose)
             {
@@ -648,8 +661,30 @@ public class test {
                 
                 
                 System.out.println(CurNum+"/"+TotalNum);
-                if(CurNum==15)
-                	break;
+                
+//                Process p=null;
+//                long starttime=System.currentTimeMillis();
+//                try {
+//                                        p=Runtime.getRuntime().exec("defects4j compile -w /Users/liuxinyuan/DefectRepairing/Time9b");
+//                                        p.waitFor();
+//
+//                                        InputStreamReader ir = new InputStreamReader(p.getInputStream());
+//                                        LineNumberReader input = new LineNumberReader(ir);
+//
+//                                        String line;
+//                                        while((line =input.readLine() )!=null)
+//                                                System.out.println(line);
+//                                        input.close();
+//                                        ir.close();
+//
+//                } catch (InterruptedException e) {
+//                                        e.printStackTrace();
+//                                }
+//                long endtime=System.currentTimeMillis();
+//                System.out.println(" "+(endtime-starttime)/1000+"s");
+//                
+//                if(CurNum==15)
+//                	break;
             }
         }
     }
