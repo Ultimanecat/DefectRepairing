@@ -66,6 +66,9 @@ public class test {
         
         return  fileData.toString();
     }
+    
+    
+    
     public static int curLine = 1;
     public static int curChar = 0;
     public static String outputBuffer=new String();
@@ -138,7 +141,10 @@ public class test {
     
     
     public static void main(String args[]) throws IOException, ParseException{
-        boolean verboset=false;
+        boolean verboset=true;
+        
+        String str="a";
+        
         
         // Create a Parser
         CommandLineParser cmdlparser = new BasicParser( );
@@ -352,12 +358,27 @@ public class test {
                         +"\t} catch (IOException e__e__e) {\n"
                         +"\te__e__e.printStackTrace();\n"
                         +"\t}\n"
-                        +"}\n";
+                        +"}\n"
+                        +"static public boolean isObject_(Object o){return true;}"
+                        +"static public boolean isObject_(byte i){return false;}"
+                        +"static public boolean isObject_(short s){return false;}"
+                        +"static public boolean isObject_(int i){return false;}"
+                        +"static public boolean isObject_(long l){return false;}"
+                        +"static public boolean isObject_(boolean b){return false;}"
+                        +"static public boolean isObject_(char c){return false;}"
+                        +"static public boolean isObject_(float f){return false;}"
+                        +"static public boolean isObject_(double d){return false;}"
+                        +"static public boolean isObject_(String str){return false;}";
+                        
+                        
                         
                         return true;
                     }
                 }
                 
+                
+                
+               
                 //				public void endvisit (ExpressionStatement Node)
                 //				{
                 //
@@ -376,7 +397,7 @@ public class test {
                 {
                     int lineEnd=cu.getLineNumber(node.getStartPosition()+node.getLength());
                     copyLines(lineEnd);
-                    outputBuffer+="import java.io.IOException; \n import java.io.RandomAccessFile;\n";
+                    outputBuffer+="import java.io.IOException; \nimport java.io.RandomAccessFile;\nimport java.util.List;\n";
                     return true;
                     
                 }
@@ -397,7 +418,7 @@ public class test {
                     String name=node.getLeftHandSide().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line + ","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+（"+name+" instanceof）+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     return;
                 }
