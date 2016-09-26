@@ -141,9 +141,9 @@ public class test {
     
     
     public static void main(String args[]) throws IOException, ParseException{
-        boolean verboset=true;
+        boolean verboset=false;
         
-        String str="a";
+        
         
         
         // Create a Parser
@@ -155,7 +155,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math1b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Time9b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -301,7 +301,7 @@ public class test {
                             if(verbose)System.out.println(name);
                             if(firstVar)
 							{
-								printMSG+="+\""+name+"=\"+"+name;
+								printMSG+="+\""+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
 								firstVar=false;
 							}
 							else printMSG+="+\","+name+"=\"+"+name;
@@ -418,7 +418,7 @@ public class test {
                     String name=node.getLeftHandSide().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line + ","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+（"+name+" instanceof）+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     return;
                 }
@@ -648,8 +648,8 @@ public class test {
                 
                 
                 System.out.println(CurNum+"/"+TotalNum);
-                //if(CurNum==16)
-                //	break;
+                if(CurNum==15)
+                	break;
             }
         }
     }
