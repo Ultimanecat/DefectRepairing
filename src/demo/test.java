@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -41,8 +40,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.apache.commons.cli.CommandLineParser;
@@ -69,9 +66,6 @@ public class test {
         
         return  fileData.toString();
     }
-    
-    
-    
     public static int curLine = 1;
     public static int curChar = 0;
     public static String outputBuffer=new String();
@@ -146,9 +140,6 @@ public class test {
     public static void main(String args[]) throws IOException, ParseException{
         boolean verboset=false;
         
-        
-        
-        
         // Create a Parser
         CommandLineParser cmdlparser = new BasicParser( );
         Options options = new Options( );
@@ -158,7 +149,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Time9b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -174,7 +165,7 @@ public class test {
         final boolean verbose=verboset;
         List<String> filelist=new ArrayList<String> ();;
         if(verbose)
-            filelist.add(new String("/Users/liuxinyuan/DefectRepairing/Time9b/src/main/java/org/joda/time/chrono/AssembledChronology.java"));
+            filelist.add(new String("/Users/liuxinyuan/DefectRepairing/Math1b/src/main/java/org/apache/commons/math3/linear/SparseRealVector.java"));
         else
             getFilelist(DirPath,filelist);
         
@@ -230,7 +221,6 @@ public class test {
                         {
                             if(judgePrint((MethodDeclaration) node))
                                 return false;
-                            
                             return true;
                         }
                     }
@@ -285,17 +275,10 @@ public class test {
                 public boolean visit(MethodDeclaration node)
                 {
                     if(node.isConstructor())//
-                        return false;
+                        return true;
                     Block body=node.getBody();
                     if(body==null)
                         return true;
-                    
-                    List<IExtendedModifier> ls=node.modifiers();
-    				for(IExtendedModifier modifier : ls)
-    				{
-    					if(modifier.toString().equals("final"));
-    					return false;
-    				}
                     
                     int line=cu.getLineNumber(node.getStartPosition());
                     if(verbose)System.out.println("MethodDeclaration:"+node.getName().toString()+",Line "+line);
@@ -312,17 +295,10 @@ public class test {
                             if(verbose)System.out.println(name);
                             if(firstVar)
 							{
-<<<<<<< HEAD
 								printMSG+="+\""+name+"=\"+"+name;
 								firstVar=false;
 							}
 							else printMSG+="+\","+name+"=\"+"+name;
-=======
-								printMSG+="+\""+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
-								firstVar=false;
-							}
-							else printMSG+="+\","+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
->>>>>>> xinyuan-liu-master
                         }
                     
                     printMSG+="+\","+"Line:"+line+"\"";
@@ -373,27 +349,12 @@ public class test {
                         +"\t} catch (IOException e__e__e) {\n"
                         +"\te__e__e.printStackTrace();\n"
                         +"\t}\n"
-                        +"}\n"
-                        +"static public boolean isObject_(Object o){return true;}"
-                        +"static public boolean isObject_(byte i){return false;}"
-                        +"static public boolean isObject_(short s){return false;}"
-                        +"static public boolean isObject_(int i){return false;}"
-                        +"static public boolean isObject_(long l){return false;}"
-                        +"static public boolean isObject_(boolean b){return false;}"
-                        +"static public boolean isObject_(char c){return false;}"
-                        +"static public boolean isObject_(float f){return false;}"
-                        +"static public boolean isObject_(double d){return false;}"
-                        +"static public boolean isObject_(String str){return false;}";
-                        
-                        
+                        +"}\n";
                         
                         return true;
                     }
                 }
                 
-                
-                
-               
                 //				public void endvisit (ExpressionStatement Node)
                 //				{
                 //
@@ -412,7 +373,7 @@ public class test {
                 {
                     int lineEnd=cu.getLineNumber(node.getStartPosition()+node.getLength());
                     copyLines(lineEnd);
-                    outputBuffer+="import java.io.IOException; \nimport java.io.RandomAccessFile;\nimport java.util.List;\n";
+                    outputBuffer+="import java.io.IOException; \n import java.io.RandomAccessFile;\n";
                     return true;
                     
                 }
@@ -433,7 +394,7 @@ public class test {
                     String name=node.getLeftHandSide().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line + ","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")"+"+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     return;
                 }
@@ -452,7 +413,7 @@ public class test {
                     String name=node.getOperand().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line +","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")"+"+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     
                     return;
@@ -474,7 +435,7 @@ public class test {
                         String name=node.getOperand().toString();
                         if(verbose)System.out.println("Assignment:"+"line " + line +","+name);
                         copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                        String printMSG = "\"<Assignment> assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")"+"+\",Line:"+line+"\"";
+                        String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",Line:"+line+"\"";
                         insertprint(printMSG);
                     }
                     return;
@@ -495,13 +456,13 @@ public class test {
                         {
                             String name=((Assignment) e).getLeftHandSide().toString();
                             if(verbose)System.out.print(","+name);
-                            printMSG += "+\",assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
+                            printMSG += "+\",assign:"+name+"=\"+"+name;
                         }
                         else if(e instanceof PostfixExpression)
                         {
                             String name=((PostfixExpression) e).getOperand().toString();
                             if(verbose)System.out.print(","+ name);
-                            printMSG += "+\",assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
+                            printMSG += "+\",assign:"+name+"=\"+"+name;
                             
                         }
                         else if(e instanceof PrefixExpression)
@@ -511,7 +472,7 @@ public class test {
                             {
                                 String name=((PrefixExpression) e).getOperand().toString();
                                 if(verbose)System.out.print(","+name);
-                                printMSG += "+\",assign:"+name+"=\"+(isObject_("+name+") ? \"Object\" : " + name +")";
+                                printMSG += "+\",assign:"+name+"=\"+"+name;
                             }
                             
                         }
@@ -632,25 +593,14 @@ public class test {
                     
                 }
                 
-<<<<<<< HEAD
                 public boolean visit(ReturnStatement node) {
-=======
-                
-				public boolean visit(ReturnStatement node) {
->>>>>>> xinyuan-liu-master
 					int line=cu.getLineNumber(node.getStartPosition());
 					if(verbose)System.out.print("ReturnStatement:line "+line);
 					
 					
 					copyto(node.getStartPosition());
 					outputBuffer+="{";
-<<<<<<< HEAD
 					String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",Line "+line+"\"";
-=======
-					//String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",Line "+line+"\"";
-					String printMSG = "\"<ReturnStatement> ReturnValue=\"+(isObject_("+node.getExpression()+") ? \"Object\" : (" + node.getExpression() +"))+\",Line "+line+"\"";
-					
->>>>>>> xinyuan-liu-master
 					insertprint(printMSG);
 					copyto(node.getStartPosition()+node.getLength());
 					outputBuffer+="}";
@@ -662,7 +612,7 @@ public class test {
                 
             });
             copytoEnd();
-            //if(verbose)System.out.print(outputBuffer);
+            if(verbose)System.out.print(outputBuffer);
             
             if(!verbose)
             {
@@ -673,30 +623,8 @@ public class test {
                 
                 
                 System.out.println(CurNum+"/"+TotalNum);
-                
-//                Process p=null;
-//                long starttime=System.currentTimeMillis();
-//                try {
-//                                        p=Runtime.getRuntime().exec("defects4j compile -w /Users/liuxinyuan/DefectRepairing/Time9b");
-//                                        p.waitFor();
-//
-//                                        InputStreamReader ir = new InputStreamReader(p.getInputStream());
-//                                        LineNumberReader input = new LineNumberReader(ir);
-//
-//                                        String line;
-//                                        while((line =input.readLine() )!=null)
-//                                                System.out.println(line);
-//                                        input.close();
-//                                        ir.close();
-//
-//                } catch (InterruptedException e) {
-//                                        e.printStackTrace();
-//                                }
-//                long endtime=System.currentTimeMillis();
-//                System.out.println(" "+(endtime-starttime)/1000+"s");
-//                
-//                if(CurNum==15)
-//                	break;
+                //if(CurNum==16)
+                //	break;
             }
         }
     }
