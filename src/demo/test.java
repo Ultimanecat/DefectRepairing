@@ -264,7 +264,7 @@ public class test {
                         
                         if(verbose)System.out.println("VariableDeclaration:"+"line " + line + ","+name);
                         copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                        String printMSG = "\"<VariableDeclaration>," + name + "=\"+" + name + "+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
+                        String printMSG = "\"<VariableDeclaration> " + name + "=\"+" + name + "+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
                         
                         insertprint(printMSG);
                         return;
@@ -287,7 +287,7 @@ public class test {
                     List<SingleVariableDeclaration> parameters=node.parameters();
                     copyto(body.getStartPosition()+1);
                     
-                    String printMSG="\"<Method_invoked,"+node.getName().toString()+"> \"";
+					String printMSG="\"<Method_invoked,"+node.getName().toString()+","+parameters.size()+"> \"";                    
                     boolean firstVar=true;
 					if(!judgePrint(node))
                         for(SingleVariableDeclaration FormalParameter:parameters)
