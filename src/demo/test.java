@@ -149,7 +149,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Lang11b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -570,20 +570,20 @@ public class test {
                 
                 public boolean visit(IfStatement node) {
                     if(verbose)System.out.print("IfStatement:line " + cu.getLineNumber(node.getStartPosition())+",else: ");
-                    String ElseMSG="\",else:";
+                    String ElseMSG=",Else:";
                     if(node.getElseStatement()!=null)
                     {
-                        ElseMSG+=cu.getLineNumber(node.getElseStatement().getStartPosition());
+                        ElseMSG+=cu.getLineNumber(node.getElseStatement().getStartPosition()) + " to " + cu.getLineNumber(node.getElseStatement().getStartPosition()+node.getElseStatement().getLength());
                     }
                     else ElseMSG+="null";
                     
                     Statement body=node.getThenStatement();
-                    String printMSG="\"<IfStatement,taken> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    String printMSG="\"<IfStatement,taken> Then:"+cu.getLineNumber(node.getThenStatement().getStartPosition())+" to "+cu.getLineNumber(node.getThenStatement().getStartPosition()+node.getThenStatement().getLength())+ElseMSG+"\"";
                     
                     
                     copyto(node.getStartPosition());
                     outputBuffer+='{';
-                    insertprint("\"<IfStatement,reached> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
+                    insertprint("\"<IfStatement,reached> Then:"+cu.getLineNumber(node.getThenStatement().getStartPosition())+" to "+cu.getLineNumber(node.getThenStatement().getStartPosition()+node.getThenStatement().getLength())+ElseMSG+"\"");
                     
                     if(body instanceof Block)
                     {
