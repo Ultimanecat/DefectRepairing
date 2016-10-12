@@ -138,7 +138,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Lang11b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -196,7 +196,7 @@ public class test {
                 public boolean judgePrint(MethodDeclaration node)
                 {
                     if(((MethodDeclaration) node).getName().toString().equals("toString")
-                       ||((MethodDeclaration) node).getName().toString().startsWith("print"))//瑙ｅ喅涓�涓猵rint鍑芥暟鏃犻檺閫掑綊鐨勭紪璇戦敊璇�
+                       ||((MethodDeclaration) node).getName().toString().startsWith("print"))//解决一个print函数无限递归的编译错误
                         return true;
                     return false;
                 }
@@ -236,7 +236,7 @@ public class test {
                 
                 
                 
-                //鍙橀噺澹版槑
+                //变量声明
                 public void endVisit(VariableDeclarationFragment node) {
                     String name=node.getName().toString();
                     if(node.getInitializer()!=null)
@@ -276,7 +276,7 @@ public class test {
                     List<SingleVariableDeclaration> parameters=node.parameters();
                     copyto(body.getStartPosition()+1);
                     
-                    String printMSG="\"<Method_invoked,"+node.getName().toString()+","+parameters.size()+"> \"";
+					String printMSG="\"<Method_invoked,"+node.getName().toString()+","+parameters.size()+"> \"";                    
                     boolean firstVar=true;
 					if(!judgePrint(node))
                         for(SingleVariableDeclaration FormalParameter:parameters)
@@ -559,20 +559,20 @@ public class test {
                 
                 public boolean visit(IfStatement node) {
                     if(verbose)System.out.print("IfStatement:line " + cu.getLineNumber(node.getStartPosition())+",else: ");
-                    String ElseMSG="\",else:";
+                    String ElseMSG=",Else:";
                     if(node.getElseStatement()!=null)
                     {
-                        ElseMSG+=cu.getLineNumber(node.getElseStatement().getStartPosition());
+                        ElseMSG+=cu.getLineNumber(node.getElseStatement().getStartPosition()) + " to " + cu.getLineNumber(node.getElseStatement().getStartPosition()+node.getElseStatement().getLength());
                     }
                     else ElseMSG+="null";
                     
                     Statement body=node.getThenStatement();
-                    String printMSG="\"<IfStatement,taken> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
+                    String printMSG="\"<IfStatement,taken> Then:"+cu.getLineNumber(node.getThenStatement().getStartPosition())+" to "+cu.getLineNumber(node.getThenStatement().getStartPosition()+node.getThenStatement().getLength())+ElseMSG+"\"";
                     
                     
                     copyto(node.getStartPosition());
                     outputBuffer+='{';
-                    insertprint("\"<IfStatement,reached> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
+                    insertprint("\"<IfStatement,reached> Then:"+cu.getLineNumber(node.getThenStatement().getStartPosition())+" to "+cu.getLineNumber(node.getThenStatement().getStartPosition()+node.getThenStatement().getLength())+ElseMSG+"\"");
                     
                     if(body instanceof Block)
                     {
