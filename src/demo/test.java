@@ -1,16 +1,11 @@
 package demo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -20,10 +15,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -33,14 +25,11 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
-import java.io.PrintStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.BasicParser;
@@ -149,7 +138,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Lang11b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Math2b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -207,7 +196,7 @@ public class test {
                 public boolean judgePrint(MethodDeclaration node)
                 {
                     if(((MethodDeclaration) node).getName().toString().equals("toString")
-                       ||((MethodDeclaration) node).getName().toString().startsWith("print"))//解决一个print函数无限递归的编译错误
+                       ||((MethodDeclaration) node).getName().toString().startsWith("print"))//瑙ｅ喅涓�涓猵rint鍑芥暟鏃犻檺閫掑綊鐨勭紪璇戦敊璇�
                         return true;
                     return false;
                 }
@@ -247,7 +236,7 @@ public class test {
                 
                 
                 
-                //变量声明
+                //鍙橀噺澹版槑
                 public void endVisit(VariableDeclarationFragment node) {
                     String name=node.getName().toString();
                     if(node.getInitializer()!=null)
@@ -287,7 +276,7 @@ public class test {
                     List<SingleVariableDeclaration> parameters=node.parameters();
                     copyto(body.getStartPosition()+1);
                     
-					String printMSG="\"<Method_invoked,"+node.getName().toString()+","+parameters.size()+"> \"";                    
+                    String printMSG="\"<Method_invoked,"+node.getName().toString()+","+parameters.size()+"> \"";
                     boolean firstVar=true;
 					if(!judgePrint(node))
                         for(SingleVariableDeclaration FormalParameter:parameters)
@@ -570,20 +559,20 @@ public class test {
                 
                 public boolean visit(IfStatement node) {
                     if(verbose)System.out.print("IfStatement:line " + cu.getLineNumber(node.getStartPosition())+",else: ");
-                    String ElseMSG=",Else:";
+                    String ElseMSG="\",else:";
                     if(node.getElseStatement()!=null)
                     {
-                        ElseMSG+=cu.getLineNumber(node.getElseStatement().getStartPosition()) + " to " + cu.getLineNumber(node.getElseStatement().getStartPosition()+node.getElseStatement().getLength());
+                        ElseMSG+=cu.getLineNumber(node.getElseStatement().getStartPosition());
                     }
                     else ElseMSG+="null";
                     
                     Statement body=node.getThenStatement();
-                    String printMSG="\"<IfStatement,taken> Then:"+cu.getLineNumber(node.getThenStatement().getStartPosition())+" to "+cu.getLineNumber(node.getThenStatement().getStartPosition()+node.getThenStatement().getLength())+ElseMSG+"\"";
+                    String printMSG="\"<IfStatement,taken> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"";
                     
                     
                     copyto(node.getStartPosition());
                     outputBuffer+='{';
-                    insertprint("\"<IfStatement,reached> Then:"+cu.getLineNumber(node.getThenStatement().getStartPosition())+" to "+cu.getLineNumber(node.getThenStatement().getStartPosition()+node.getThenStatement().getLength())+ElseMSG+"\"");
+                    insertprint("\"<IfStatement,reached> Line:"+cu.getLineNumber(node.getStartPosition())+" to "+cu.getLineNumber(node.getStartPosition()+node.getLength())+"\"");
                     
                     if(body instanceof Block)
                     {
