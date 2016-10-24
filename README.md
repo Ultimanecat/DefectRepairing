@@ -2,22 +2,23 @@
 Spectrum_based
 
 make run RUNFLAG="-D directory -T tracefile"
+
 make parser PARSERFLAG="tracefile1.txt tracefile2.txt"
 
-Object的赋值输出为字符串"Object"
+Mutator：
 
-未追踪constructor
+输入是一个只包含一个方法的文件。
 
-未追踪final method
+随机变异生成若干方法，输出到STDOUT。
+
+帮忙写一下makefile。
 
 TODO:
 
 解决body部分为一条语句而不是一个block的if/for/while/do语句可能追踪不全的bug
 
-追踪constructor的传参
 
 automatic patch apply&test
-testcase mutation
 
 complete parser:
 	consider filename

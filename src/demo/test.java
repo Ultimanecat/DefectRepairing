@@ -138,7 +138,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Lang11b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Time9b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -253,7 +253,7 @@ public class test {
                         
                         if(verbose)System.out.println("VariableDeclaration:"+"line " + line + ","+name);
                         copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                        String printMSG = "\"<VariableDeclaration> " + name + "=\"+" + name + "+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
+                        String printMSG = "\"<VariableDeclaration> " + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
                         
                         insertprint(printMSG);
                         return;
@@ -285,10 +285,10 @@ public class test {
                             if(verbose)System.out.println(name);
                             if(firstVar)
 							{
-								printMSG+="+\""+name+"=\"+"+name+"+\",type:\"+getType_("+name+")";
+								printMSG+="+\""+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")";
 								firstVar=false;
 							}
-							else printMSG+="+\","+name+"=\"+"+name+"+\",type:\"+getType_("+name+")";
+							else printMSG+="+\","+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")";
                         }
                     
                     printMSG+="+\","+"Line:"+line+"\"";
@@ -328,8 +328,11 @@ public class test {
                         
                         
                         copyto(((BodyDeclaration)(node.bodyDeclarations().get(0))).getStartPosition());
-                        outputBuffer+="\nstatic public void printRuntimeMSG (String printMSG)\n"
+                        outputBuffer+="\nstatic boolean flag__lxy=false;\n"
+                        +"static public void printRuntimeMSG (String printMSG)\n"
                         +"{\n"
+                        +"if(flag__lxy)return;\n"
+                        +"flag__lxy=true;\n"
                         +"\ttry {\n"
                         +"\tRandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
                         +"\tlong fileLength = randomFile.length();\n"
@@ -338,10 +341,11 @@ public class test {
                         +"\trandomFile.close();\n"
                         +"\t} catch (IOException e__e__e) {\n"
                         +"\te__e__e.printStackTrace();\n"
+                        +"flag__lxy=false;\n"
                         +"\t}\n"
                         +"}\n"
                         +"static public String getType_(Object o){return \"Object\";}\n"
-                        +"static public String getType_(byte i){return \"byte\";}\n"
+                        +"static public String getType_(byte b){return \"byte\";}\n"
                         +"static public String getType_(short s){return \"short\";}\n"
                         +"static public String getType_(int i){return \"int\";}\n"
                         +"static public String getType_(long l){return \"long\";}\n"
@@ -349,7 +353,18 @@ public class test {
                         +"static public String getType_(char c){return \"char\";}\n"
                         +"static public String getType_(float f){return \"float\";}\n"
                         +"static public String getType_(double d){return \"double\";}\n"
-                        +"static public String getType_(String str){return \"String\";}\n";
+                        +"static public String getType_(String str){return \"String\";}\n"
+                        +"static public String getValue_(Object o){return \"Object\";}\n"
+                        +"static public String getValue_(byte b){return String.valueOf(b);}\n"
+                        +"static public String getValue_(short s){return String.valueOf(s);}\n"
+                        +"static public String getValue_(int i){return String.valueOf(i);}\n"
+                        +"static public String getValue_(long l){return String.valueOf(l);}\n"
+                        +"static public String getValue_(boolean b){return String.valueOf(b);}\n"
+                        +"static public String getValue_(char c){return String.valueOf(c);}\n"
+                        +"static public String getValue_(float f){return String.valueOf(f);}\n"
+                        +"static public String getValue_(double d){return String.valueOf(d);}\n"
+                        +"static public String getValue_(String str){return str;}\n";
+
                         
                         return true;
                     }
@@ -394,7 +409,7 @@ public class test {
                     String name=node.getLeftHandSide().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line + ","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     return;
                 }
@@ -413,7 +428,7 @@ public class test {
                     String name=node.getOperand().toString();
                     if(verbose)System.out.println("Assignment:"+"line " + line +","+name);
                     copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                    String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
+                    String printMSG = "\"<Assignment> assign:"+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
                     insertprint(printMSG);
                     
                     return;
@@ -435,7 +450,7 @@ public class test {
                         String name=node.getOperand().toString();
                         if(verbose)System.out.println("Assignment:"+"line " + line +","+name);
                         copyto(ParentStatement.getStartPosition()+ParentStatement.getLength());
-                        String printMSG = "\"<Assignment> assign:"+name+"=\"+"+name+"+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
+                        String printMSG = "\"<Assignment> assign:"+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")+\",Line:"+line+"\"";
                         insertprint(printMSG);
                     }
                     return;
@@ -456,13 +471,13 @@ public class test {
                         {
                             String name=((Assignment) e).getLeftHandSide().toString();
                             if(verbose)System.out.print(","+name);
-                            printMSG += "+\",assign:"+name+"=\"+"+name+"+\",type:\"+getType_("+name+")";
+                            printMSG += "+\",assign:"+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")";
                         }
                         else if(e instanceof PostfixExpression)
                         {
                             String name=((PostfixExpression) e).getOperand().toString();
                             if(verbose)System.out.print(","+ name);
-                            printMSG += "+\",assign:"+name+"=\"+"+name+"+\",type:\"+getType_("+name+")";
+                            printMSG += "+\",assign:"+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")";
                             
                         }
                         else if(e instanceof PrefixExpression)
@@ -472,7 +487,7 @@ public class test {
                             {
                                 String name=((PrefixExpression) e).getOperand().toString();
                                 if(verbose)System.out.print(","+name);
-                                printMSG += "+\",assign:"+name+"=\"+"+name+"+\",type:\"+getType_("+name+")";
+                                printMSG += "+\",assign:"+name+"=\"+getValue_(" + name + ")+\",type:\"+getType_("+name+")";
                             }
                             
                         }
@@ -593,6 +608,7 @@ public class test {
                     
                 }
                 
+<<<<<<< HEAD
                 public boolean visit(ReturnStatement node) {
 					int line=cu.getLineNumber(node.getStartPosition());
 					if(verbose)System.out.print("ReturnStatement:line "+line);
@@ -606,6 +622,21 @@ public class test {
 					outputBuffer+="}";
 					return false;
 				}
+=======
+//                public boolean visit(ReturnStatement node) {
+//					int line=cu.getLineNumber(node.getStartPosition());
+//					if(verbose)System.out.print("ReturnStatement:line "+line);
+//					
+//					
+//					copyto(node.getStartPosition());
+//					outputBuffer+="{";
+//					String printMSG = "\"<ReturnStatement> ReturnValue=\"+getValue_(" + node.getExpression() + ")+\",type:\"+getType_("+node.getExpression()+")+\",Line "+line+"\"";
+//					insertprint(printMSG);
+//					copyto(node.getStartPosition()+node.getLength());
+//					outputBuffer+="}";
+//					return false;
+//				}
+>>>>>>> 6cdd27bddec1b23ff1fc775253100f09362a37d3
                 
                 
                 
