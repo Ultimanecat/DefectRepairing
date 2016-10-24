@@ -607,8 +607,7 @@ public class test {
                     }
                     
                 }
-                
-<<<<<<< HEAD
+
                 public boolean visit(ReturnStatement node) {
 					int line=cu.getLineNumber(node.getStartPosition());
 					if(verbose)System.out.print("ReturnStatement:line "+line);
@@ -622,22 +621,7 @@ public class test {
 					outputBuffer+="}";
 					return false;
 				}
-=======
-//                public boolean visit(ReturnStatement node) {
-//					int line=cu.getLineNumber(node.getStartPosition());
-//					if(verbose)System.out.print("ReturnStatement:line "+line);
-//					
-//					
-//					copyto(node.getStartPosition());
-//					outputBuffer+="{";
-//					String printMSG = "\"<ReturnStatement> ReturnValue=\"+getValue_(" + node.getExpression() + ")+\",type:\"+getType_("+node.getExpression()+")+\",Line "+line+"\"";
-//					insertprint(printMSG);
-//					copyto(node.getStartPosition()+node.getLength());
-//					outputBuffer+="}";
-//					return false;
-//				}
->>>>>>> 6cdd27bddec1b23ff1fc775253100f09362a37d3
-                
+ 
                 
                 
                 

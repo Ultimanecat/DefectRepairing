@@ -5,13 +5,12 @@ make run RUNFLAG="-D directory -T tracefile"
 
 make parser PARSERFLAG="tracefile1.txt tracefile2.txt"
 
-Mutator：
+Mutator：make mutate MUTATEFLAG=""
 
 输入是一个只包含一个方法的文件。
 
 随机变异生成若干方法，输出到STDOUT。
 
-帮忙写一下makefile。
 
 TODO:
 
