@@ -138,8 +138,9 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Lang11b/src/main/";
-        String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Time9b/src/main/";
+        String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt
+        ";
         
         if( commandLine.hasOption('D') ) {
             DirPath=commandLine.getOptionValue('D');
