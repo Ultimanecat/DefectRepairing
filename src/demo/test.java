@@ -138,7 +138,7 @@ public class test {
         // Parse the program arguments
         CommandLine commandLine = cmdlparser.parse( options, args );
         // Set the appropriate variables based on supplied options
-        String DirPath ="/Users/liuxinyuan/DefectRepairing/Lang11b/src/main/";
+        String DirPath ="/Users/liuxinyuan/DefectRepairing/Time9b/src/main/";
         String TraceFilet="/Users/liuxinyuan/DefectRepairing/a.txt";
         
         if( commandLine.hasOption('D') ) {
@@ -328,8 +328,11 @@ public class test {
                         
                         
                         copyto(((BodyDeclaration)(node.bodyDeclarations().get(0))).getStartPosition());
-                        outputBuffer+="\nstatic public void printRuntimeMSG (String printMSG)\n"
+                        outputBuffer+="\nstatic boolean flag__lxy=false;\n"
+                        +"static public void printRuntimeMSG (String printMSG)\n"
                         +"{\n"
+                        +"if(flag__lxy)return;\n"
+                        +"flag__lxy=true;\n"
                         +"\ttry {\n"
                         +"\tRandomAccessFile randomFile = new RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
                         +"\tlong fileLength = randomFile.length();\n"
@@ -338,6 +341,7 @@ public class test {
                         +"\trandomFile.close();\n"
                         +"\t} catch (IOException e__e__e) {\n"
                         +"\te__e__e.printStackTrace();\n"
+                        +"flag__lxy=false;\n"
                         +"\t}\n"
                         +"}\n"
                         +"static public String getType_(Object o){return \"Object\";}\n"
