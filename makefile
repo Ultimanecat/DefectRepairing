@@ -10,8 +10,12 @@ JAR_PKG = demo.test.jar
 # 设置你的项目的入口点
 # Set your entry point of your java app:
 ENTRY_POINT = demo.test
+PARSER = demo.parser
 LIB_DIR = ./lib/
 LIBS = $(LIB_DIR)commons-collections-3.2.1.jar:$(LIB_DIR)commons-cli-1.3.1.jar:$(LIB_DIR)commons-cli-1.3.1-javadoc.jar:$(LIB_DIR)commons-configuration-1.6.jar:$(LIB_DIR)commons-lang-2.5.jar:$(LIB_DIR)commons-logging-1.1.1.jar:$(LIB_DIR)org.eclipse.core.contenttype_3.4.1.R35x_v20090826-0451.jar:$(LIB_DIR)org.eclipse.core.jobs_3.4.100.v20090429-1800.jar:$(LIB_DIR)org.eclipse.core.resources_3.5.2.R35x_v20091203-1235.jar:$(LIB_DIR)org.eclipse.core.runtime_3.5.0.v20090525.jar:$(LIB_DIR)org.eclipse.equinox.common_3.5.1.R35x_v20090807-1100.jar:$(LIB_DIR)org.eclipse.equinox.preferences_3.2.301.R35x_v20091117.jar:$(LIB_DIR)org.eclipse.jdt.core_3.5.2.v_981_R35x.jar:$(LIB_DIR)org.eclipse.osgi_3.5.2.R35x_v20100126.jar
+
+RUNFLAG = 
+PARSERFLAG=
 # 是否需要res目录，如果你的程序有图片、文档等，
 # 最好放入res目录中。
 # yes: 需要；no：不需要
@@ -25,7 +29,7 @@ RES_DIR = no
 # 建议一行一个。
 # 另外注意顺序，如果class A 引用 class B，那么B.java应该放在A.java前。
 SOURCE_FILES = \
-demo/test.java
+demo/test.java demo/parser.java
 
 # 设置你的java编译器
 # Set your java compiler here:
@@ -81,7 +85,7 @@ build: $(SOURCE_FILES:.java=.class)
 
 rebuild: clean build
 
-.PHONY: new clean run jar
+.PHONY: new clean run jar parser
 
 new:
 ifeq ($(RES_DIR),yes)
@@ -94,7 +98,7 @@ clean:
 	rm -frv bin/*
 
 run:
-	java -cp bin/:$(LIBS) $(ENTRY_POINT)
+	java -cp bin/:$(LIBS) $(ENTRY_POINT) $(RUNFLAG)
 
 jar:
 ifeq ($(RES_DIR),yes)
@@ -103,3 +107,5 @@ else
 	jar cvfe $(JAR_PKG) $(ENTRY_POINT) -C bin .
 endif
 
+parser:
+	java -cp bin/:$(LIBS) $(PARSER) $(PARSERFLAG)

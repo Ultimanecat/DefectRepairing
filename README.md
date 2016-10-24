@@ -1,12 +1,26 @@
 # DefectRepairing
 Spectrum_based
 
-Object的赋值输出为字符串"Object"
-未追踪constructor
-未追踪final method
+make run RUNFLAG="-D directory -T tracefile"
+
+make parser PARSERFLAG="tracefile1.txt tracefile2.txt"
+
+Mutator：
+
+输入是一个只包含一个方法的文件。
+
+随机变异生成若干方法，输出到STDOUT。
+
+帮忙写一下makefile。
 
 TODO:
-if同时输出else部分行号
-输出变量类型
+
 解决body部分为一条语句而不是一个block的if/for/while/do语句可能追踪不全的bug
-追踪constructor的传参
+
+
+automatic patch apply&test
+
+complete parser:
+	consider filename
+	consider function call&return
+	ForStatement\Break
