@@ -600,7 +600,7 @@ public class test {
 					
 					copyto(node.getStartPosition());
 					outputBuffer+="{";
-					String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",type:\"+getType_("+node.getExpression()+")+\",Line "+line+"\"";
+					String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",type:\"+getType_("+node.getExpression()+")+\",Line:"+line+"\"";
 					insertprint(printMSG);
 					copyto(node.getStartPosition()+node.getLength());
 					outputBuffer+="}";

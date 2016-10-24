@@ -275,16 +275,17 @@ public class parser {
 
 	private static class ReturnStatement extends Statement {
 		// TODO : return value
-
+		Variable var;
 		int Line;
 
-		ReturnStatement(int _Line) {
+		ReturnStatement(Variable _var, int _Line) {
+			var = _var;
 			Line = _Line;
 		}
 
 		@Override
 		public String toString() {
-			return "ReturnStatement [Line=" + Line + "]";
+			return "ReturnStatement [var=" + var + ", Line=" + Line + "]";
 		}
 	}
 
@@ -421,7 +422,8 @@ public class parser {
 				 */
 			}
 			for (LineVariables i : values) {
-				System.out.println("Line " + i.line + ": " + i.Variables);
+				//if(verbose)
+				//System.out.println("Line " + i.line + ": " + i.Variables);
 			}
 		}
 
@@ -594,7 +596,12 @@ public class parser {
 			ret = new Assignment(var, line);
 			break;
 		case "ReturnStatement":
-			// TODO
+			labelsc.close();
+			labelsc = new Scanner(sc.next()).useDelimiter(",");
+			var = getVariable(labelsc);
+			line = getLine(labelsc.next());
+			file = getFile(labelsc.next());
+			ret = new ReturnStatement(var, line);
 			break;
 		case "VariableDeclaration":
 			labelsc.close();
