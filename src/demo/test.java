@@ -607,21 +607,21 @@ public class test {
                     }
                     
                 }
-
-                public boolean visit(ReturnStatement node) {
-					int line=cu.getLineNumber(node.getStartPosition());
-					if(verbose)System.out.print("ReturnStatement:line "+line);
-					
-					
-					copyto(node.getStartPosition());
-					outputBuffer+="{";
-					String printMSG = "\"<ReturnStatement> ReturnValue=\"+("+node.getExpression()+")+\",type:\"+getType_("+node.getExpression()+")+\",Line:"+line+"\"";
-					insertprint(printMSG);
-					copyto(node.getStartPosition()+node.getLength());
-					outputBuffer+="}";
-					return false;
-				}
- 
+                
+//                public boolean visit(ReturnStatement node) {
+//					int line=cu.getLineNumber(node.getStartPosition());
+//					if(verbose)System.out.print("ReturnStatement:line "+line);
+//					
+//					
+//					copyto(node.getStartPosition());
+//					outputBuffer+="{";
+//					String printMSG = "\"<ReturnStatement> ReturnValue=\"+getValue_(" + node.getExpression() + ")+\",type:\"+getType_("+node.getExpression()+")+\",Line "+line+"\"";
+//					insertprint(printMSG);
+//					copyto(node.getStartPosition()+node.getLength());
+//					outputBuffer+="}";
+//					return false;
+//				}
+                
                 
                 
                 
