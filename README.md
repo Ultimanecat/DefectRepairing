@@ -5,7 +5,7 @@ make run RUNFLAG="-D directory -T tracefile"
 
 make parser PARSERFLAG="tracefile1.txt tracefile2.txt"
 
-Mutator：make mutate MUTATEFLAG=""
+Mutator：make mutate MUTATEFLAG="-F testfilename"
 
 输入是一个只包含一个方法的文件。
 

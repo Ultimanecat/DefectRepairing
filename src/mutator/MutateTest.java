@@ -17,6 +17,12 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.CommandLine;
+
 public class MutateTest {
 
     public static String readFileToString(String filePath) throws IOException {
@@ -34,8 +40,26 @@ public class MutateTest {
     }
     
 	
-	public static void main(String[] args) throws IOException {
-		String method=readFileToString("/Users/liuxinyuan/DefectRepairing/foo.txt");
+	public static void main(String[] args) throws IOException,ParseException {
+		
+        CommandLineParser cmdlparser = new BasicParser( );
+        Options options = new Options( );
+        options.addOption("F","File",true,"input file");
+        options.addOption("v","Verbose",false,"verbose debug");
+        // Parse the program arguments
+        CommandLine commandLine = cmdlparser.parse( options, args );
+        // Set the appropriate variables based on supplied options
+        String cmdlfile="/Users/liuxinyuan/DefectRepairing/foo.txt";
+        boolean verbose;
+        if( commandLine.hasOption('M') ) {
+            cmdlfile=commandLine.getOptionValue('M');
+        }
+        if(commandLine.hasOption('v')){
+            verbose=true;
+        }
+        
+
+        String method=readFileToString(cmdlfile);
 		int time=10;
 		
 		String source=toCompilationUnit(method);
