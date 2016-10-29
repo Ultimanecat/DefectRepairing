@@ -12,12 +12,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
 public class parser {
 
 	private static class Variable implements Cloneable, Comparable {
@@ -422,8 +416,8 @@ public class parser {
 				 */
 			}
 			for (LineVariables i : values) {
-				//if(verbose)
-				//System.out.println("Line " + i.line + ": " + i.Variables);
+				// if(verbose)
+				// System.out.println("Line " + i.line + ": " + i.Variables);
 			}
 		}
 
@@ -612,8 +606,9 @@ public class parser {
 			ret = new VariableDeclaration(var, line);
 			break;
 		}
-		sc.close();
 		labelsc.close();
+		sc.close();
+
 		ret.set(file, type);
 		// System.out.println(ret);
 		return ret;
@@ -659,11 +654,14 @@ public class parser {
 		return Stmts;
 	}
 
-	public static void main(String args[]) throws ParseException, IOException {
-		CommandLineParser cmdlparser = new BasicParser();
-		Options options = new Options();
-		options.addOption("T", "TraceFile", true, "input file1");
-		CommandLine commandLine = cmdlparser.parse(options, args);
+	public static int main(String args[]) {
+		/*
+		 * CommandLineParser cmdlparser = new DefaultParser(); Options options =
+		 * new Options(); options.addOption("T", "TraceFile", true,
+		 * "input file1"); try { CommandLine commandLine =
+		 * cmdlparser.parse(options, args); } catch (ParseException e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); }
+		 */
 		String TraceFile1 = "", TraceFile2 = "";
 		TraceFile1 = args[0];
 		TraceFile2 = args[1];
@@ -674,12 +672,23 @@ public class parser {
 
 		System.out.println("Spec1:");
 		Spectrum spec1 = new Spectrum();
-		spec1.form(parsetrace(TraceFile1));
+		try {
+			spec1.form(parsetrace(TraceFile1));
+		} catch (IOException e) {
+			System.out.println("parse Tracefile1 failed");
+			e.printStackTrace();
+		}
 		System.out.println("Spec2:");
 		Spectrum spec2 = new Spectrum();
-		spec2.form(parsetrace(TraceFile2));
-		System.out.println(spec1.diff(spec2));
-		return;
+		try {
+			spec2.form(parsetrace(TraceFile2));
+		} catch (IOException e) {
+			System.out.println("parse Tracefile2 failed");
+			e.printStackTrace();
+		}
+		int ret = spec1.diff(spec2);
+		System.out.println(ret);
+		return ret;
 	}
 
 }
