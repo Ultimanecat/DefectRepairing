@@ -3,8 +3,10 @@ package mutator;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -37,25 +39,51 @@ public class MutateTest {
 		return fileData.toString();
 	}
 
-	public static void main(String[] args) throws IOException, ParseException {
+	public static void main(String[] args) {
 
 		CommandLineParser cmdlparser = new DefaultParser();
 		Options options = new Options();
-		options.addOption("F", "File", true, "input file");
+		options.addOption("i", "input", true, "input file");
+		options.addOption("o", "output", true, "output file");
 		options.addOption("v", "Verbose", false, "verbose debug");
 		// Parse the program arguments
-		CommandLine commandLine = cmdlparser.parse(options, args);
+		CommandLine commandLine = null;
+		try {
+			commandLine = cmdlparser.parse(options, args);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// Set the appropriate variables based on supplied options
-		String cmdlfile = "/Users/liuxinyuan/DefectRepairing/foo.txt";
+		String inputfile = "/Users/liuxinyuan/DefectRepairing/foo.txt";
+		String outputfile = "";
 		boolean verbose;
-		if (commandLine.hasOption('M')) {
-			cmdlfile = commandLine.getOptionValue('M');
+		if (commandLine.hasOption('i')) {
+			inputfile = commandLine.getOptionValue('i');
 		}
 		if (commandLine.hasOption('v')) {
 			verbose = true;
 		}
+		if (commandLine.hasOption('o')) {
+			outputfile = commandLine.getOptionValue('o');
+			try {
+				PrintStream ps;
+				ps = new PrintStream(outputfile);
+				System.setOut(ps);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-		String method = readFileToString(cmdlfile);
+		}
+
+		String method = null;
+		try {
+			method = readFileToString(inputfile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		int time = 10;
 
 		String source = toCompilationUnit(method);
@@ -77,6 +105,7 @@ public class MutateTest {
 				l.get(i).setToken(mutateop.randommutate(l_bak.get(i)));
 
 			methodname.setIdentifier(methodname_bak + "__" + num);
+
 			System.out.println(getmethod(cu));
 			System.out.println();
 		}
