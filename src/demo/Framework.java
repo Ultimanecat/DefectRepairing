@@ -11,7 +11,7 @@ public class Framework {
 	public void insertprint(String dir, String tracefile) {
 		String[] args = new String[1];
 		args[0] = new String("-D " + dir + " -T " + tracefile);
-		test.main(args);
+		instrumenter.main(args);
 	}
 
 	public int getdiff(String file1, String file2) {

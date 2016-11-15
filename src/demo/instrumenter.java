@@ -37,7 +37,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.CommandLine;
 
-public class test {
+public class instrumenter {
 
 	public static String readFileToString(String filePath) throws IOException {
 		StringBuilder fileData = new StringBuilder(1000);
@@ -130,7 +130,7 @@ public class test {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String DirPath = "/Users/liuxinyuan/DefectRepairing/Time9b/src/main/";
+		String DirPath = "/Users/liuxinyuan/DefectRepairing/Math3b/src/main/";
 		String TraceFilet = "/Users/liuxinyuan/DefectRepairing/a.txt";
 
 		if (commandLine.hasOption('D')) {
@@ -325,7 +325,7 @@ public class test {
 								+ "\trandomFile.seek(fileLength);\n" + "\trandomFile.writeBytes(printMSG" + "+\",File:"
 								+ FilePath + "\"" + "+ \"\\n\");\n" + "\trandomFile.close();\n"
 								+ "\t} catch (IOException e__e__e) {\n" + "\te__e__e.printStackTrace();\n"
-								+ "flag__lxy=false;\n" + "\t}\n" + "}\n"
+								+ "\n" + "\t}\n" + "flag__lxy=false;\n}\n"
 								+ "static public String getType_(Object o){return \"Object\";}\n"
 								+ "static public String getType_(byte b){return \"byte\";}\n"
 								+ "static public String getType_(short s){return \"short\";}\n"
@@ -621,7 +621,6 @@ public class test {
 					fw.write(outputBuffer);
 					fw.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				CurNum++;
@@ -634,7 +633,4 @@ public class test {
 	}
 
 }
-// return
-// if
-// SQL
-// every-line
+

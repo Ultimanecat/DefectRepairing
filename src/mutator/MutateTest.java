@@ -57,7 +57,7 @@ public class MutateTest {
 		// Set the appropriate variables based on supplied options
 		String inputfile = "/Users/liuxinyuan/DefectRepairing/foo.txt";
 		String outputfile = "";
-		boolean verbose;
+		boolean verbose=false;
 		if (commandLine.hasOption('i')) {
 			inputfile = commandLine.getOptionValue('i');
 		}
@@ -81,7 +81,6 @@ public class MutateTest {
 		try {
 			method = readFileToString(inputfile);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		int time = 10;
@@ -99,15 +98,14 @@ public class MutateTest {
 		for (NumberLiteral node : l)
 			l_bak.add(node.toString());
 		String methodname_bak = methodname.toString();
-
+		String mutateoutput="";
 		for (int num = 0; num < time; num++) {
 			for (int i = 0; i < len; i++)
 				l.get(i).setToken(mutateop.randommutate(l_bak.get(i)));
 
 			methodname.setIdentifier(methodname_bak + "__" + num);
-
-			System.out.println(getmethod(cu));
-			System.out.println();
+			
+			mutateoutput+=getmethod(cu);
 		}
 
 	}
