@@ -1,4 +1,4 @@
-package demo;
+package DefectRepairing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -186,7 +186,6 @@ public class Instrumenter {
 		try {
 			commandLine = cmdlparser.parse(options, args);
 		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
@@ -549,7 +548,7 @@ public class Instrumenter {
 						outputBuffer += "{\n";
 						insertprint(printMSG);
 						copyto(body.getStartPosition() + body.getLength());
-						// TODO
+						ProcessSingleStatement(body);
 						outputBuffer += "\n}";
 						return false;
 					}
@@ -575,7 +574,7 @@ public class Instrumenter {
 						outputBuffer += "{\n";
 						insertprint(printMSG);
 						copyto(body.getStartPosition() + body.getLength());
-						// TODO
+						ProcessSingleStatement(body);
 						outputBuffer += "\n}";
 						return false;
 					}
@@ -600,7 +599,7 @@ public class Instrumenter {
 						outputBuffer += "{\n";
 						insertprint(printMSG);
 						copyto(body.getStartPosition() + body.getLength());
-						// TODO
+						ProcessSingleStatement(body);
 						outputBuffer += "\n}";
 						return false;
 					}
@@ -647,13 +646,18 @@ public class Instrumenter {
 						outputBuffer += "{\n";
 						insertprint(printMSG);
 						copyto(body.getStartPosition() + body.getLength());
-						// TODO
+						ProcessSingleStatement(body);
 						outputBuffer += "\n}";
 						return false;
 					}
 
 				}
-
+				
+				public void ProcessSingleStatement(Statement node){
+					node.accept(this);
+					
+				}
+				
 				// public boolean visit(ReturnStatement node) {
 				// int line=cu.getLineNumber(node.getStartPosition());
 				// if(verbose)System.out.print("ReturnStatement:line "+line);

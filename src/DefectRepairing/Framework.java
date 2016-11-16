@@ -1,4 +1,4 @@
-package demo;
+package DefectRepairing;
 
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.CommandLine;
@@ -26,7 +26,7 @@ public class Framework {
 		Options options = new Options();
 		options.addOption("s", "srcdir", true, "source file directory");
 		options.addOption("w", "workdir", true, "d4j working directory");
-		options.addOption("t", "testcase", true, "the test case to mutate and run");
+		options.addOption("t", "testcase", true, "the Instrumenter case to mutate and run");
 		options.addOption("v", "Verbose", false, "verbose debug");
 		CommandLine commandLine = null;
 		try {
@@ -52,17 +52,17 @@ public class Framework {
 			verbose = true;
 		}
 
-		// TODO mutate and get testcase list
+		// TODO mutate and get testcase list//不同程序，数据流权重适当增大；不同test，数据流权重小，甚至不考虑
 
 		// TODO insert print
 
 		// TODO run testcases and get spectrum
 
-		// TODO compare with t0 and determine positive/negative test
+		// TODO compare with t0 and determine positive/negative Instrumenter
 
 		/*
 		 * TODO for each patch remove working dir checkout apply patch insert
-		 * print message for each test run -- collect spectrum compare with
+		 * print message for each Instrumenter run -- collect spectrum compare with
 		 * t0(no patch) give out score sort patches
 		 */
 	}

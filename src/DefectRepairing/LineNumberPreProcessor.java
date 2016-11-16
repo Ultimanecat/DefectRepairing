@@ -1,4 +1,4 @@
-package demo;
+package DefectRepairing;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,11 +50,8 @@ public class LineNumberPreProcessor {
 	
 	public static void main(String[] args) {
 		
-		//process("/Users/liuxinyuan/DefectRepairing/Math3b/src/main/");
-		String line="    //123";
-		Pattern pattern=Pattern.compile(".*    //[0-9]+$");
-		Matcher matcher = pattern.matcher(line);
-		System.out.println(matcher.matches());;
+		process("/Users/liuxinyuan/DefectRepairing/Math3b/src/main/");
+		
 	}
 	
 	
