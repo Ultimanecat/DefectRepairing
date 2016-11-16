@@ -10,8 +10,8 @@ public class Framework {
 
 	public void insertprint(String dir, String tracefile) {
 		String[] args = new String[1];
-		args[0] = new String("-D " + dir + " -T " + tracefile);
-		instrumenter.main(args);
+		args[0] = new String("-D " + dir + " -T " + tracefile);//不能把参数全放arg[0]吧？
+		Instrumenter.main(args);
 	}
 
 	public int getdiff(String file1, String file2) {

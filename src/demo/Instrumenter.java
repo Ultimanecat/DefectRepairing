@@ -1,7 +1,12 @@
 package demo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -30,6 +35,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
+
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -37,7 +44,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.CommandLine;
 
-public class instrumenter {
+public class Instrumenter {
 
 	public static String readFileToString(String filePath) throws IOException {
 		StringBuilder fileData = new StringBuilder(1000);
@@ -50,17 +57,70 @@ public class instrumenter {
 			fileData.append(readData);
 			buf = new char[1024];
 		}
-
 		reader.close();
-
 		return fileData.toString();
 	}
 
+	public static void writeStringToFile(String FilePath,String output)
+	{
+		try {
+			FileWriter fw = new FileWriter(FilePath);
+			fw.write(output);
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static int curLine = 1;
 	public static int curChar = 0;
 	public static String outputBuffer = new String();
 	public static String source = new String();
-
+	
+	public static Map<Integer, Integer> LineNumberMap;
+	
+	public static void init(){
+		curLine = 1;
+		curChar = 0;
+		outputBuffer = new String();
+		LineNumberMap=new HashMap<Integer,Integer>();
+	}
+	
+	public static void ConstructMap(String FilePath) {
+		BufferedReader br = new BufferedReader(new StringReader(source));
+		String line;
+		int ln=0;
+		try {
+			while((line=br.readLine())!=null)
+			{
+				ln++;
+				int i=line.length()-1;
+				Pattern pattern=Pattern.compile(".*    //[0-9]+$");
+				Matcher matcher = pattern.matcher(line);
+				if(matcher.matches())
+					for(;i>=0;i--)
+					{
+						if(line.charAt(i)=='/')
+						{
+							LineNumberMap.put(ln, Integer.parseInt(line.substring(i+1)));
+							break;
+						}
+					}
+				else
+				{
+					//TODO
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static int getLineNumber(int ln)
+	{
+		return LineNumberMap.get(ln);
+	}
+	
 	public static void copyaLine() {
 		curLine++;
 		int preChar = curChar;
@@ -113,7 +173,7 @@ public class instrumenter {
 	}
 
 	public static void main(String args[]) {
-		boolean verboset = false;
+		boolean verboset = true;
 
 		// Create a Parser
 		CommandLineParser cmdlparser = new DefaultParser();
@@ -142,13 +202,16 @@ public class instrumenter {
 		if (commandLine.hasOption('v')) {
 			verboset = true;
 		}
+		
+		init();
+		
 		final String TraceFile = TraceFilet;
 		final boolean verbose = verboset;
 		List<String> filelist = new ArrayList<String>();
-		;
+		
 		if (verbose)
 			filelist.add(new String(
-					"/Users/liuxinyuan/DefectRepairing/Math1b/src/main/java/org/apache/commons/math3/linear/SparseRealVector.java"));
+					"/Users/liuxinyuan/DefectRepairing/Math3b/src/main/java/org/apache/commons/math3/complex/Complex.java"));
 		else
 			getFilelist(DirPath, filelist);
 
@@ -161,18 +224,16 @@ public class instrumenter {
 		for (final String FilePath : filelist)
 
 		{
+			init();
 			System.out.println(FilePath);
 			try {
 				source = readFileToString(FilePath);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
+				
 				e1.printStackTrace();
 			}
-			// else source="public class A{\nvoid foo(){\nfor(int
-			// i=0;i<5;i++)\ni++;\n}\n}";
-			curLine = 1;
-			curChar = 0;
-			outputBuffer = new String();
+			
+			ConstructMap(FilePath);
 
 			parser.setSource(source.toCharArray());
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -616,13 +677,7 @@ public class instrumenter {
 				System.out.print(outputBuffer);
 
 			if (!verbose) {
-				try {
-					FileWriter fw = new FileWriter(FilePath);
-					fw.write(outputBuffer);
-					fw.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				writeStringToFile(FilePath,outputBuffer);
 				CurNum++;
 
 				System.out.println(CurNum + "/" + TotalNum);
