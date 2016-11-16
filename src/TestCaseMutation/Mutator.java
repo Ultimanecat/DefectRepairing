@@ -104,7 +104,7 @@ public class Mutator {
 	}
 	
 
-	public static MethodDeclaration getTarget(CompilationUnit cu, final List<NumberLiteral> l, String method) {
+	public static MethodDeclaration getTarget(CompilationUnit cu, final List<NumberLiteral> l, final String method) {
 		final List<MethodDeclaration> l_ = new ArrayList<MethodDeclaration>();
 		cu.accept(new ASTVisitor() {
 			public boolean visit(MethodDeclaration node) {
