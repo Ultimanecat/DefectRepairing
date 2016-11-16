@@ -100,7 +100,6 @@ public class Mutator {
 		}
 		
 		String output=insert(source,method.getStartPosition()+method.getLength(),mutateoutput);
-		System.out.print(output);
 		Instrumenter.writeStringToFile(filepath, output);
 	}
 	
