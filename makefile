@@ -9,7 +9,7 @@
 JAR_PKG = DefectRepairing.Instrumenter.jar
 # 设置你的项目的入口点
 # Set your entry point of your java app:
-ENTRY_POINT = DefectRepairing.Instrumenter # should change to Framework (maybe the name "test" should be changed)
+ENTRY_POINT = DefectRepairing.Instrumenter # should change to Framework 
 TEST = DefectRepairing.Instrumenter
 PARSER = DefectRepairing.parser
 MUTATE = TestCaseMutation.MutateTest

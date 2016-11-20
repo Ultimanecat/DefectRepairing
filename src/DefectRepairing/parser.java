@@ -421,20 +421,52 @@ public class parser {
 			}
 		}
 
-		public int diff(Spectrum spec2) {
-			int ret = 0;
-			ret += java.lang.Math.abs(spec2.values.size() - values.size());
-			Iterator<LineVariables> it1 = values.iterator(), it2 = spec2.values.iterator();
-			while (it1.hasNext() && it2.hasNext()) {
-				LineVariables l1 = it1.next(), l2 = it2.next();
-				if (l1.line != l2.line)
-					ret += 2;
-				else {
-					if (!l1.Variables.equals(l2.Variables))
-						ret++;
-				}
+		public static class Mode {
+			public enum ModeEnum {
+				Default, LCS;
 			}
-			return ret;
+
+			ModeEnum mode;
+			double varw;
+
+			Mode(ModeEnum _mode, double _varw) {
+				mode = _mode;
+				varw = _varw;
+			}
+		}
+
+		public double diff(Spectrum spec2, Mode diffmode) {
+			double ret = 0;
+			switch (diffmode.mode) {
+			case Default:
+				ret += java.lang.Math.abs(spec2.values.size() - values.size());
+				Iterator<LineVariables> it1 = values.iterator(), it2 = spec2.values.iterator();
+				while (it1.hasNext() && it2.hasNext()) {
+					LineVariables l1 = it1.next(), l2 = it2.next();
+					if (l1.line != l2.line)
+						ret += 2;
+					else {
+						if (!l1.Variables.equals(l2.Variables))
+							ret+=diffmode.varw;
+					}
+				}
+				return ret;
+			case LCS:
+				ret += java.lang.Math.abs(spec2.values.size() - values.size());
+				it1 = values.iterator(); it2 = spec2.values.iterator();
+				while (it1.hasNext() && it2.hasNext()) {
+					LineVariables l1 = it1.next(), l2 = it2.next();
+					if (l1.line != l2.line)
+						ret += 2;
+					else {
+						if (!l1.Variables.equals(l2.Variables))
+							ret+=diffmode.varw;
+					}
+				}
+				return ret;
+			default:
+				return 0;
+			}
 		}
 	}
 
@@ -686,9 +718,9 @@ public class parser {
 			System.out.println("parse Tracefile2 failed");
 			e.printStackTrace();
 		}
-		int ret = spec1.diff(spec2);
+		double ret = spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default,0.2));
 		System.out.println(ret);
-		return ret;
+		return 0;
 	}
 
 }
