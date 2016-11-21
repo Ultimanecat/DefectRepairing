@@ -21,17 +21,20 @@ defects4j的API需要哪些？目前来看需要checkout、compile、test（这�
 
 完成framework
 
-处理一下make
-
 parser类名字起的不好（要改）
 
-test里面一个list泛型类型检查的warning调不过（也不是那么关键）
 
 
 automatic patch apply&test
 
 complete parser:
+
 	consider filename
+
 	consider function call&return
+
 	ForStatement\Break
-        LCS
+
+    LCS(need debugging) O(n2)
+
+    LCS_bestfit(need dubugging) O(n3) using BFS instead of DP may get better performance
