@@ -77,19 +77,20 @@ public class Instrumenter {
 	public static String outputBuffer = new String();
 	public static String source = new String();
 	
-	public static Map<Integer, Integer> LineNumberMap;
+	public static Map<Integer, String> LineNumberMap;
 	
 	public static void init(){
 		curLine = 1;
 		curChar = 0;
 		outputBuffer = new String();
-		LineNumberMap=new HashMap<Integer,Integer>();
+		LineNumberMap=new HashMap<Integer,String>();
 	}
 	
 	public static void ConstructMap(String FilePath) {
 		BufferedReader br = new BufferedReader(new StringReader(source));
 		String line;
 		int ln=0;
+		int temp1=0,temp2=1;
 		try {
 			while((line=br.readLine())!=null)
 			{
@@ -102,13 +103,16 @@ public class Instrumenter {
 					{
 						if(line.charAt(i)=='/')
 						{
-							LineNumberMap.put(ln, Integer.parseInt(line.substring(i+1)));
+							temp1=(int)Double.parseDouble(line.substring(i+1));
+							temp2=1;
+							LineNumberMap.put(ln, line.substring(i+1) );
 							break;
 						}
 					}
 				else
 				{
-					//TODO
+					temp2++;
+					LineNumberMap.put(ln, temp1+"."+temp2);
 				}
 			}
 		} catch (IOException e) {
@@ -116,7 +120,7 @@ public class Instrumenter {
 		}
 	}
 	
-	public static int getLineNumber(int ln)
+	public static String getLineNumber(int ln)
 	{
 		return LineNumberMap.get(ln);
 	}
@@ -295,7 +299,7 @@ public class Instrumenter {
 								|| ParentStatement instanceof ForStatement || ParentStatement instanceof IfStatement
 								|| ParentStatement instanceof ReturnStatement)
 							return;
-						int line = cu.getLineNumber(node.getStartPosition());
+						String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 
 						if (verbose)
 							System.out.println("VariableDeclaration:" + "line " + line + "," + name);
@@ -319,7 +323,7 @@ public class Instrumenter {
 					if (body == null)
 						return true;
 
-					int line = cu.getLineNumber(node.getStartPosition());
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					if (verbose)
 						System.out.println("MethodDeclaration:" + node.getName().toString() + ",Line " + line);
 
@@ -442,7 +446,7 @@ public class Instrumenter {
 							|| ParentStatement instanceof ReturnStatement)
 						return;
 
-					int line = cu.getLineNumber(node.getStartPosition());
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 
 					String name = node.getLeftHandSide().toString();
 					if (verbose)
@@ -462,7 +466,7 @@ public class Instrumenter {
 							|| ParentStatement instanceof ForStatement || ParentStatement instanceof IfStatement
 							|| ParentStatement instanceof ReturnStatement)
 						return;
-					int line = cu.getLineNumber(node.getStartPosition());
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 
 					String name = node.getOperand().toString();
 					if (verbose)
@@ -485,7 +489,7 @@ public class Instrumenter {
 								|| ParentStatement instanceof ForStatement || ParentStatement instanceof IfStatement
 								|| ParentStatement instanceof ReturnStatement)
 							return;
-						int line = cu.getLineNumber(node.getStartPosition());
+						String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 
 						String name = node.getOperand().toString();
 						if (verbose)
@@ -499,15 +503,16 @@ public class Instrumenter {
 				}
 
 				public boolean visit(ForStatement node) {
-					int line = cu.getLineNumber(node.getStartPosition());
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
+					String lineend = getLineNumber(cu.getLineNumber(node.getStartPosition() + node.getLength()));
 					if (verbose)
 						System.out.print("ForStatement:" + "line " + line);
 
 					String printMSG = "\"<ForStatement,taken> Line:" + line + " to "
-							+ cu.getLineNumber(node.getStartPosition() + node.getLength()) + "\"";
+							+ lineend + "\"";
 					CopytoLabel(node);
 					insertprint("\"<ForStatement,reached> Line:" + line + " to "
-							+ cu.getLineNumber(node.getStartPosition() + node.getLength()) + "\"");
+							+ lineend + "\"");
 					List<Expression> l = node.updaters();
 					for (Expression e : l) {
 						if (e instanceof Assignment) {
@@ -532,9 +537,7 @@ public class Instrumenter {
 								printMSG += "+\",assign:" + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_("
 										+ name + ")";
 							}
-
 						}
-
 					}
 					if (verbose)
 						System.out.println();
@@ -556,15 +559,17 @@ public class Instrumenter {
 				}
 
 				public boolean visit(DoStatement node) {
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
+					String lineend = getLineNumber(cu.getLineNumber((node.getStartPosition() + node.getLength())));
 					if (verbose)
-						System.out.println("DoStatement:line " + cu.getLineNumber(node.getStartPosition()) + ","
-								+ cu.getLineNumber((node.getStartPosition() + node.getLength())));
+						System.out.println("DoStatement:line " + line + ","
+								+ lineend);
 					Statement body = node.getBody();
-					String printMSG = "\"<DoStatement,taken> Line:" + cu.getLineNumber(node.getStartPosition()) + " to "
-							+ cu.getLineNumber(node.getStartPosition() + node.getLength()) + "\"";
+					String printMSG = "\"<DoStatement,taken> Line:" + line + " to "
+							+ lineend + "\"";
 					CopytoLabel(node);
-					insertprint("\"<DoStatement,reached> Line:" + cu.getLineNumber(node.getStartPosition()) + " to "
-							+ cu.getLineNumber(node.getStartPosition() + node.getLength()) + "\"");
+					insertprint("\"<DoStatement,reached> Line:" + line + " to "
+							+ lineend + "\"");
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
@@ -582,14 +587,17 @@ public class Instrumenter {
 				}
 
 				public boolean visit(WhileStatement node) {
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
+					String lineend = getLineNumber(cu.getLineNumber((node.getStartPosition() + node.getLength())));
+					
 					if (verbose)
-						System.out.println("WhileStatement:line " + cu.getLineNumber(node.getStartPosition()));
+						System.out.println("WhileStatement:line " + line);
 					Statement body = node.getBody();
-					String printMSG = "\"<WhileStatement,taken> Line:" + cu.getLineNumber(node.getStartPosition())
-							+ " to " + cu.getLineNumber(node.getStartPosition() + node.getLength()) + "\"";
+					String printMSG = "\"<WhileStatement,taken> Line:" + line
+							+ " to " + lineend + "\"";
 					CopytoLabel(node);
-					insertprint("\"<WhileStatement,reached> Line:" + cu.getLineNumber(node.getStartPosition()) + " to "
-							+ cu.getLineNumber(node.getStartPosition() + node.getLength()) + "\"");
+					insertprint("\"<WhileStatement,reached> Line:" + line + " to "
+							+ lineend + "\"");
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
@@ -612,29 +620,30 @@ public class Instrumenter {
 				}
 
 				public boolean visit(IfStatement node) {
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
+					String then_start = getLineNumber(cu.getLineNumber(node.getThenStatement().getStartPosition()));
+					String then_end = getLineNumber(cu.getLineNumber(node.getThenStatement().getStartPosition() + node.getThenStatement().getLength()));
 					if (verbose)
-						System.out.print("IfStatement:line " + cu.getLineNumber(node.getStartPosition()) + ",else: ");
+						System.out.print("IfStatement:line " + line + ",else: ");
 					String ElseMSG = ",Else:";
 					if (node.getElseStatement() != null) {
-						ElseMSG += cu.getLineNumber(node.getElseStatement().getStartPosition()) + " to "
-								+ cu.getLineNumber(node.getElseStatement().getStartPosition()
-										+ node.getElseStatement().getLength());
+						String else_start = getLineNumber(cu.getLineNumber(node.getElseStatement().getStartPosition()));
+						String else_end = getLineNumber(cu.getLineNumber(node.getElseStatement().getStartPosition() + node.getElseStatement().getLength()));
+						ElseMSG += else_start + " to "+ else_end;
 					} else
 						ElseMSG += "null";
 
 					Statement body = node.getThenStatement();
 					String printMSG = "\"<IfStatement,taken> Then:"
-							+ cu.getLineNumber(node.getThenStatement().getStartPosition()) + " to "
-							+ cu.getLineNumber(
-									node.getThenStatement().getStartPosition() + node.getThenStatement().getLength())
+							+ then_start + " to "
+							+ then_end
 							+ ElseMSG + "\"";
 
 					copyto(node.getStartPosition());
 					outputBuffer += '{';
 					insertprint("\"<IfStatement,reached> Then:"
-							+ cu.getLineNumber(node.getThenStatement().getStartPosition()) + " to "
-							+ cu.getLineNumber(
-									node.getThenStatement().getStartPosition() + node.getThenStatement().getLength())
+							+ then_start + " to "
+							+ then_end
 							+ ElseMSG + "\"");
 
 					if (body instanceof Block) {

@@ -64,11 +64,16 @@ public class defects4j_API {
 	public static void main(String[] args) {
 		//StringBuilder stdout=new StringBuilder();
 		//execcommand(new String[]{"sh","-c","ls"},stdout,new StringBuilder());
+//		init();
+//		List<String>l=get_failing_tests("Math",3);
+//		for(String str:l)
+//			System.out.println(str);
 		init();
-		List<String>l=get_failing_tests("Math",3);
-		for(String str:l)
-			System.out.println(str);
-		
+		StringBuilder stdout=new StringBuilder();
+		StringBuilder stderr=new StringBuilder();
+		execcommand(new String[]{"perl",PathToD4j+"framework/bin/defects4j","info","-p","Math"},stdout,stderr);
+		System.out.print(stdout);
+		System.out.print(stderr);
 	}
 	public static void init(){
 		try {
