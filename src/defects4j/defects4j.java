@@ -43,6 +43,8 @@ public class defects4j {
 	public static void run(String [] command,StringBuilder STDOUT,StringBuilder STDERR)
 	{
 		execcommand((String[])ArrayUtils.addAll(new String[]{"perl",PathToD4j+"framework/bin/defects4j"}, command),STDOUT,STDERR);
+		System.out.println(STDOUT);
+		System.out.println(STDERR);
 	}
 	
 	public static List<String> get_failing_tests(String Project,int Bug_id)
@@ -65,20 +67,6 @@ public class defects4j {
 			e.printStackTrace();
 		}
 		return l;
-	}
-	
-	
-	
-	public static void main(String[] args) {
-		init();
-		BuggyVersion bug=new BuggyVersion("Math",3,"/Users/liuxinyuan/DefectRepairing/Math3b");
-		//bug.checkout();
-//		bug.getFailingTests();
-//		for(JavaMethod t:bug.FailingTests)
-//		{
-//			System.out.println(t.FilePath+" "+t.MethodName);
-//		}
-		bug.getsrcdir();
 	}
 	
 	public static void init(){

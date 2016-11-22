@@ -22,8 +22,8 @@ public class BuggyVersion {
 	String project;
 	int bug_id;
 	String workdir;
-	String sourcedir;
-	String testdir;
+	public String sourcedir;
+	public String testdir;
 	public List<JavaMethod>FailingTests;
 	
 	BuggyVersion(String project_,int bug_id_,String workdir_)
@@ -31,6 +31,9 @@ public class BuggyVersion {
 		project=project_;
 		bug_id=bug_id_;
 		workdir=workdir_;
+		checkout();
+		getsrcdir();
+		getFailingTests();
 	}
 	
 	public void checkout()
@@ -38,8 +41,13 @@ public class BuggyVersion {
 		StringBuilder stdout=new StringBuilder();
 		StringBuilder stderr=new StringBuilder();
 		defects4j.run(new String[]{"checkout","-p",project,"-v",bug_id+"b","-w",workdir},stdout, stderr);
-		System.out.print(stdout);
-		System.out.print(stderr);
+	}
+	
+	public void test(String testcase)
+	{
+		StringBuilder stdout=new StringBuilder();
+		StringBuilder stderr=new StringBuilder();
+		defects4j.run(new String[]{"test","-t",testcase,"-w",workdir},stdout, stderr);
 	}
 	
 	public void getFailingTests()
@@ -50,7 +58,7 @@ public class BuggyVersion {
 		{
 			String [] tmp=test.split("::");
 			tmp[0]=tmp[0].replace('.', '/');
-			FailingTests.add(new JavaMethod(tmp[0]+".java",tmp[1]));
+			FailingTests.add(new JavaMethod(Paths.get(testdir,tmp[0]+".java").toString(),tmp[1],test));
 		}
 	}
 	
@@ -62,12 +70,11 @@ public class BuggyVersion {
 			Element root = doc.getRootElement();
 			List<Element> l=root.getChildren("property");
 			for(Element e:l){
-            	//System.out.println(e.getAttributeValue("value"));
 				if(e.getAttributeValue("name")!=null)
 					if(e.getAttributeValue("name").equals("source.home"))
-						sourcedir=e.getAttributeValue("value");
+						sourcedir=Paths.get(workdir, e.getAttributeValue("value")).toString();
 					else if(e.getAttributeValue("name").equals("test.home"))
-						testdir=e.getAttributeValue("value");
+						testdir=Paths.get(workdir,e.getAttributeValue("value")).toString();
             }
 		} catch (JDOMException | IOException e) {
 			e.printStackTrace();
