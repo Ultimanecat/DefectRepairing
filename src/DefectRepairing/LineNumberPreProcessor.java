@@ -37,11 +37,7 @@ public class LineNumberPreProcessor {
 			curChar = 0;
 			curLine = 0;
 			System.out.println(filepath);
-			try {
-				source=Instrumenter.readFileToString(filepath);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			source=Instrumenter.readFileToString(filepath);
 			while(curChar<source.length())
 				copyaLine();
 			Instrumenter.writeStringToFile(filepath,outputBuffer);

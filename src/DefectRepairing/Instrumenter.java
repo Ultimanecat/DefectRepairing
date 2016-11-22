@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,18 +47,26 @@ import org.apache.commons.cli.CommandLine;
 
 public class Instrumenter {
 
-	public static String readFileToString(String filePath) throws IOException {
+	public static String readFileToString(String filePath)  {
 		StringBuilder fileData = new StringBuilder(1000);
-		BufferedReader reader = new BufferedReader(new FileReader(filePath));
-
-		char[] buf = new char[10];
-		int numRead = 0;
-		while ((numRead = reader.read(buf)) != -1) {
-			String readData = String.valueOf(buf, 0, numRead);
-			fileData.append(readData);
-			buf = new char[1024];
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(filePath));
+			char[] buf = new char[10];
+			int numRead = 0;
+			while ((numRead = reader.read(buf)) != -1) {
+				String readData = String.valueOf(buf, 0, numRead);
+				fileData.append(readData);
+				buf = new char[1024];
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		reader.close();
+
+		
 		return fileData.toString();
 	}
 
@@ -229,12 +238,7 @@ public class Instrumenter {
 		{
 			init();
 			System.out.println(FilePath);
-			try {
-				source = readFileToString(FilePath);
-			} catch (IOException e1) {
-				
-				e1.printStackTrace();
-			}
+			source = readFileToString(FilePath);
 			
 			ConstructMap(FilePath);
 

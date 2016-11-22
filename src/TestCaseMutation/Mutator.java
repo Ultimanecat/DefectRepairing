@@ -70,11 +70,7 @@ public class Mutator {
 	public static void process(String filepath, String methodname)
 	{
 		String source = null;
-		try {
-			source = Instrumenter.readFileToString(filepath);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		source = Instrumenter.readFileToString(filepath);
 		int time = 10;
 
 		final CompilationUnit cu = getCompilationUnit(source);
