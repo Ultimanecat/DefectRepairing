@@ -1,4 +1,4 @@
-package DefectRepairing;
+package defects4j;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class defects4j_API {
+import org.apache.commons.lang.ArrayUtils;
+
+public class defects4j {
 	public static String PathToD4j;
 	
 	public static void execcommand(String [] command,StringBuilder STDOUT,StringBuilder STDERR)
@@ -24,7 +26,7 @@ public class defects4j_API {
 			BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			
-			String line = "";           
+			String line;           
 			while ((line = stderr.readLine())!= null) {
 				STDERR.append(line+"\n");
 			}
@@ -36,7 +38,11 @@ public class defects4j_API {
 		{
 			e.printStackTrace();
 		}
-		
+	}
+	
+	public static void run(String [] command,StringBuilder STDOUT,StringBuilder STDERR)
+	{
+		execcommand((String[])ArrayUtils.addAll(new String[]{"perl",PathToD4j+"framework/bin/defects4j"}, command),STDOUT,STDERR);
 	}
 	
 	public static List<String> get_failing_tests(String Project,int Bug_id)
@@ -61,20 +67,16 @@ public class defects4j_API {
 		return l;
 	}
 	
+	
+	
 	public static void main(String[] args) {
-		//StringBuilder stdout=new StringBuilder();
-		//execcommand(new String[]{"sh","-c","ls"},stdout,new StringBuilder());
-//		init();
-//		List<String>l=get_failing_tests("Math",3);
-//		for(String str:l)
-//			System.out.println(str);
 		init();
-		StringBuilder stdout=new StringBuilder();
-		StringBuilder stderr=new StringBuilder();
-		execcommand(new String[]{"perl",PathToD4j+"framework/bin/defects4j","info","-p","Math"},stdout,stderr);
-		System.out.print(stdout);
-		System.out.print(stderr);
+		
+		BuggyVersion bug=new BuggyVersion("Math",3,"/Users/liuxinyuan/DefectRepairing/Math3b");
+		bug.checkout();
+		
 	}
+	
 	public static void init(){
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader("config"));
