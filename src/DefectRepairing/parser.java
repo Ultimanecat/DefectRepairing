@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class parser {
@@ -314,6 +316,7 @@ public class parser {
 	private static class Spectrum {
 		List<LineVariables> values;
 		Queue<Jump> pendingjumps;
+		Map<Integer, Integer> addedlines;
 		int curLine;
 
 		void runto(int targetline) {
@@ -335,6 +338,12 @@ public class parser {
 		Spectrum() {
 			values = new ArrayList<LineVariables>();
 			pendingjumps = new LinkedList<Jump>();
+		}
+
+		Spectrum(Map<Integer, Integer> _addedlines) {
+			values = new ArrayList<LineVariables>();
+			pendingjumps = new LinkedList<Jump>();
+			addedlines = _addedlines;
 		}
 
 		void form(List<Statement> Stmts) {
@@ -729,9 +738,9 @@ public class parser {
 		return fileData.toString();
 	}
 
-	public static List<Statement> parsetrace(String Filename) throws IOException {
+	public static List<Statement> parsetrace(BufferedReader reader) throws IOException {
 		List<Statement> Stmts = new ArrayList<Statement>();
-		BufferedReader reader = new BufferedReader(new FileReader(Filename));
+		// BufferedReader reader = new BufferedReader(new FileReader(Filename));
 		String str = null;
 		while ((str = reader.readLine()) != null) {
 			Statement st = getStatement(str);
@@ -753,7 +762,13 @@ public class parser {
 		return Stmts;
 	}
 
-	public static int main(String args[]) {
+	public static Map<Integer, Integer> parselineno(BufferedReader reader) throws IOException {
+		// TODO
+		Map<Integer, Integer> ret = new TreeMap<Integer, Integer>();
+		return ret;
+	}
+
+	public static double main(String args[]) {
 		/*
 		 * CommandLineParser cmdlparser = new DefaultParser(); Options options =
 		 * new Options(); options.addOption("T", "TraceFile", true,
@@ -770,24 +785,30 @@ public class parser {
 		 */
 
 		System.out.println("Spec1:");
-		Spectrum spec1 = new Spectrum();
+		BufferedReader reader = null;
+		Spectrum spec1 = null, spec2 = null;
 		try {
-			spec1.form(parsetrace(TraceFile1));
+			reader = new BufferedReader(new FileReader(TraceFile1));
+			spec1 = new Spectrum(parselineno(reader));
+			spec1.form(parsetrace(reader));
 		} catch (IOException e) {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
 		}
+
 		System.out.println("Spec2:");
-		Spectrum spec2 = new Spectrum();
 		try {
-			spec2.form(parsetrace(TraceFile2));
+			reader = new BufferedReader(new FileReader(TraceFile2));
+			spec2 = new Spectrum(parselineno(reader));
+			spec2.form(parsetrace(reader));
 		} catch (IOException e) {
 			System.out.println("parse Tracefile2 failed");
 			e.printStackTrace();
 		}
+
 		double ret = spec1.diff(spec2, new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0.2, 1, 2));
 		System.out.println(ret);
-		return 0;
+		return ret;
 	}
 
 }

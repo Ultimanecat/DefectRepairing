@@ -47,7 +47,7 @@ import org.apache.commons.cli.CommandLine;
 
 public class Instrumenter {
 
-	public static String readFileToString(String filePath)  {
+	public static String readFileToString(String filePath) {
 		StringBuilder fileData = new StringBuilder(1000);
 		BufferedReader reader;
 		try {
@@ -66,12 +66,10 @@ public class Instrumenter {
 			e.printStackTrace();
 		}
 
-		
 		return fileData.toString();
 	}
 
-	public static void writeStringToFile(String FilePath,String output)
-	{
+	public static void writeStringToFile(String FilePath, String output) {
 		try {
 			FileWriter fw = new FileWriter(FilePath);
 			fw.write(output);
@@ -80,60 +78,55 @@ public class Instrumenter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static int curLine = 1;
 	public static int curChar = 0;
 	public static String outputBuffer = new String();
 	public static String source = new String();
-	
+
 	public static String[] LineNumberMap;
-	
-	public static void init(){
+
+	public static void init() {
 		curLine = 1;
 		curChar = 0;
 		outputBuffer = new String();
-		//LineNumberMap=new HashMap<Integer,String>();
+		// LineNumberMap=new HashMap<Integer,String>();
 	}
-	
+
 	public static void ConstructMap(String FilePath) {
 		BufferedReader br = new BufferedReader(new StringReader(source));
-		String [] lines=source.split("\n");
-		LineNumberMap=new String[lines.length+1];
-		
-		int ln=0;
-		int temp1=0,temp2=0;
-		for(String line:lines)
-		{
+		String[] lines = source.split("\n");
+		LineNumberMap = new String[lines.length + 1];
+
+		int ln = 0;
+		int temp1 = 0, temp2 = 0;
+		for (String line : lines) {
 			ln++;
-			int i=line.length()-1;
-			Pattern pattern=Pattern.compile(".*    //[0-9]+$");
+			int i = line.length() - 1;
+			Pattern pattern = Pattern.compile(".*    //[0-9]+$");
 			Matcher matcher = pattern.matcher(line);
-			if(matcher.matches())
-				for(;i>=0;i--)
-				{
-					if(line.charAt(i)=='/')
-					{
-						temp1=(int)Double.parseDouble(line.substring(i+1));
-						temp2=0;
-						LineNumberMap[ln]=line.substring(i+1);
+			if (matcher.matches())
+				for (; i >= 0; i--) {
+					if (line.charAt(i) == '/') {
+						temp1 = (int) Double.parseDouble(line.substring(i + 1));
+						temp2 = 0;
+						LineNumberMap[ln] = line.substring(i + 1);
 						break;
 					}
 				}
-			else
-			{
+			else {
 				temp2++;
-				outputBuffer+="//"+temp1+"."+temp2+"\n";
-				LineNumberMap[ln]=temp1+"."+temp2;
+				outputBuffer += "//" + temp1 + "." + temp2 + "\n";
+				LineNumberMap[ln] = temp1 + "." + temp2;
 			}
 		}
-		outputBuffer+="//END\n";
+		outputBuffer += "//END\n";
 	}
-	
-	public static String getLineNumber(int ln)
-	{
+
+	public static String getLineNumber(int ln) {
 		return LineNumberMap[ln];
 	}
-	
+
 	public static void copyaLine() {
 		curLine++;
 		int preChar = curChar;
@@ -214,13 +207,13 @@ public class Instrumenter {
 		if (commandLine.hasOption('v')) {
 			verboset = true;
 		}
-		
+
 		init();
-		
+
 		final String TraceFile = TraceFilet;
 		final boolean verbose = verboset;
 		List<String> filelist = new ArrayList<String>();
-		
+
 		if (verbose)
 			filelist.add(new String(
 					"/Users/liuxinyuan/DefectRepairing/Math3b/src/main/java/org/apache/commons/math3/complex/Complex.java"));
@@ -239,7 +232,7 @@ public class Instrumenter {
 			init();
 			System.out.println(FilePath);
 			source = readFileToString(FilePath);
-			
+
 			ConstructMap(FilePath);
 
 			parser.setSource(source.toCharArray());
@@ -392,8 +385,8 @@ public class Instrumenter {
 								+ "\", \"rw\");\n" + "\tlong fileLength = randomFile.length();\n"
 								+ "\trandomFile.seek(fileLength);\n" + "\trandomFile.writeBytes(printMSG" + "+\",File:"
 								+ FilePath + "\"" + "+ \"\\n\");\n" + "\trandomFile.close();\n"
-								+ "\t} catch (IOException e__e__e) {\n" + "\te__e__e.printStackTrace();\n"
-								+ "\n" + "\t}\n" + "flag__lxy=false;\n}\n"
+								+ "\t} catch (IOException e__e__e) {\n" + "\te__e__e.printStackTrace();\n" + "\n"
+								+ "\t}\n" + "flag__lxy=false;\n}\n"
 								+ "static public String getType_(Object o){return \"Object\";}\n"
 								+ "static public String getType_(byte b){return \"byte\";}\n"
 								+ "static public String getType_(short s){return \"short\";}\n"
@@ -512,11 +505,9 @@ public class Instrumenter {
 					if (verbose)
 						System.out.print("ForStatement:" + "line " + line);
 
-					String printMSG = "\"<ForStatement,taken> Line:" + line + " to "
-							+ lineend + "\"";
+					String printMSG = "\"<ForStatement,taken> Line:" + line + " to " + lineend + "\"";
 					CopytoLabel(node);
-					insertprint("\"<ForStatement,reached> Line:" + line + " to "
-							+ lineend + "\"");
+					insertprint("\"<ForStatement,reached> Line:" + line + " to " + lineend + "\"");
 					List<Expression> l = node.updaters();
 					for (Expression e : l) {
 						if (e instanceof Assignment) {
@@ -566,14 +557,11 @@ public class Instrumenter {
 					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					String lineend = getLineNumber(cu.getLineNumber((node.getStartPosition() + node.getLength())));
 					if (verbose)
-						System.out.println("DoStatement:line " + line + ","
-								+ lineend);
+						System.out.println("DoStatement:line " + line + "," + lineend);
 					Statement body = node.getBody();
-					String printMSG = "\"<DoStatement,taken> Line:" + line + " to "
-							+ lineend + "\"";
+					String printMSG = "\"<DoStatement,taken> Line:" + line + " to " + lineend + "\"";
 					CopytoLabel(node);
-					insertprint("\"<DoStatement,reached> Line:" + line + " to "
-							+ lineend + "\"");
+					insertprint("\"<DoStatement,reached> Line:" + line + " to " + lineend + "\"");
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
@@ -593,15 +581,13 @@ public class Instrumenter {
 				public boolean visit(WhileStatement node) {
 					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					String lineend = getLineNumber(cu.getLineNumber((node.getStartPosition() + node.getLength())));
-					
+
 					if (verbose)
 						System.out.println("WhileStatement:line " + line);
 					Statement body = node.getBody();
-					String printMSG = "\"<WhileStatement,taken> Line:" + line
-							+ " to " + lineend + "\"";
+					String printMSG = "\"<WhileStatement,taken> Line:" + line + " to " + lineend + "\"";
 					CopytoLabel(node);
-					insertprint("\"<WhileStatement,reached> Line:" + line + " to "
-							+ lineend + "\"");
+					insertprint("\"<WhileStatement,reached> Line:" + line + " to " + lineend + "\"");
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
@@ -626,29 +612,25 @@ public class Instrumenter {
 				public boolean visit(IfStatement node) {
 					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					String then_start = getLineNumber(cu.getLineNumber(node.getThenStatement().getStartPosition()));
-					String then_end = getLineNumber(cu.getLineNumber(node.getThenStatement().getStartPosition() + node.getThenStatement().getLength()));
+					String then_end = getLineNumber(cu.getLineNumber(
+							node.getThenStatement().getStartPosition() + node.getThenStatement().getLength()));
 					if (verbose)
 						System.out.print("IfStatement:line " + line + ",else: ");
 					String ElseMSG = ",Else:";
 					if (node.getElseStatement() != null) {
 						String else_start = getLineNumber(cu.getLineNumber(node.getElseStatement().getStartPosition()));
-						String else_end = getLineNumber(cu.getLineNumber(node.getElseStatement().getStartPosition() + node.getElseStatement().getLength()));
-						ElseMSG += else_start + " to "+ else_end;
+						String else_end = getLineNumber(cu.getLineNumber(
+								node.getElseStatement().getStartPosition() + node.getElseStatement().getLength()));
+						ElseMSG += else_start + " to " + else_end;
 					} else
 						ElseMSG += "null";
 
 					Statement body = node.getThenStatement();
-					String printMSG = "\"<IfStatement,taken> Then:"
-							+ then_start + " to "
-							+ then_end
-							+ ElseMSG + "\"";
+					String printMSG = "\"<IfStatement,taken> Then:" + then_start + " to " + then_end + ElseMSG + "\"";
 
 					copyto(node.getStartPosition());
 					outputBuffer += '{';
-					insertprint("\"<IfStatement,reached> Then:"
-							+ then_start + " to "
-							+ then_end
-							+ ElseMSG + "\"");
+					insertprint("\"<IfStatement,reached> Then:" + then_start + " to " + then_end + ElseMSG + "\"");
 
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
@@ -665,12 +647,12 @@ public class Instrumenter {
 					}
 
 				}
-				
-				public void ProcessSingleStatement(Statement node){
+
+				public void ProcessSingleStatement(Statement node) {
 					node.accept(this);
-					
+
 				}
-				
+
 				// public boolean visit(ReturnStatement node) {
 				// int line=cu.getLineNumber(node.getStartPosition());
 				// if(verbose)System.out.print("ReturnStatement:line "+line);
@@ -694,7 +676,7 @@ public class Instrumenter {
 				System.out.print(outputBuffer);
 
 			if (!verbose) {
-				writeStringToFile(FilePath,outputBuffer);
+				writeStringToFile(FilePath, outputBuffer);
 				CurNum++;
 
 				System.out.println(CurNum + "/" + TotalNum);
@@ -705,4 +687,3 @@ public class Instrumenter {
 	}
 
 }
-
