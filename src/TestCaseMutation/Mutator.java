@@ -66,7 +66,22 @@ public class Mutator {
 		
 
 	}
+	
+	public static MethodDeclaration get_method(String filepath, String methodname)
+	{
+		String source = null;
+		source = Instrumenter.readFileToString(filepath);
+		int time = 10;
 
+		final CompilationUnit cu = getCompilationUnit(source);
+		final List<NumberLiteral> l = new ArrayList<NumberLiteral>();
+		MutateOperator mutateop = new MutateOperator();
+
+		
+		MethodDeclaration method = getTarget(cu, l, methodname);
+		return method;
+	}
+	
 	public static void process(String filepath, String methodname)
 	{
 		String source = null;

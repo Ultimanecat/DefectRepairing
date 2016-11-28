@@ -64,21 +64,26 @@ public class BuggyVersion {
 	
 	public void getsrcdir()
 	{
-		SAXBuilder saxBuilder = new SAXBuilder();
+		FileReader reader;
 		try {
-			Document doc = saxBuilder.build(Paths.get(workdir, "build.xml").toString());
-			Element root = doc.getRootElement();
-			List<Element> l=root.getChildren("property");
-			for(Element e:l){
-				if(e.getAttributeValue("name")!=null)
-					if(e.getAttributeValue("name").equals("source.home"))
-						sourcedir=Paths.get(workdir, e.getAttributeValue("value")).toString();
-					else if(e.getAttributeValue("name").equals("test.home"))
-						testdir=Paths.get(workdir,e.getAttributeValue("value")).toString();
-            }
-		} catch (JDOMException | IOException e) {
+			reader = new FileReader(Paths.get(workdir,"defects4j.build.properties").toString());
+			BufferedReader br = new BufferedReader(reader);
+			String Line;
+			while((Line=br.readLine())!=null)
+			{
+				if(Line.startsWith("d4j.dir.src.classes"))
+					sourcedir=Paths.get(workdir,Line.split("=")[1]).toString();
+				else if(Line.startsWith("d4j.dir.src.tests"))
+					testdir=Paths.get(workdir,Line.split("=")[1]).toString();
+			}
+			br.close();
+			reader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	

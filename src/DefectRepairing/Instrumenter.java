@@ -86,52 +86,52 @@ public class Instrumenter {
 	public static String outputBuffer = new String();
 	public static String source = new String();
 	
-	public static Map<Integer, String> LineNumberMap;
+	public static String[] LineNumberMap;
 	
 	public static void init(){
 		curLine = 1;
 		curChar = 0;
 		outputBuffer = new String();
-		LineNumberMap=new HashMap<Integer,String>();
+		//LineNumberMap=new HashMap<Integer,String>();
 	}
 	
 	public static void ConstructMap(String FilePath) {
 		BufferedReader br = new BufferedReader(new StringReader(source));
-		String line;
+		String [] lines=source.split("\n");
+		LineNumberMap=new String[lines.length+1];
+		
 		int ln=0;
-		int temp1=0,temp2=1;
-		try {
-			while((line=br.readLine())!=null)
-			{
-				ln++;
-				int i=line.length()-1;
-				Pattern pattern=Pattern.compile(".*    //[0-9]+$");
-				Matcher matcher = pattern.matcher(line);
-				if(matcher.matches())
-					for(;i>=0;i--)
-					{
-						if(line.charAt(i)=='/')
-						{
-							temp1=(int)Double.parseDouble(line.substring(i+1));
-							temp2=1;
-							LineNumberMap.put(ln, line.substring(i+1) );
-							break;
-						}
-					}
-				else
+		int temp1=0,temp2=0;
+		for(String line:lines)
+		{
+			ln++;
+			int i=line.length()-1;
+			Pattern pattern=Pattern.compile(".*    //[0-9]+$");
+			Matcher matcher = pattern.matcher(line);
+			if(matcher.matches())
+				for(;i>=0;i--)
 				{
-					temp2++;
-					LineNumberMap.put(ln, temp1+"."+temp2);
+					if(line.charAt(i)=='/')
+					{
+						temp1=(int)Double.parseDouble(line.substring(i+1));
+						temp2=0;
+						LineNumberMap[ln]=line.substring(i+1);
+						break;
+					}
 				}
+			else
+			{
+				temp2++;
+				outputBuffer+="//"+temp1+"."+temp2+"\n";
+				LineNumberMap[ln]=temp1+"."+temp2;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+		
 	}
 	
 	public static String getLineNumber(int ln)
 	{
-		return LineNumberMap.get(ln);
+		return LineNumberMap[ln];
 	}
 	
 	public static void copyaLine() {

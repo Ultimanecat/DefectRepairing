@@ -13,7 +13,7 @@ ENTRY_POINT = DefectRepairing.Instrumenter # should change to Framework
 TEST = DefectRepairing.Instrumenter
 PARSER = DefectRepairing.parser
 MUTATE = TestCaseMutation.MutateTest
-DEBUG = defects4j.Main
+D4J = defects4j.Main
 
 
 LIB_DIR = ./lib/
@@ -36,9 +36,9 @@ RES_DIR = no
 # 建议一行一个。
 # 另外注意顺序，如果class A 引用 class B，那么B.java应该放在A.java前。
 SOURCE_FILES = \
-defects4j/JavaMethod.java defects4j/defects4j.java defects4j/BuggyVersion.java defects4j/Main.java \
+defects4j/JavaMethod.java defects4j/defects4j.java defects4j/BuggyVersion.java \
 DefectRepairing/Instrumenter.java DefectRepairing/parser.java DefectRepairing/Framework.java \
-TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java \
+TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java \
 
 
 # 设置你的java编译器
@@ -123,5 +123,5 @@ parser:
 	java -cp bin/:$(LIBS) $(PARSER) $(PARSERFLAG)
 mutate:
 	java -cp bin/:$(LIBS) $(MUTATE) $(MUTATEFLAG)
-debug:
-	java -cp bin/:$(LIBS) $(DEBUG) $(MUTATEFLAG)
+d4j:
+	java -cp bin/:$(LIBS) $(D4J) $(D4JFLAG)
