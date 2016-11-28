@@ -126,7 +126,7 @@ public class Instrumenter {
 				LineNumberMap[ln]=temp1+"."+temp2;
 			}
 		}
-		
+		outputBuffer+="//END\n";
 	}
 	
 	public static String getLineNumber(int ln)
