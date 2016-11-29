@@ -26,7 +26,7 @@ public class BuggyVersion {
 	public String testdir;
 	public List<JavaMethod>FailingTests;
 	
-	BuggyVersion(String project_,int bug_id_,String workdir_)
+	public BuggyVersion(String project_,int bug_id_,String workdir_)
 	{
 		project=project_;
 		bug_id=bug_id_;

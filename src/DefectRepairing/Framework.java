@@ -10,8 +10,6 @@ public class Framework {
 
 	public static void insertprint(String dir, String tracefile) {
 		String[] args = { "-D", dir, "-T", tracefile };
-		// args[0] = new String("-D " + dir + " -T ;" +
-		// tracefile);//不能把参数全放arg[0]吧？
 		Instrumenter.main(args);
 	}
 
@@ -25,10 +23,12 @@ public class Framework {
 		CommandLineParser cmdlparser = new DefaultParser();
 		Options options = new Options();
 		options.addOption("s", "srcdir", true, "source file directory");
-		options.addOption("w", "workdir", true, "d4j working directory");
+		options.addOption("w", "workdir", true, " working directory");
 		options.addOption("t", "testcase", true, "the Instrumenter case to mutate and run");
 		options.addOption("n", "name", true, "test method name");
 		options.addOption("v", "Verbose", false, "verbose debug");
+		options.addOption("i", "id", true, "bugid");
+		options.addOption("p", "project", true, "project name");
 		CommandLine commandLine = null;
 		try {
 			commandLine = cmdlparser.parse(options, args);
@@ -39,6 +39,8 @@ public class Framework {
 		String workdir = "";
 		String testcase = "";
 		String testmethodname = "";
+		String project = "";
+		int bug_id = 0;
 		boolean verbose = false;
 		if (commandLine.hasOption('s')) {
 			srcdir = commandLine.getOptionValue('s');
@@ -55,12 +57,20 @@ public class Framework {
 		if (commandLine.hasOption('n')) {
 			testmethodname = commandLine.getOptionValue('n');
 		}
+		if (commandLine.hasOption('i')) {
+			bug_id = Integer.parseInt(commandLine.getOptionValue('i'));
+		}
+		if (commandLine.hasOption('p')) {
+			project = commandLine.getOptionValue('p');
+		}
 
+		defects4j.BuggyVersion bugv = new defects4j.BuggyVersion(project, bug_id, workdir);
 		// TODO mutate and get testcase list//不同程序，数据流权重适当增大；不同test，数据流权重小，甚至不考虑
-		TestCaseMutation.Mutator.process(testcase,testmethodname);// TODO get method name list
+		TestCaseMutation.Mutator.process(testcase, testmethodname);
+		// TODO get method name list
 		// TODO insert print
-		LineNumberPreProcessor.process(srcdir);
-		insertprint(srcdir, srcdir + "_ori.txt");
+		LineNumberPreProcessor.process(bugv.sourcedir);
+		insertprint(bugv.sourcedir, bugv.sourcedir + "_ori.txt");
 		// TODO run testcases and get spectrum
 
 		// TODO compare with t0 and determine positive/negative Instrumenter
