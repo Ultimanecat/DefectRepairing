@@ -16,7 +16,7 @@ import java.util.TreeSet;
 
 public class parser {
 
-	private static class Variable implements Cloneable, Comparable {
+	private static class Variable implements Cloneable, Comparable<Variable> {
 		String Name;
 		String Type;
 		Object Value;
@@ -47,12 +47,9 @@ public class parser {
 		}
 
 		@Override
-		public int compareTo(Object arg0) {
+		public int compareTo(Variable arg0) {
 			// TODO Auto-generated method stub
-			if (arg0 instanceof Variable) {
-				return Name.compareTo(((Variable) arg0).Name);
-			}
-			return 0;
+			return Name.compareTo(((Variable) arg0).Name);
 		}
 	}
 
@@ -186,13 +183,13 @@ public class parser {
 
 	private static class IfStatement extends Statement {
 		boolean taken;// 0 for reached, 1 for taken
-		int startLine;
-		int endLine;
+		LineNumber startLine;
+		LineNumber endLine;
 		boolean hasElse;
-		int elseStartLine;
-		int elseEndLine;
+		LineNumber elseStartLine;
+		LineNumber elseEndLine;
 
-		IfStatement(boolean _taken, int _startLine, int _endLine) {
+		IfStatement(boolean _taken, LineNumber _startLine, LineNumber _endLine) {
 			taken = _taken;
 			startLine = _startLine;
 			endLine = _endLine;
@@ -207,10 +204,10 @@ public class parser {
 
 	private static class WhileStatement extends Statement {
 		boolean taken;// 0 for reached, 1 for taken
-		int startLine;
-		int endLine;
+		LineNumber startLine;
+		LineNumber endLine;
 
-		WhileStatement(boolean _taken, int _startLine, int _endLine) {
+		WhileStatement(boolean _taken, LineNumber _startLine, LineNumber _endLine) {
 			taken = _taken;
 			startLine = _startLine;
 			endLine = _endLine;
@@ -224,9 +221,9 @@ public class parser {
 
 	private static class VariableDeclaration extends Statement {
 		Variable var;
-		int Line;
+		LineNumber Line;
 
-		VariableDeclaration(Variable _var, int _Line) {
+		VariableDeclaration(Variable _var, LineNumber _Line) {
 			var = _var;
 			Line = _Line;
 		}
@@ -240,9 +237,9 @@ public class parser {
 	private static class MethodInvoked extends Statement {
 		String MethodName;
 		Set<Variable> Parameters;
-		int Line;
+		LineNumber Line;
 
-		MethodInvoked(String _MethodName, Set<Variable> _Parameters, int _Line) {
+		MethodInvoked(String _MethodName, Set<Variable> _Parameters, LineNumber _Line) {
 			MethodName = _MethodName;
 			Parameters = _Parameters;
 			Line = _Line;
@@ -256,9 +253,9 @@ public class parser {
 
 	private static class Assignment extends Statement {
 		Variable var;
-		int Line;
+		LineNumber Line;
 
-		Assignment(Variable _var, int _Line) {
+		Assignment(Variable _var, LineNumber _Line) {
 			var = _var;
 			Line = _Line;
 		}
@@ -272,9 +269,9 @@ public class parser {
 	private static class ReturnStatement extends Statement {
 		// TODO : return value
 		Variable var;
-		int Line;
+		LineNumber Line;
 
-		ReturnStatement(Variable _var, int _Line) {
+		ReturnStatement(Variable _var, LineNumber _Line) {
 			var = _var;
 			Line = _Line;
 		}
@@ -285,14 +282,54 @@ public class parser {
 		}
 	}
 
+	private static class LineNumber implements Comparable<LineNumber> {
+		int line;
+		int addedline;
+
+		LineNumber(int _line, int _addedline) {
+			line = _line;
+			addedline = _addedline;
+		}
+
+		public static LineNumber parserLineNumber(String s) {
+			int line = Integer.parseInt(s);
+			int addedline = 0;
+			if (s.indexOf(".") != -1)
+				addedline = Integer.parseInt(s.substring(s.indexOf(".") + 1));
+			return new LineNumber(line, addedline);
+		}
+		@Override
+		public int compareTo(LineNumber o) {
+			if (this.line == o.line) {
+				if (this.addedline < o.addedline)
+					return -1;
+				else if (this.addedline > o.addedline)
+					return 1;
+				else
+					return 0;
+			} else {
+				if (this.line < o.line)
+					return -1;
+				else
+					return 1;
+			}
+
+		}
+
+		@Override
+		public String toString() {
+			return "LineNumber [line=" + line + ", addedline=" + addedline + "]";
+		}
+	}
+
 	private static class LineVariables {
-		public LineVariables(int line, Set<Variable> variables) {
+		public LineVariables(LineNumber line, Set<Variable> variables) {
 			super();
 			this.line = line;
 			Variables = variables;
 		}
 
-		int line;
+		LineNumber line;
 		Set<Variable> Variables;
 
 		@Override
@@ -302,14 +339,14 @@ public class parser {
 	}
 
 	private static class Jump {
-		public Jump(int fromline, int toline) {
+		public Jump(LineNumber fromline, LineNumber toline) {
 			super();
 			this.fromline = fromline;
 			this.toline = toline;
 		}
 
-		int fromline;
-		int toline;
+		LineNumber fromline;
+		LineNumber toline;
 
 	}
 
@@ -317,19 +354,38 @@ public class parser {
 		List<LineVariables> values;
 		Queue<Jump> pendingjumps;
 		Map<Integer, Integer> addedlines;
-		int curLine;
+		List<Integer> deletedlines;// TODO
+		LineNumber curLine;
 
-		void runto(int targetline) {
+		void nextline() {
+			if (addedlines.get(curLine.line) == null) {
+				curLine.line++;
+				return;
+			} else {
+				if (curLine.addedline == addedlines.get(curLine.line)) {
+					curLine.line++;
+					curLine.addedline = 0;
+				} else {
+					curLine.addedline++;
+				}
+			}
+		}
+
+		void runto(LineNumber targetline) {
 			LineVariables last = values.get(values.size() - 1);
 			while (curLine != targetline) {
-				if ((pendingjumps.isEmpty() || curLine > pendingjumps.peek().fromline) && curLine > targetline) {
+				// if ((pendingjumps.isEmpty() || curLine >
+				// pendingjumps.peek().fromline) && curLine > targetline) {
+				if ((pendingjumps.isEmpty() || curLine.compareTo(pendingjumps.peek().fromline) < 0)
+						&& curLine.compareTo(targetline) > 0) {
 					break;
 					// throw new Exception("wild line");
 				}
 				if (!pendingjumps.isEmpty() && pendingjumps.peek().fromline == curLine) {
 					curLine = pendingjumps.poll().toline;
 				} else {
-					curLine++;
+					// curLine++;
+					nextline();
 				}
 				values.add(new LineVariables(curLine, last.Variables));
 			}
@@ -340,10 +396,11 @@ public class parser {
 			pendingjumps = new LinkedList<Jump>();
 		}
 
-		Spectrum(Map<Integer, Integer> _addedlines) {
+		Spectrum(Map<Integer, Integer> _addedlines,List<Integer> _deletedlines) {
 			values = new ArrayList<LineVariables>();
 			pendingjumps = new LinkedList<Jump>();
 			addedlines = _addedlines;
+			deletedlines = _deletedlines;
 		}
 
 		void form(List<Statement> Stmts) {
@@ -354,7 +411,7 @@ public class parser {
 				Statement st = it.next();
 
 				if (st instanceof IfStatement) {
-					int t = ((IfStatement) st).startLine;
+					LineNumber t = ((IfStatement) st).startLine;
 					runto(t);
 					if (!((IfStatement) st).taken) {
 						if (!((IfStatement) st).hasElse)
@@ -370,7 +427,7 @@ public class parser {
 					}
 				}
 				if (st instanceof WhileStatement) {
-					int t = ((WhileStatement) st).startLine;
+					LineNumber t = ((WhileStatement) st).startLine;
 					runto(t);
 					if (!((WhileStatement) st).taken)
 						pendingjumps.offer(new Jump(curLine, ((WhileStatement) st).endLine));
@@ -380,7 +437,7 @@ public class parser {
 					// curLine=((WhileStatement) st).startLine;
 				}
 				if (st instanceof VariableDeclaration) {
-					int t = ((VariableDeclaration) st).Line;
+					LineNumber t = ((VariableDeclaration) st).Line;
 					runto(t);
 					Set<Variable> tmp = new TreeSet<Variable>();
 					tmp.addAll(values.get(values.size() - 1).Variables);
@@ -389,7 +446,7 @@ public class parser {
 					values.add(new LineVariables(t, tmp));
 				}
 				if (st instanceof MethodInvoked) {
-					int t = ((MethodInvoked) st).Line;
+					LineNumber t = ((MethodInvoked) st).Line;
 					// pendingjumps.offer(new Jump(curLine,t));
 					curLine = t;
 					Set<Variable> tmp = new TreeSet<Variable>();
@@ -397,7 +454,7 @@ public class parser {
 					values.add(new LineVariables(t, tmp));
 				}
 				if (st instanceof Assignment) {
-					int t = ((Assignment) st).Line;
+					LineNumber t = ((Assignment) st).Line;
 					runto(t);
 					LineVariables tmp = values.get(values.size() - 1);
 					Set<Variable> add = new TreeSet<Variable>();
@@ -413,7 +470,7 @@ public class parser {
 					curLine = t;
 				}
 				if (st instanceof ReturnStatement) {
-					int t = ((ReturnStatement) st).Line;
+					LineNumber t = ((ReturnStatement) st).Line;
 					runto(t);
 					// TODO
 				}
@@ -546,8 +603,11 @@ public class parser {
 		}
 	}
 
-	public static int getLine(String s) {
-		return Integer.parseInt(s.substring(s.indexOf(":") + 1));
+	
+
+	public static LineNumber getLine(String s) {
+		// return Integer.parseInt(s.substring(s.indexOf(":") + 1));/
+		return LineNumber.parserLineNumber(s.substring(s.indexOf(":") + 1));
 	}
 
 	public static String getFile(String s) {
@@ -562,8 +622,8 @@ public class parser {
 			st.hasElse = false;
 		else {
 			st.hasElse = true;
-			st.elseStartLine = Integer.parseInt(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
-			st.elseEndLine = Integer.parseInt(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
+			st.elseStartLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
+			st.elseEndLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
 		}
 	}
 
@@ -571,16 +631,16 @@ public class parser {
 		if (t.startsWith(" "))
 			t = t.substring(1);
 		// System.out.println("getBranchLines from \"" + t + "\"");
-		st.startLine = Integer.parseInt(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
-		st.endLine = Integer.parseInt(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
+		st.startLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
+		st.endLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
 	}
 
 	public static void getBranchLines(String t, WhileStatement st) {
 		if (t.startsWith(" "))
 			t = t.substring(1);
 		// System.out.println("getBranchLines from \"" + t + "\"");
-		st.startLine = Integer.parseInt(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
-		st.endLine = Integer.parseInt(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
+		st.startLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
+		st.endLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
 	}
 
 	public static Variable getVariable(Scanner sc) {
@@ -667,7 +727,7 @@ public class parser {
 				Variable par = getVariable(labelsc);
 				Parameters.add(par);
 			}
-			int line = getLine(labelsc.next());
+			LineNumber line = getLine(labelsc.next());
 			file = getFile(labelsc.next());
 			ret = new MethodInvoked(funcname, Parameters, line);
 			break;
@@ -675,7 +735,7 @@ public class parser {
 			String temp = labelsc.next();
 			boolean taken = (temp.equals("taken") ? true : false);
 			sc.useDelimiter(",");
-			ret = new IfStatement(taken, 0, 0);
+			ret = new IfStatement(taken, null, null);
 			getBranchLines(sc.next(), (IfStatement) ret);
 			getElseLines(sc.next(), (IfStatement) ret);
 			file = getFile(sc.next());
@@ -683,7 +743,7 @@ public class parser {
 		case "WhileStatement":
 			temp = labelsc.next();
 			taken = (temp.equals("taken") ? true : false);
-			ret = new WhileStatement(taken, 0, 0);
+			ret = new WhileStatement(taken, null, null);
 			sc.useDelimiter(",");
 			getBranchLines(sc.next(), (WhileStatement) ret);
 			file = getFile(sc.next());
@@ -756,16 +816,17 @@ public class parser {
 			}
 			Stmts.add(st);
 		}
-		for (Statement st : Stmts) {
-			// System.out.println(st);
-		}
+		/*
+		 * for (Statement st : Stmts) { System.out.println(st); }
+		 */
 		return Stmts;
 	}
 
-	public static Map<Integer, Integer> parselineno(BufferedReader reader) throws IOException {
+	public static Spectrum parseheader(BufferedReader reader) throws IOException {
 		// TODO
-		Map<Integer, Integer> ret = new TreeMap<Integer, Integer>();
-		return ret;
+		Map<Integer, Integer> addedlines = new TreeMap<Integer, Integer>();
+		List<Integer> deletedlines=new LinkedList<Integer>();
+		return new Spectrum(addedlines,deletedlines);
 	}
 
 	public static double main(String args[]) {
@@ -773,8 +834,8 @@ public class parser {
 		 * CommandLineParser cmdlparser = new DefaultParser(); Options options =
 		 * new Options(); options.addOption("T", "TraceFile", true,
 		 * "input file1"); try { CommandLine commandLine =
-		 * cmdlparser.parse(options, args); } catch (ParseException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); }
+		 * cmdlparser.parse(options, args); } catch (ParseException e) {
+		 * e.printStackTrace(); }
 		 */
 		String TraceFile1 = "", TraceFile2 = "";
 		TraceFile1 = args[0];
@@ -789,7 +850,7 @@ public class parser {
 		Spectrum spec1 = null, spec2 = null;
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile1));
-			spec1 = new Spectrum(parselineno(reader));
+			spec1 = parseheader(reader);
 			spec1.form(parsetrace(reader));
 		} catch (IOException e) {
 			System.out.println("parse Tracefile1 failed");
@@ -799,7 +860,7 @@ public class parser {
 		System.out.println("Spec2:");
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile2));
-			spec2 = new Spectrum(parselineno(reader));
+			spec2 = parseheader(reader);
 			spec2.form(parsetrace(reader));
 		} catch (IOException e) {
 			System.out.println("parse Tracefile2 failed");

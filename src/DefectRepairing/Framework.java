@@ -33,7 +33,6 @@ public class Framework {
 		try {
 			commandLine = cmdlparser.parse(options, args);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		String srcdir = "";
@@ -58,11 +57,9 @@ public class Framework {
 		}
 
 		// TODO mutate and get testcase list//不同程序，数据流权重适当增大；不同test，数据流权重小，甚至不考虑
-		String mutatorargs[] = { testcase, testmethodname };
-		TestCaseMutation.Mutator.main(mutatorargs);// TODO get method name list
+		TestCaseMutation.Mutator.process(testcase,testmethodname);// TODO get method name list
 		// TODO insert print
-		String preargs[] = { srcdir };
-		LineNumberPreProcessor.main(preargs);
+		LineNumberPreProcessor.process(srcdir);
 		insertprint(srcdir, srcdir + "_ori.txt");
 		// TODO run testcases and get spectrum
 
