@@ -829,7 +829,21 @@ public class parser {
 		return new Spectrum(addedlines,deletedlines);
 	}
 
-	public static double main(String args[]) {
+	public static void main(String args[]) {
+		System.out.println("Spec1:");
+		BufferedReader reader = null;
+		Spectrum spec1 = null, spec2 = null;
+		try {
+			reader = new BufferedReader(new FileReader("/Users/liuxinyuan/DefectRepairing/a.txt"));
+			spec1 = parseheader(reader);
+			spec1.form(parsetrace(reader));
+		} catch (IOException e) {
+			System.out.println("parse Tracefile1 failed");
+			e.printStackTrace();
+		}
+	}
+	
+	public static double process(String args[]) {
 		/*
 		 * CommandLineParser cmdlparser = new DefaultParser(); Options options =
 		 * new Options(); options.addOption("T", "TraceFile", true,

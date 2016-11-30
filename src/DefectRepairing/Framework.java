@@ -15,7 +15,7 @@ public class Framework {
 
 	public double getdiff(String file1, String file2) {
 		String[] args = { file1, file2 };
-		return parser.main(args);
+		return parser.process(args);
 	}
 
 	public static void main(String[] args) {

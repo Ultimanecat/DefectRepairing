@@ -37,8 +37,8 @@ RES_DIR = no
 # 另外注意顺序，如果class A 引用 class B，那么B.java应该放在A.java前。
 SOURCE_FILES = \
 defects4j/JavaMethod.java defects4j/defects4j.java defects4j/BuggyVersion.java \
-DefectRepairing/Instrumenter.java DefectRepairing/parser.java DefectRepairing/Framework.java \
-TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java \
+DefectRepairing/Instrumenter.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/parser.java \
+TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java DefectRepairing/Framework.java \
 
 
 # 设置你的java编译器
