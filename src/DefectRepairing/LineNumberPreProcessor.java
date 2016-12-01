@@ -41,7 +41,7 @@ public class LineNumberPreProcessor {
 	public static void main(String[] args) {
 
 		// process("/Users/liuxinyuan/DefectRepairing/Math3b/src/main/");
-		process(args[0]);
+		process("/Users/liuxinyuan/DefectRepairing/test");
 
 	}
 

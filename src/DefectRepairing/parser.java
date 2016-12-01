@@ -459,11 +459,17 @@ public class parser {
 					LineVariables tmp = values.get(values.size() - 1);
 					Set<Variable> add = new TreeSet<Variable>();
 					String s = ((Assignment) st).var.Name;
+					boolean flag=true;
 					for (Variable v : tmp.Variables) {
 						if (v.Name == s) {
+							flag=false;
 							add.add(((Assignment) st).var);
 						} else
 							add.add(v);
+					}
+					if(flag)
+					{
+						add.add(((Assignment) st).var);
 					}
 					values.remove(values.size() - 1);
 					values.add(new LineVariables(t, add));
@@ -483,7 +489,7 @@ public class parser {
 			}
 			for (LineVariables i : values) {
 				// if(verbose)
-				// System.out.println("Line " + i.line + ": " + i.Variables);
+				 System.out.println("Line " + i.line + ": " + i.Variables);
 			}
 		}
 

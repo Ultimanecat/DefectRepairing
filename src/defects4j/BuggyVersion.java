@@ -50,6 +50,13 @@ public class BuggyVersion {
 		defects4j.run(new String[]{"test","-t",testcase,"-w",workdir},stdout, stderr);
 	}
 	
+	public void compile(String testcase)
+	{
+		StringBuilder stdout=new StringBuilder();
+		StringBuilder stderr=new StringBuilder();
+		defects4j.run(new String[]{"compile","-w",workdir},stdout, stderr);
+	}
+	
 	public void getFailingTests()
 	{
 		FailingTests=new ArrayList<JavaMethod>();
