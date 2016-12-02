@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -178,6 +179,16 @@ public class Instrumenter {
 		}
 	}
 
+	public static void insertimport(CompilationUnit cu) {
+		PackageDeclaration pkgdec=cu.getPackage();
+		if(pkgdec!=null)
+		{
+			int lineEnd = cu.getLineNumber(pkgdec.getStartPosition() + pkgdec.getLength());
+			copyLines(lineEnd);
+		}
+		outputBuffer += "import java.io.IOException; \nimport java.io.RandomAccessFile;\n";
+	}
+	
 	public static void main(String args[]) {
 		boolean verboset = true;
 
@@ -239,6 +250,8 @@ public class Instrumenter {
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
 
 			final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+			
+			insertimport(cu);
 			cu.accept(new ASTVisitor() {
 
 				public ASTNode getparentstatement(ASTNode node) {
@@ -247,7 +260,14 @@ public class Instrumenter {
 					}
 					return node;
 				}
-
+				
+				public ASTNode getparentBlock(ASTNode node) {
+					while (!(node instanceof Block)) {
+						node = node.getParent();
+					}
+					return node;
+				}
+				
 				public boolean judgePrint(MethodDeclaration node) {
 					if (((MethodDeclaration) node).getName().toString().equals("toString")
 							|| ((MethodDeclaration) node).getName().toString().startsWith("print"))// 解决一个print函数无限递归的编译错误
@@ -288,29 +308,36 @@ public class Instrumenter {
 				// 变量声明
 				public void endVisit(VariableDeclarationFragment node) {
 					String name = node.getName().toString();
-					if (node.getInitializer() != null) {
-						if (!isinMethod(node))
-							return;
-						ASTNode ParentStatement = getparentstatement(node);
-						if (ParentStatement instanceof WhileStatement || ParentStatement instanceof DoStatement
-								|| ParentStatement instanceof ForStatement || ParentStatement instanceof IfStatement
-								|| ParentStatement instanceof ReturnStatement)
-							return;
-						String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
-
-						if (verbose)
-							System.out.println("VariableDeclaration:" + "line " + line + "," + name);
-						copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
-						String printMSG = "\"<VariableDeclaration> " + name + "=\"+getValue_(" + name
-								+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + "\"";
-
-						insertprint(printMSG);
-						return;
-					}
 					if (verbose)
 						System.out.println(
 								"Declaration of '" + name + "' at line" + cu.getLineNumber(node.getStartPosition()));
+					
+					if (!isinMethod(node))
+						return;
+					ASTNode ParentStatement = getparentstatement(node);
+					if (ParentStatement instanceof WhileStatement || ParentStatement instanceof DoStatement
+							|| ParentStatement instanceof ForStatement || ParentStatement instanceof IfStatement
+							|| ParentStatement instanceof ReturnStatement)
+						return;
+					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
+					Block scope=(Block) getparentBlock(node);
+					String LineStart = getLineNumber(cu.getLineNumber(scope.getStartPosition()));
+					String LineEnd = getLineNumber(cu.getLineNumber(scope.getStartPosition()+scope.getLength()));
+					
+					if (verbose)
+						System.out.println("VariableDeclaration:" + "line " + line + "," + name);
+					copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
+					
+					String printMSG;
+					if (node.getInitializer() != null)
+						printMSG= "\"<VariableDeclaration> " + name + "=\"+getValue_(" + name
+							+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + ",scope:"+LineStart+" to "+LineEnd+"\"";
+					else
+						printMSG= "\"<VariableDeclaration> " + name + "=\"Uninitialized\",type:\"+getType_(" + name + ")+\",Line:" + line + ",scope:"+LineStart+" to "+LineEnd+"\"";
+					
+					insertprint(printMSG);
 					return;
+	
 				}
 
 				public boolean visit(MethodDeclaration node) {
@@ -412,27 +439,6 @@ public class Instrumenter {
 					}
 				}
 
-				// public void endvisit (ExpressionStatement Node)
-				// {
-				//
-				//
-				// if(curChar==Node.getStartPosition()+Node.getLength())
-				// return;
-				//
-				// int line=cu.getLineNumber(Node.getStartPosition());
-				// copyto(Node.getStartPosition()+Node.getLength());
-				// insertprint("\"Line "+line+"\"");
-				// //return true;
-				//
-				// }
-
-				public boolean visit(PackageDeclaration node) {
-					int lineEnd = cu.getLineNumber(node.getStartPosition() + node.getLength());
-					copyLines(lineEnd);
-					outputBuffer += "import java.io.IOException; \n import java.io.RandomAccessFile;\n";
-					return true;
-
-				}
 
 				public void endVisit(Assignment node) {
 					if (!isinMethod(node))
@@ -449,7 +455,7 @@ public class Instrumenter {
 					if (verbose)
 						System.out.println("Assignment:" + "line " + line + "," + name);
 					copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
-					String printMSG = "\"<Assignment> assign:" + name + "=\"+getValue_(" + name
+					String printMSG = "\"<Assignment> " + name + "=\"+getValue_(" + name
 							+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + "\"";
 					insertprint(printMSG);
 					return;
@@ -469,7 +475,7 @@ public class Instrumenter {
 					if (verbose)
 						System.out.println("Assignment:" + "line " + line + "," + name);
 					copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
-					String printMSG = "\"<Assignment> assign:" + name + "=\"+getValue_(" + name
+					String printMSG = "\"<Assignment> " + name + "=\"+getValue_(" + name
 							+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + "\"";
 					insertprint(printMSG);
 
@@ -492,7 +498,7 @@ public class Instrumenter {
 						if (verbose)
 							System.out.println("Assignment:" + "line " + line + "," + name);
 						copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
-						String printMSG = "\"<Assignment> assign:" + name + "=\"+getValue_(" + name
+						String printMSG = "\"<Assignment> " + name + "=\"+getValue_(" + name
 								+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + "\"";
 						insertprint(printMSG);
 					}
@@ -500,43 +506,65 @@ public class Instrumenter {
 				}
 
 				public boolean visit(ForStatement node) {
+//					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
+//					String lineend = getLineNumber(cu.getLineNumber(node.getStartPosition() + node.getLength()));
+//					if (verbose)
+//						System.out.print("ForStatement:" + "line " + line);
+//
+//					String printMSG = "\"<ForStatement,taken> Line:" + line + " to " + lineend + "\"";
+//					CopytoLabel(node);
+//					insertprint("\"<ForStatement,reached> Line:" + line + " to " + lineend + "\"");
+//					List<Expression> l = node.updaters();
+//					for (Expression e : l) {
+//						if (e instanceof Assignment) {
+//							String name = ((Assignment) e).getLeftHandSide().toString();
+//							if (verbose)
+//								System.out.print("," + name);
+//							printMSG += "+\",assign:" + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_(" + name
+//									+ ")";
+//						} else if (e instanceof PostfixExpression) {
+//							String name = ((PostfixExpression) e).getOperand().toString();
+//							if (verbose)
+//								System.out.print("," + name);
+//							printMSG += "+\",assign:" + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_(" + name
+//									+ ")";
+//
+//						} else if (e instanceof PrefixExpression) {
+//							if ((((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.INCREMENT
+//									|| (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.DECREMENT) {
+//								String name = ((PrefixExpression) e).getOperand().toString();
+//								if (verbose)
+//									System.out.print("," + name);
+//								printMSG += "+\",assign:" + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_("
+//										+ name + ")";
+//							}
+//						}
+//					}
+//					if (verbose)
+//						System.out.println();
+//					Statement body = node.getBody();
+//					if (body instanceof Block) {
+//						copyto(body.getStartPosition() + 1);
+//						insertprint(printMSG);
+//						return true;
+//					} else {
+//						copyto(body.getStartPosition());
+//						outputBuffer += "{\n";
+//						insertprint(printMSG);
+//						copyto(body.getStartPosition() + body.getLength());
+//						ProcessSingleStatement(body);
+//						outputBuffer += "\n}";
+//						return false;
+//					}
 					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
-					String lineend = getLineNumber(cu.getLineNumber(node.getStartPosition() + node.getLength()));
-					if (verbose)
-						System.out.print("ForStatement:" + "line " + line);
+					String lineend = getLineNumber(cu.getLineNumber((node.getStartPosition() + node.getLength())));
 
-					String printMSG = "\"<ForStatement,taken> Line:" + line + " to " + lineend + "\"";
-					CopytoLabel(node);
-					insertprint("\"<ForStatement,reached> Line:" + line + " to " + lineend + "\"");
-					List<Expression> l = node.updaters();
-					for (Expression e : l) {
-						if (e instanceof Assignment) {
-							String name = ((Assignment) e).getLeftHandSide().toString();
-							if (verbose)
-								System.out.print("," + name);
-							printMSG += "+\",assign:" + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_(" + name
-									+ ")";
-						} else if (e instanceof PostfixExpression) {
-							String name = ((PostfixExpression) e).getOperand().toString();
-							if (verbose)
-								System.out.print("," + name);
-							printMSG += "+\",assign:" + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_(" + name
-									+ ")";
-
-						} else if (e instanceof PrefixExpression) {
-							if ((((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.INCREMENT
-									|| (((PrefixExpression) e).getOperator()) == PrefixExpression.Operator.DECREMENT) {
-								String name = ((PrefixExpression) e).getOperand().toString();
-								if (verbose)
-									System.out.print("," + name);
-								printMSG += "+\",assign:" + name + "=\"+getValue_(" + name + ")+\",type:\"+getType_("
-										+ name + ")";
-							}
-						}
-					}
 					if (verbose)
-						System.out.println();
+						System.out.println("WhileStatement:line " + line);
 					Statement body = node.getBody();
+					String printMSG = "\"<WhileStatement,taken> Line:" + line + " to " + lineend + "\"";
+					CopytoLabel(node);
+					insertprint("\"<WhileStatement,reached> Line:" + line + " to " + lineend + "\"");
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
@@ -550,7 +578,6 @@ public class Instrumenter {
 						outputBuffer += "\n}";
 						return false;
 					}
-
 				}
 
 				public boolean visit(DoStatement node) {
@@ -653,22 +680,25 @@ public class Instrumenter {
 
 				}
 
-				// public boolean visit(ReturnStatement node) {
-				// int line=cu.getLineNumber(node.getStartPosition());
-				// if(verbose)System.out.print("ReturnStatement:line "+line);
-				//
-				//
-				// copyto(node.getStartPosition());
-				// outputBuffer+="{";
-				// String printMSG = "\"<ReturnStatement>
-				// ReturnValue=\"+getValue_(" + node.getExpression() +
-				// ")+\",type:\"+getType_("+node.getExpression()+")+\",Line
-				// "+line+"\"";
-				// insertprint(printMSG);
-				// copyto(node.getStartPosition()+node.getLength());
-				// outputBuffer+="}";
-				// return false;
-				// }
+				public boolean visit (MethodInvocation node) {
+					Statement s=(Statement) getparentstatement(node);
+					CopytoLabel(s);
+					String Line=getLineNumber(cu.getLineNumber(s.getStartPosition()));
+					//int paranum;
+					String printMSG="\"<MethodInvocation,"+node.getName()+","+node.arguments().size()+"> Line:"+Line+"\"";
+					insertprint(printMSG);
+					return true;
+				}
+				
+				 public boolean visit(ReturnStatement node) {
+					 String Line=getLineNumber(cu.getLineNumber(node.getStartPosition()));
+					 if(verbose)System.out.print("ReturnStatement:line "+Line);
+					 copyto(node.getStartPosition());
+					 String printMSG="\"<ReturnStatement> Line:"+Line+"\"";
+					 insertprint(printMSG);
+
+					 return false;
+				 }
 
 			});
 			copytoEnd();
