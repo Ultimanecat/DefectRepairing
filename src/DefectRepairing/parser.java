@@ -21,6 +21,8 @@ public class parser {
 		String Type;
 		Object Value;
 		Boolean Defined;
+		LineNumber scopeendLine;
+		LineNumber scopestartLine;
 
 		Variable() {
 		}
@@ -271,6 +273,7 @@ public class parser {
 	private static class VariableDeclaration extends Statement {
 		Variable var;
 		LineNumber Line;
+		
 
 		VariableDeclaration(Variable _var, LineNumber _Line) {
 			var = _var;
@@ -423,7 +426,7 @@ public class parser {
 
 		void runto(LineNumber targetline) {
 			LineVariables last = values.get(values.size() - 1);
-			while (curLine != targetline) {
+			do {
 				// if ((pendingjumps.isEmpty() || curLine >
 				// pendingjumps.peek().fromline) && curLine > targetline) {
 				if ((pendingjumps.isEmpty() || curLine.compareTo(pendingjumps.peek().fromline) < 0)
@@ -438,7 +441,7 @@ public class parser {
 					nextline();
 				}
 				values.add(new LineVariables(curLine, last.Variables));
-			}
+			} while (curLine != targetline);
 		}
 
 		Spectrum() {
@@ -630,34 +633,28 @@ public class parser {
 							prev[i][j] = 0;
 							f[i][j] = f[i - 1][j - 1] + 1;
 							int neq = values.get(i - 1).Variables.equals(spec2.values.get(j - 1).Variables) ? 0 : 1;
-							b[i][j]=b[i-1][j-1]+neq * diffmode.varw;
-							if(f[i-1][j]==f[i][j]&&b[i-1][j]<b[i][j])
-							{
+							b[i][j] = b[i - 1][j - 1] + neq * diffmode.varw;
+							if (f[i - 1][j] == f[i][j] && b[i - 1][j] < b[i][j]) {
 								f[i][j] = f[i - 1][j];
 								b[i][j] = b[i - 1][j];
 								prev[i][j] = 1;
 							}
-							if(f[i][j-1]==f[i][j]&&b[i][j-1]<b[i][j])
-							{
+							if (f[i][j - 1] == f[i][j] && b[i][j - 1] < b[i][j]) {
 								f[i][j] = f[i][j - 1];
 								b[i][j] = b[i][j - 1];
 								prev[i][j] = 2;
 							}
-						}else if(f[i - 1][j] == f[i][j - 1]){
-							if(b[i-1][j]<b[i][j-1])
-							{
+						} else if (f[i - 1][j] == f[i][j - 1]) {
+							if (b[i - 1][j] < b[i][j - 1]) {
 								f[i][j] = f[i - 1][j];
 								b[i][j] = b[i - 1][j];
 								prev[i][j] = 1;
-							}
-							else
-							{
+							} else {
 								f[i][j] = f[i][j - 1];
 								b[i][j] = b[i][j - 1];
 								prev[i][j] = 2;
 							}
-						}
-						else if (f[i - 1][j] < f[i][j - 1]) {
+						} else if (f[i - 1][j] < f[i][j - 1]) {
 							f[i][j] = f[i][j - 1];
 							prev[i][j] = 2;
 						} else {
@@ -724,6 +721,13 @@ public class parser {
 		st.startLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
 		st.endLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
 	}
+	public static void getScope(String t,VariableDeclaration st){
+		if (t.startsWith(" "))
+			t = t.substring(1);
+		// System.out.println("getBranchLines from \"" + t + "\"");
+		st.var.scopestartLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
+		st.var.scopeendLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
+	}
 
 	public static Variable getVariable(Scanner sc) {
 		String t1 = sc.next();
@@ -732,68 +736,98 @@ public class parser {
 		String type = t2.substring(t2.indexOf(':') + 1);
 		Scanner sc2 = new Scanner(t1).useDelimiter("=");
 		Variable ret = null;
-		String name;
-		Object value;
+		String name = sc2.next();
+		String value = sc2.next();
 		switch (type) {
 		case "int":
-			name = sc2.next();
-			value = sc2.nextInt();
-			ret = new VarInt(name, type, (int) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarInt(name, type, 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarInt(name, type, Integer.parseInt(value));
+				ret.Defined = true;
+			}
 			break;
 		case "short":
-			name = sc2.next();
-			value = sc2.nextShort();
-			ret = new VarShort(name, type, (short) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarShort(name, type, (short) 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarShort(name, type, Short.parseShort(value));
+				ret.Defined = true;
+			}
 			break;
 		case "long":
-			name = sc2.next();
-			value = sc2.nextLong();
-			ret = new VarLong(name, type, (long) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarLong(name, type, 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarLong(name, type, Long.parseLong(value));
+				ret.Defined = true;
+			}
 			break;
 		case "byte":
-			name = sc2.next();
-			value = sc2.nextByte();
-			ret = new VarByte(name, type, (byte) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarByte(name, type, (byte) 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarByte(name, type, Byte.parseByte(value));
+				ret.Defined = true;
+			}
 			break;
 		case "Object":
-			name = sc2.next();
-			value = sc2.next();
-			ret = new VarObject(name, type, value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarObject(name, type, 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarObject(name, type, value);
+				ret.Defined = true;
+			}
 			break;
 		case "char":
-			name = sc2.next();
-			value = sc2.next().charAt(0);
-			ret = new VarChar(name, type, (char) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarChar(name, type, (char) 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarChar(name, type, value.charAt(0));
+				ret.Defined = true;
+			}
 			break;
 		case "boolean":
-			name = sc2.next();
-			value = sc2.nextBoolean();
-			ret = new VarBoolean(name, type, (boolean) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarBoolean(name, type, false);
+				ret.Defined = false;
+			} else {
+				ret = new VarBoolean(name, type, Boolean.parseBoolean(value));
+				ret.Defined = true;
+			}
 			break;
 		case "float":
-			name = sc2.next();
-			value = sc2.nextFloat();
-			ret = new VarFloat(name, type, (float) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarFloat(name, type, 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarFloat(name, type, Float.parseFloat(value));
+				ret.Defined = true;
+			}
 			break;
 		case "double":
-			name = sc2.next();
-			value = sc2.nextDouble();
-			ret = new VarDouble(name, type, (double) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarDouble(name, type, 0);
+				ret.Defined = false;
+			} else {
+				ret = new VarDouble(name, type, Double.parseDouble(value));
+				ret.Defined = true;
+			}
 			break;
 		case "string":
-			name = sc2.next();
-			value = sc2.next();
-			ret = new VarString(name, type, (String) value);
-			ret.Defined = true;
+			if (value.equals("Uninitialized")) {
+				ret = new VarString(name, type, "");
+				ret.Defined = false;
+			} else {
+				ret = new VarString(name, type, value);
+				ret.Defined = true;
+			}
 			break;
 		}
 		sc2.close();
@@ -864,8 +898,11 @@ public class parser {
 			labelsc = new Scanner(sc.next()).useDelimiter(",");
 			var = getVariable(labelsc);
 			line = getLine(labelsc.next());
-			file = getFile(labelsc.next());
 			ret = new VariableDeclaration(var, line);
+			getScope(labelsc.next(),(VariableDeclaration)ret);
+			file = getFile(labelsc.next());
+			
+			
 			break;
 		}
 		labelsc.close();
@@ -935,7 +972,8 @@ public class parser {
 		BufferedReader reader = null;
 		Spectrum spec1 = null, spec2 = null;
 		try {
-			reader = new BufferedReader(new FileReader("/Users/liuxinyuan/DefectRepairing/a.txt"));
+			String testf = "/Users/liuxinyuan/DefectRepairing/a.txt";
+			reader = new BufferedReader(new FileReader(testf));
 			spec1 = parseheader(reader);
 			spec1.form(parsetrace(reader));
 		} catch (IOException e) {
