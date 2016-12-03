@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -255,10 +256,11 @@ public class parser {
 
 	private static class DoStatement extends Statement {
 		boolean taken;// 0 for reached, 1 for taken
-		int startLine;
-		int endLine;
+		boolean firsttaken;
+		LineNumber startLine;
+		LineNumber endLine;
 
-		DoStatement(boolean _taken, int _startLine, int _endLine) {
+		DoStatement(boolean _taken, LineNumber _startLine, LineNumber _endLine) {
 			taken = _taken;
 			startLine = _startLine;
 			endLine = _endLine;
@@ -273,7 +275,6 @@ public class parser {
 	private static class VariableDeclaration extends Statement {
 		Variable var;
 		LineNumber Line;
-		
 
 		VariableDeclaration(Variable _var, LineNumber _Line) {
 			var = _var;
@@ -300,6 +301,23 @@ public class parser {
 		@Override
 		public String toString() {
 			return "MethodInvoked [MethodName=" + MethodName + ", Parameters=" + Parameters + ", Line=" + Line + "]";
+		}
+	}
+
+	private static class MethodInvocation extends Statement {
+		String MethodName;
+		Set<Variable> Parameters;
+		LineNumber Line;
+
+		MethodInvocation(String _MethodName, Set<Variable> _Parameters, LineNumber _Line) {
+			MethodName = _MethodName;
+			Parameters = _Parameters;
+			Line = _Line;
+		}
+
+		@Override
+		public String toString() {
+			return "MethodInvocation [MethodName=" + MethodName + ", Parameters=" + Parameters + ", Line=" + Line + "]";
 		}
 	}
 
@@ -341,6 +359,11 @@ public class parser {
 		LineNumber(int _line, int _addedline) {
 			line = _line;
 			addedline = _addedline;
+		}
+
+		LineNumber() {
+			line = 0;
+			addedline = 0;
 		}
 
 		public static LineNumber parserLineNumber(String s) {
@@ -403,12 +426,23 @@ public class parser {
 
 	}
 
+	private static class Context {
+		Queue<Jump> pendingjumps;
+		LineNumber curLine;
+
+		Context(Queue<Jump> _pendingjumps, LineNumber _curLine) {
+			pendingjumps = _pendingjumps;
+			curLine = _curLine;
+		}
+	}
+
 	private static class Spectrum {
 		List<LineVariables> values;
+		LineNumber curLine;
 		Queue<Jump> pendingjumps;
+		Stack<Context> contexts;
 		Map<Integer, Integer> addedlines;
 		List<Integer> deletedlines;// TODO
-		LineNumber curLine;
 
 		void nextline() {
 			if (addedlines.get(curLine.line) == null) {
@@ -447,18 +481,24 @@ public class parser {
 		Spectrum() {
 			values = new ArrayList<LineVariables>();
 			pendingjumps = new LinkedList<Jump>();
+			contexts = new Stack<Context>();
+			contexts.push(new Context(new LinkedList<Jump>(), new LineNumber()));
 		}
 
 		Spectrum(Map<Integer, Integer> _addedlines, List<Integer> _deletedlines) {
 			values = new ArrayList<LineVariables>();
 			pendingjumps = new LinkedList<Jump>();
+			contexts = new Stack<Context>();
+			contexts.push(new Context(new LinkedList<Jump>(), new LineNumber()));
 			addedlines = _addedlines;
 			deletedlines = _deletedlines;
 		}
 
 		void form(List<Statement> Stmts) {
 			values = new ArrayList<LineVariables>();
-			pendingjumps = new LinkedList<Jump>();
+			// pendingjumps = new LinkedList<Jump>();
+			pendingjumps = contexts.peek().pendingjumps;
+			curLine = contexts.peek().curLine;
 			Iterator<Statement> it = Stmts.iterator();
 			while (it.hasNext()) {
 				Statement st = it.next();
@@ -495,6 +535,15 @@ public class parser {
 
 					}
 				}
+				if (st instanceof DoStatement) {
+					LineNumber t = ((DoStatement) st).startLine;
+					if (((DoStatement) st).firsttaken) {
+						runto(t);
+					} else {
+						pendingjumps.offer(new Jump(((DoStatement) st).endLine, ((DoStatement) st).startLine));
+						runto(t);
+					}
+				}
 				if (st instanceof VariableDeclaration) {
 					LineNumber t = ((VariableDeclaration) st).Line;
 					runto(t);
@@ -506,8 +555,10 @@ public class parser {
 				}
 				if (st instanceof MethodInvoked) {
 					LineNumber t = ((MethodInvoked) st).Line;
-					// pendingjumps.offer(new Jump(curLine,t));
-					curLine = t;
+
+					contexts.push(new Context(new LinkedList<Jump>(), t));
+					pendingjumps = contexts.peek().pendingjumps;
+					curLine = contexts.peek().curLine;
 					Set<Variable> tmp = new TreeSet<Variable>();
 					tmp.addAll(((MethodInvoked) st).Parameters);
 					values.add(new LineVariables(t, tmp));
@@ -536,7 +587,12 @@ public class parser {
 				if (st instanceof ReturnStatement) {
 					LineNumber t = ((ReturnStatement) st).Line;
 					runto(t);
-					// TODO
+					contexts.pop();
+					pendingjumps = contexts.peek().pendingjumps;
+					curLine = contexts.peek().curLine;
+				}
+				if (st instanceof MethodInvocation) {
+
 				}
 				// System.out.println(values);
 				/*
@@ -721,7 +777,8 @@ public class parser {
 		st.startLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
 		st.endLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
 	}
-	public static void getScope(String t,VariableDeclaration st){
+
+	public static void getScope(String t, VariableDeclaration st) {
 		if (t.startsWith(" "))
 			t = t.substring(1);
 		// System.out.println("getBranchLines from \"" + t + "\"");
@@ -859,6 +916,20 @@ public class parser {
 			file = getFile(labelsc.next());
 			ret = new MethodInvoked(funcname, Parameters, line);
 			break;
+		case "MethodInvocation":
+			funcname = labelsc.next();
+			parac = labelsc.nextInt();
+			labelsc.close();
+			labelsc = new Scanner(sc.next()).useDelimiter(",");
+			Parameters = new TreeSet<Variable>();
+			for (int i = 0; i < parac; i++) {
+				Variable par = getVariable(labelsc);
+				Parameters.add(par);
+			}
+			line = getLine(labelsc.next());
+			file = getFile(labelsc.next());
+			ret = new MethodInvoked(funcname, Parameters, line);
+			break;
 		case "IfStatement":
 			String temp = labelsc.next();
 			boolean taken = (temp.equals("taken") ? true : false);
@@ -868,6 +939,14 @@ public class parser {
 			getElseLines(sc.next(), (IfStatement) ret);
 			file = getFile(sc.next());
 			break;
+		case "DoStatement":
+			temp = labelsc.next();
+			taken = (temp.equals("taken") ? true : false);
+			ret = new WhileStatement(taken, null, null);
+			sc.useDelimiter(",");
+			getBranchLines(sc.next(), (WhileStatement) ret);
+			file = getFile(sc.next());
+			break;
 		case "WhileStatement":
 			temp = labelsc.next();
 			taken = (temp.equals("taken") ? true : false);
@@ -875,7 +954,6 @@ public class parser {
 			sc.useDelimiter(",");
 			getBranchLines(sc.next(), (WhileStatement) ret);
 			file = getFile(sc.next());
-
 			break;
 		case "Assignment":
 			labelsc.close();
@@ -899,10 +977,8 @@ public class parser {
 			var = getVariable(labelsc);
 			line = getLine(labelsc.next());
 			ret = new VariableDeclaration(var, line);
-			getScope(labelsc.next(),(VariableDeclaration)ret);
+			getScope(labelsc.next(), (VariableDeclaration) ret);
 			file = getFile(labelsc.next());
-			
-			
 			break;
 		}
 		labelsc.close();
@@ -948,6 +1024,17 @@ public class parser {
 								&& !((WhileStatement) s).taken) {
 							Stmts.remove(Stmts.size() - 1);
 							((WhileStatement) st).firsttaken = true;
+						}
+					}
+				}
+			}
+			if (st instanceof DoStatement) {
+				if (((DoStatement) st).taken) {
+					Statement s = Stmts.get(Stmts.size() - 1);
+					if (s instanceof DoStatement) {
+						if (((DoStatement) s).startLine == ((DoStatement) st).startLine && !((DoStatement) s).taken) {
+							Stmts.remove(Stmts.size() - 1);
+							((DoStatement) st).firsttaken = true;
 						}
 					}
 				}
