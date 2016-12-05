@@ -459,6 +459,7 @@ public class parser {
 		}
 
 		void runto(LineNumber targetline) {
+			System.out.println("curLine:"+curLine+"\ntargetLine:"+targetline);
 			LineVariables last = values.get(values.size() - 1);
 			do {
 				// if ((pendingjumps.isEmpty() || curLine >
@@ -475,7 +476,8 @@ public class parser {
 					nextline();
 				}
 				values.add(new LineVariables(curLine, last.Variables));
-			} while (curLine != targetline);
+			} while (curLine.compareTo(targetline)!=0);
+			System.out.println("after:curLine:"+curLine+"\ntargetLine:"+targetline);
 		}
 
 		Spectrum() {
@@ -538,8 +540,10 @@ public class parser {
 				if (st instanceof DoStatement) {
 					LineNumber t = ((DoStatement) st).startLine;
 					if (((DoStatement) st).firsttaken) {
+						System.out.println("Dostmt 1st taken");
 						runto(t);
 					} else {
+						System.out.println("Dosymt taken");
 						pendingjumps.offer(new Jump(((DoStatement) st).endLine, ((DoStatement) st).startLine));
 						runto(t);
 					}
@@ -777,8 +781,16 @@ public class parser {
 		st.startLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
 		st.endLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
 	}
+	public static void getBranchLines(String t, DoStatement st) {
+		if (t.startsWith(" "))
+			t = t.substring(1);
+		// System.out.println("getBranchLines from \"" + t + "\"");
+		st.startLine = LineNumber.parserLineNumber(t.substring(t.indexOf(":") + 1, t.indexOf(" ")));
+		st.endLine = LineNumber.parserLineNumber(t.substring(t.indexOf(" ", t.indexOf(" ") + 1) + 1));
+	}
 
 	public static void getScope(String t, VariableDeclaration st) {
+		System.out.println(t);
 		if (t.startsWith(" "))
 			t = t.substring(1);
 		// System.out.println("getBranchLines from \"" + t + "\"");
@@ -942,9 +954,9 @@ public class parser {
 		case "DoStatement":
 			temp = labelsc.next();
 			taken = (temp.equals("taken") ? true : false);
-			ret = new WhileStatement(taken, null, null);
+			ret = new DoStatement(taken, null, null);
 			sc.useDelimiter(",");
-			getBranchLines(sc.next(), (WhileStatement) ret);
+			getBranchLines(sc.next(), (DoStatement) ret);
 			file = getFile(sc.next());
 			break;
 		case "WhileStatement":
@@ -973,7 +985,7 @@ public class parser {
 			break;
 		case "VariableDeclaration":
 			labelsc.close();
-			labelsc = new Scanner(sc.next()).useDelimiter(",");
+			labelsc = sc.useDelimiter(",");
 			var = getVariable(labelsc);
 			line = getLine(labelsc.next());
 			ret = new VariableDeclaration(var, line);
@@ -1059,7 +1071,7 @@ public class parser {
 		BufferedReader reader = null;
 		Spectrum spec1 = null, spec2 = null;
 		try {
-			String testf = "/Users/liuxinyuan/DefectRepairing/a.txt";
+			String testf = "/home/akarin/workspace/test/test1.txt";
 			reader = new BufferedReader(new FileReader(testf));
 			spec1 = parseheader(reader);
 			spec1.form(parsetrace(reader));
@@ -1067,6 +1079,7 @@ public class parser {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
 		}
+		System.out.println("done:");
 	}
 
 	public static double process(String args[]) {

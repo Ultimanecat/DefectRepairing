@@ -206,8 +206,8 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String DirPath = "/home/akarin/workspace/test/mytest/";
-		String TraceFilet = "/home/akarin/workspace/test/test1.txt";
+		String DirPath = "/Users/liuxinyuan/DefectRepairing/test/";
+		String TraceFilet = "/Users/liuxinyuan/DefectRepairing/a.txt";
 
 		if (commandLine.hasOption('D')) {
 			DirPath = commandLine.getOptionValue('D');
