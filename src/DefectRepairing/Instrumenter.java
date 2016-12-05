@@ -190,7 +190,7 @@ public class Instrumenter {
 	}
 	
 	public static void main(String args[]) {
-		boolean verboset = true;
+		boolean verboset = false;
 
 		// Create a Parser
 		CommandLineParser cmdlparser = new DefaultParser();
@@ -206,8 +206,8 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String DirPath = "/Users/liuxinyuan/DefectRepairing/Math3b/src/main/";
-		String TraceFilet = "/Users/liuxinyuan/DefectRepairing/a.txt";
+		String DirPath = "/home/akarin/workspace/test/mytest/";
+		String TraceFilet = "/home/akarin/workspace/test/test1.txt";
 
 		if (commandLine.hasOption('D')) {
 			DirPath = commandLine.getOptionValue('D');
@@ -225,10 +225,10 @@ public class Instrumenter {
 		final boolean verbose = verboset;
 		List<String> filelist = new ArrayList<String>();
 
-		if (verbose)
+		/*if (verbose)
 			filelist.add(new String(
 					"/Users/liuxinyuan/DefectRepairing/Math3b/src/main/java/org/apache/commons/math3/complex/Complex.java"));
-		else
+		else*/
 			getFilelist(DirPath, filelist);
 
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
