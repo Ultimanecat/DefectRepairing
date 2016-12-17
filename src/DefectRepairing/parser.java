@@ -15,6 +15,12 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 public class parser {
 
 	private static class Variable implements Cloneable, Comparable<Variable> {
@@ -436,7 +442,7 @@ public class parser {
 		}
 	}
 
-	private static class Spectrum {
+	private static class Spectrum implements Cloneable{
 		List<LineVariables> values;
 		LineNumber curLine;
 		Queue<Jump> pendingjumps;
@@ -444,6 +450,15 @@ public class parser {
 		Map<Integer, Integer> addedlines;
 		List<Integer> deletedlines;// TODO
 
+		public Spectrum clone() {
+			Spectrum o = null;
+			try {
+				o = (Spectrum) super.clone();
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+			return o;
+		}
 		void nextline() {
 			if (addedlines.get(curLine.line) == null) {
 				curLine.line++;
@@ -1017,11 +1032,12 @@ public class parser {
 		return fileData.toString();
 	}
 
-	public static List<Statement> parsetrace(BufferedReader reader) throws IOException {
+	public static List<Statement> parsetrace(BufferedReader reader,String delimiter) throws IOException {
 		List<Statement> Stmts = new ArrayList<Statement>();
 		// BufferedReader reader = new BufferedReader(new FileReader(Filename));
 		String str = null;
 		while ((str = reader.readLine()) != null) {
+			if(str.equals(delimiter))break;
 			Statement st = getStatement(str);
 			if (st instanceof IfStatement) {
 				if (((IfStatement) st).taken) {
@@ -1074,7 +1090,7 @@ public class parser {
 			String testf = "/home/akarin/workspace/test/test1.txt";
 			reader = new BufferedReader(new FileReader(testf));
 			spec1 = parseheader(reader);
-			spec1.form(parsetrace(reader));
+			spec1.form(parsetrace(reader,null));
 		} catch (IOException e) {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
@@ -1083,28 +1099,47 @@ public class parser {
 	}
 
 	public static double process(String args[]) {
-		/*
-		 * CommandLineParser cmdlparser = new DefaultParser(); Options options =
-		 * new Options(); options.addOption("T", "TraceFile", true,
-		 * "input file1"); try { CommandLine commandLine =
-		 * cmdlparser.parse(options, args); } catch (ParseException e) {
-		 * e.printStackTrace(); }
-		 */
+		
+		CommandLineParser cmdlparser = new DefaultParser();
+		Options options = new Options();
+		options.addOption("D", "Delimiter", true, "Delimiter");
+		options.addOption("r", "repeats",true,"how many test cases in 1 tracefile");
+		CommandLine commandLine = null;
+		try {
+			commandLine = cmdlparser.parse(options, args);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
 		String TraceFile1 = "", TraceFile2 = "";
 		TraceFile1 = args[0];
 		TraceFile2 = args[1];
-		/*
-		 * if( commandLine.hasOption('T') ) { TraceFilet =
-		 * commandLine.getOptionValue('T'); }
-		 */
+		String delimiter = null;
+		int times = 1;
+		
+		if (commandLine.hasOption('D')) {
+			delimiter = commandLine.getOptionValue('D');
+		}
+		if(commandLine.hasOption('r'))
+		{
+			times = Integer.parseInt(commandLine.getOptionValue('r'));
+		}
+		
 
 		System.out.println("Spec1:");
 		BufferedReader reader = null;
+		List<Spectrum> list1 = new LinkedList<Spectrum>(), list2 = new LinkedList<Spectrum>();
 		Spectrum spec1 = null, spec2 = null;
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile1));
 			spec1 = parseheader(reader);
-			spec1.form(parsetrace(reader));
+			for(int i=1;i<=times;i++)
+			{
+				Spectrum tempspec = spec1.clone();
+				tempspec.form(parsetrace(reader,delimiter));
+				list1.add(tempspec);
+			}
+			
 		} catch (IOException e) {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
@@ -1114,14 +1149,35 @@ public class parser {
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile2));
 			spec2 = parseheader(reader);
-			spec2.form(parsetrace(reader));
+			for(int i=1;i<=times;i++)
+			{
+				Spectrum tempspec = spec2.clone();
+				tempspec.form(parsetrace(reader,delimiter));
+				list2.add(tempspec);
+			}
 		} catch (IOException e) {
 			System.out.println("parse Tracefile2 failed");
 			e.printStackTrace();
 		}
 
-		double ret = spec1.diff(spec2, new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0.2, 1, 2));
-		System.out.println(ret);
+		//double ret = spec1.diff(spec2, new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0.2, 1, 2));
+		double ret = 0;
+		int maxi = 0;
+		List<Double> distance = new LinkedList<Double>();
+		for(int i=0;i<times;i++)
+		{
+			double tmp;
+			tmp = list1.get(i).diff(list2.get(i),new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0.2, 1, 2));
+			System.out.println(tmp);
+			distance.add(new Double(tmp));
+			if(tmp>ret)
+			{
+				ret = tmp;
+				maxi = i;
+			}
+		}
+		//System.out.println(ret);
+		System.out.println("testcase "+String.valueOf(maxi)+" has the longest distance "+String.valueOf(ret));
 		return ret;
 	}
 
