@@ -181,7 +181,7 @@ public class MutateOperator {
 		case INT_TO_MIN:
 			return "-2147483648";
 		case INT_RANDOM:
-			return String.valueOf(RANDOM.nextDouble());
+			return String.valueOf(RANDOM.nextInt());
 		default:
 			return input;
 		}
