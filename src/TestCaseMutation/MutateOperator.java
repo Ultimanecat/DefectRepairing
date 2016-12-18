@@ -8,7 +8,7 @@ import java.util.Random;
 public class MutateOperator {
 
 	interface NumberMutator{
-
+		
 	}
 	public enum IntMutator implements NumberMutator{
 		INT_ADD_ONE,
@@ -28,7 +28,7 @@ public class MutateOperator {
 		private static final int SIZE = VALUES.size();
 		private static final Random RANDOM = new Random();
 		public static NumberMutator randomMutator() {
-			return VALUES.get(RANDOM.nextInt(SIZE));
+			return VALUES.get(RANDOM.nextInt(SIZE-1));//exclude Int_RANDOM
 		}
 	}
 	public enum DoubleMutator implements NumberMutator{
@@ -40,13 +40,14 @@ public class MutateOperator {
 		DOUBLE_TO_ONE,
 		DOUBLE_TO_MINUSONE,
 		DOUBLE_RANDOM;
-		
+				
 		private static final List<NumberMutator> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
 		private static final int SIZE = VALUES.size();
 		private static final Random RANDOM = new Random();
 		public static NumberMutator randomMutator() {
-			return VALUES.get(RANDOM.nextInt(SIZE));
+			return VALUES.get(RANDOM.nextInt(SIZE-1));//exclude DOUBLE_RANDOM
 		}
+		
 	}
 
 	
@@ -102,10 +103,10 @@ public class MutateOperator {
 			//operation = (int) (Math.random() * 11) + 1;
 			operation = IntMutator.randomMutator();
 		}
-		return mutate(input, type, operation);
+		return mutate(input, type, operation,0);
 	}
 	
-	public String mutateonlyrandom(String input) {
+	public String mutateonlyrandom(String input,double randomrange) {
 		int type = gettype(input);
 		//int operation = -1;
 		NumberMutator operation = null;
@@ -117,18 +118,18 @@ public class MutateOperator {
 			//operation = (int) (Math.random() * 11) + 1;
 			operation = IntMutator.INT_RANDOM;
 		}
-		return mutate(input, type, operation);
+		return mutate(input, type, operation,randomrange);
 	}
 
-	public String mutate(String input, int type, NumberMutator operation) {
+	public String mutate(String input, int type, NumberMutator operation,double randomrange) {
 		if (type == INT)
-			return mutateint(input, (IntMutator)operation);
+			return mutateint(input, (IntMutator)operation,randomrange);
 		if (type == DOUBLE)
-			return mutatedouble(input, (DoubleMutator)operation);
+			return mutatedouble(input, (DoubleMutator)operation,randomrange);
 		return input;
 	}
 
-	public String mutatedouble(String input, DoubleMutator operation) {
+	public String mutatedouble(String input, DoubleMutator operation,double randomrange) {
 		Random RANDOM = new Random();
 		double number = Double.parseDouble(input);
 		switch (operation) {
@@ -147,14 +148,14 @@ public class MutateOperator {
 		case DOUBLE_TO_MINUSONE:
 			return String.valueOf(-1.0);
 		case DOUBLE_RANDOM:
-			return String.valueOf(RANDOM.nextDouble());
+			return String.valueOf(RANDOM.nextDouble()*randomrange);
 		default:
 			return input;
 		}
 
 	}
 
-	public String mutateint(String input, IntMutator operation) {
+	public String mutateint(String input, IntMutator operation,double randomrange) {
 		Random RANDOM = new Random();
 		int number = Integer.parseInt(input);
 		switch (operation) {
@@ -181,7 +182,7 @@ public class MutateOperator {
 		case INT_TO_MIN:
 			return "-2147483648";
 		case INT_RANDOM:
-			return String.valueOf(RANDOM.nextInt());
+			return String.valueOf(RANDOM.nextInt(Double.valueOf(randomrange).intValue()));
 		default:
 			return input;
 		}

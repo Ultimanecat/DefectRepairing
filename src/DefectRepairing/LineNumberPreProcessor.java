@@ -37,6 +37,18 @@ public class LineNumberPreProcessor {
 			Instrumenter.writeStringToFile(filepath, outputBuffer);
 		}
 	}
+	
+	public static void singleprocess(String FilePath) {
+
+			outputBuffer = new String();
+			curChar = 0;
+			curLine = 0;
+			System.out.println(FilePath);
+			source = Instrumenter.readFileToString(FilePath);
+			while (curChar < source.length())
+				copyaLine();
+			Instrumenter.writeStringToFile(FilePath, outputBuffer);
+	}
 
 	public static void main(String[] args) {
 

@@ -196,6 +196,7 @@ public class Instrumenter {
 		CommandLineParser cmdlparser = new DefaultParser();
 		Options options = new Options();
 		options.addOption("D", "DirPath", true, "input file");
+		options.addOption("F", "FilePath", true, "input file");
 		options.addOption("T", "TraceFile", true, "output file");
 		options.addOption("v", "Verbose", false, "verbose debug");
 		// Parse the program arguments
@@ -207,10 +208,15 @@ public class Instrumenter {
 		}
 		// Set the appropriate variables based on supplied options
 		String DirPath = "/Users/liuxinyuan/DefectRepairing/test/";
+		String Filename = "";
 		String TraceFilet = "/Users/liuxinyuan/DefectRepairing/a.txt";
 
 		if (commandLine.hasOption('D')) {
 			DirPath = commandLine.getOptionValue('D');
+		}
+		if (commandLine.hasOption('F')) {
+			Filename = commandLine.getOptionValue('F');
+			System.out.println(Filename);
 		}
 		if (commandLine.hasOption('T')) {
 			TraceFilet = commandLine.getOptionValue('T');
@@ -229,8 +235,10 @@ public class Instrumenter {
 			filelist.add(new String(
 					"/Users/liuxinyuan/DefectRepairing/Math3b/src/main/java/org/apache/commons/math3/complex/Complex.java"));
 		else*/
-			getFilelist(DirPath, filelist);
-
+		if (commandLine.hasOption('D'))	getFilelist(DirPath, filelist);
+		if (commandLine.hasOption('F')) {
+			filelist.add(Filename);
+		}
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		final AST ast = AST.newAST(AST.JLS3);
 

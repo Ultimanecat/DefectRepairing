@@ -474,7 +474,7 @@ public class parser {
 		}
 
 		void runto(LineNumber targetline) {
-			System.out.println("curLine:"+curLine+"\ntargetLine:"+targetline);
+			//System.out.println("curLine:"+curLine+"\ntargetLine:"+targetline);
 			LineVariables last = values.get(values.size() - 1);
 			do {
 				// if ((pendingjumps.isEmpty() || curLine >
@@ -492,7 +492,7 @@ public class parser {
 				}
 				values.add(new LineVariables(curLine, last.Variables));
 			} while (curLine.compareTo(targetline)!=0);
-			System.out.println("after:curLine:"+curLine+"\ntargetLine:"+targetline);
+			//System.out.println("after:curLine:"+curLine+"\ntargetLine:"+targetline);
 		}
 
 		Spectrum() {
@@ -622,7 +622,7 @@ public class parser {
 			}
 			for (LineVariables i : values) {
 				// if(verbose)
-				System.out.println("Line " + i.line + ": " + i.Variables);
+				//System.out.println("Line " + i.line + ": " + i.Variables);
 			}
 		}
 
@@ -654,7 +654,7 @@ public class parser {
 			case Default:
 				while (it1.hasNext() && it2.hasNext()) {
 					LineVariables l1 = it1.next(), l2 = it2.next();
-					if (l1.line != l2.line)
+					if (l1.line.compareTo(l2.line)!=0)
 						ret += diffmode.linediffw;
 					else {
 						if (!l1.Variables.equals(l2.Variables))
@@ -669,7 +669,7 @@ public class parser {
 					LineVariables l1 = it1.next();
 					for (int j = 1; it2.hasNext(); j++) {
 						LineVariables l2 = it2.next();
-						if (l1.line == l2.line) {
+						if (l1.line.compareTo(l2.line)==0) {
 							prev[i][j] = 0;
 							f[i][j] = f[i - 1][j - 1] + 1;
 						} else if (f[i - 1][j] <= f[i][j - 1]) {// 优先让spec2失配
@@ -704,7 +704,7 @@ public class parser {
 					LineVariables l1 = it1.next();
 					for (int j = 1; it2.hasNext(); j++) {
 						LineVariables l2 = it2.next();
-						if (l1.line == l2.line) {
+						if (l1.line.compareTo(l2.line)==0) {
 							prev[i][j] = 0;
 							f[i][j] = f[i - 1][j - 1] + 1;
 							int neq = values.get(i - 1).Variables.equals(spec2.values.get(j - 1).Variables) ? 0 : 1;
@@ -805,7 +805,7 @@ public class parser {
 	}
 
 	public static void getScope(String t, VariableDeclaration st) {
-		System.out.println(t);
+		//System.out.println(t);
 		if (t.startsWith(" "))
 			t = t.substring(1);
 		// System.out.println("getBranchLines from \"" + t + "\"");
@@ -993,10 +993,10 @@ public class parser {
 		case "ReturnStatement":
 			labelsc.close();
 			labelsc = new Scanner(sc.next()).useDelimiter(",");
-			var = getVariable(labelsc);
+			//var = getVariable(labelsc);
 			line = getLine(labelsc.next());
 			file = getFile(labelsc.next());
-			ret = new ReturnStatement(var, line);
+			ret = new ReturnStatement(null, line);
 			break;
 		case "VariableDeclaration":
 			labelsc.close();
@@ -1037,8 +1037,11 @@ public class parser {
 		// BufferedReader reader = new BufferedReader(new FileReader(Filename));
 		String str = null;
 		while ((str = reader.readLine()) != null) {
-			if(str.equals(delimiter))break;
+			//System.out.println(str);
+			if(str.startsWith(delimiter))break;
+			//System.out.println("not ****");
 			Statement st = getStatement(str);
+			//System.out.println(st);
 			if (st instanceof IfStatement) {
 				if (((IfStatement) st).taken) {
 					Stmts.remove(Stmts.size() - 1);
@@ -1083,7 +1086,7 @@ public class parser {
 	}
 
 	public static void main(String args[]) {
-		System.out.println("Spec1:");
+		/*System.out.println("Spec1:");
 		BufferedReader reader = null;
 		Spectrum spec1 = null, spec2 = null;
 		try {
@@ -1095,7 +1098,10 @@ public class parser {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
 		}
-		System.out.println("done:");
+		System.out.println("done:");*/
+		String tracefile1 = "/home/akarin/workspace/test/randomtest/trace1.txt";
+		String tracefile2 = "/home/akarin/workspace/test/randomtest/trace2.txt";
+		parser.process(new String[] { tracefile1, tracefile2, "-D", "**************", "-r", String.valueOf(11) });
 	}
 
 	public static double process(String args[]) {
