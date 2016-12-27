@@ -1132,7 +1132,7 @@ public class parser {
 		}
 		
 
-		System.out.println("Spec1:");
+		//System.out.println("Spec1:");
 		BufferedReader reader = null;
 		List<Spectrum> list1 = new LinkedList<Spectrum>(), list2 = new LinkedList<Spectrum>();
 		Spectrum spec1 = null, spec2 = null;
@@ -1151,7 +1151,7 @@ public class parser {
 			e.printStackTrace();
 		}
 
-		System.out.println("Spec2:");
+		//System.out.println("Spec2:");
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile2));
 			spec2 = parseheader(reader);
@@ -1183,7 +1183,10 @@ public class parser {
 			}
 		}
 		//System.out.println(ret);
-		System.out.println("testcase "+String.valueOf(maxi)+" has the longest distance "+String.valueOf(ret));
+		if(maxi>0)
+			System.out.println("testcase "+String.valueOf(maxi-1)+" has the longest distance "+String.valueOf(ret));
+		else
+			System.out.println("the original test case has the longest distance "+String.valueOf(ret));
 		return ret;
 	}
 
