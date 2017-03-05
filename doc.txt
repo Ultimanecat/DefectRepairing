@@ -1,0 +1,28 @@
+DefectRepairing
+	Instrumenter.java
+	instrument source file.
+	main: -D <directory> -T <output file> 
+		  -F <filename>  
+	must be preprocessed by LineNumberPreProcessor
+
+	LineNumberPreProcessor.java
+	preprocess line number before applying your patches.
+	LineNumberPreProcessor.process(String DirPath)
+	preprocess all .java files in the directory DirPath
+
+	parser.java
+	parser.process(String args[])
+	parse two tracefiles.
+	if the two tracefiles both contain multiple traces, use -D -r
+	tracefile1 tracefile2 -D <Delimiter> -r <repeat times>
+	-D can be **************
+defects4j
+	BuggyVersion.java
+TestCase
+	seperator.java
+	use this to print seperator in Junit testfile.
+	seperator.process(String filepath,String tracefile)
+TestCaseMutation
+	Mutator.java
+	use this to mutate your testcase(replaced by other test generator like evosuite)
+	Mutator.process(String filepath,String methodname)
