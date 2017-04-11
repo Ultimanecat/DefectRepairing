@@ -68,7 +68,7 @@ public class patchparser {
 			}
 		}
 		// run to end
-		while (fromp < alllines - 1) {
+		while (top < alllines - 1) {
 			lnmap.put(++top, new LineNumber(++fromp, 0));
 		}
 		// debug
