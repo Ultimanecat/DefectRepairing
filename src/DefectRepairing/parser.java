@@ -358,11 +358,11 @@ public class parser {
 		}
 	}
 
-	private static class LineNumber implements Comparable<LineNumber> {
+	public static class LineNumber implements Comparable<LineNumber> {
 		int line;
 		int addedline;
 
-		LineNumber(int _line, int _addedline) {
+		public LineNumber(int _line, int _addedline) {
 			line = _line;
 			addedline = _addedline;
 		}
