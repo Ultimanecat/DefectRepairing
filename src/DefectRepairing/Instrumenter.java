@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -85,47 +86,47 @@ public class Instrumenter {
 	public static String outputBuffer = new String();
 	public static String source = new String();
 
-	public static String[] LineNumberMap;
+
 
 	public static void init() {
 		curLine = 1;
 		curChar = 0;
 		outputBuffer = new String();
-		// LineNumberMap=new HashMap<Integer,String>();
+		
 	}
 
 	public static void ConstructMap(String FilePath) {
-		BufferedReader br = new BufferedReader(new StringReader(source));
-		String[] lines = source.split("\n");
-		LineNumberMap = new String[lines.length + 1];
-
-		int ln = 0;
-		int temp1 = 0, temp2 = 0;
-		for (String line : lines) {
-			ln++;
-			int i = line.length() - 1;
-			Pattern pattern = Pattern.compile(".*    //[0-9]+$");
-			Matcher matcher = pattern.matcher(line);
-			if (matcher.matches())
-				for (; i >= 0; i--) {
-					if (line.charAt(i) == '/') {
-						temp1 = (int) Double.parseDouble(line.substring(i + 1));
-						temp2 = 0;
-						LineNumberMap[ln] = line.substring(i + 1);
-						break;
-					}
-				}
-			else {
-				temp2++;
-				outputBuffer += "//" + temp1 + "." + temp2 + "\n";
-				LineNumberMap[ln] = temp1 + "." + temp2;
-			}
-		}
-		outputBuffer += "//END\n";
+//		BufferedReader br = new BufferedReader(new StringReader(source));
+//		String[] lines = source.split("\n");
+//		LineNumberMap = new String[lines.length + 1];
+//
+//		int ln = 0;
+//		int temp1 = 0, temp2 = 0;
+//		for (String line : lines) {
+//			ln++;
+//			int i = line.length() - 1;
+//			Pattern pattern = Pattern.compile(".*    //[0-9]+$");
+//			Matcher matcher = pattern.matcher(line);
+//			if (matcher.matches())
+//				for (; i >= 0; i--) {
+//					if (line.charAt(i) == '/') {
+//						temp1 = (int) Double.parseDouble(line.substring(i + 1));
+//						temp2 = 0;
+//						LineNumberMap[ln] = line.substring(i + 1);
+//						break;
+//					}
+//				}
+//			else {
+//				temp2++;
+//				outputBuffer += "//" + temp1 + "." + temp2 + "\n";
+//				LineNumberMap[ln] = temp1 + "." + temp2;
+//			}
+//		}
+//		outputBuffer += "//END\n";
 	}
 
 	public static String getLineNumber(int ln) {
-		return LineNumberMap[ln];
+		return String.valueOf(ln);
 	}
 
 	public static void copyaLine() {
@@ -150,6 +151,7 @@ public class Instrumenter {
 	}
 
 	public static void copyto(int pos) {
+		//System.out.println(pos);
 		int preChar = curChar;
 		for (int i = preChar; i <= pos; i++) {
 			if (source.charAt(i) == '\n') {
@@ -191,7 +193,8 @@ public class Instrumenter {
 	
 	public static void main(String args[]) {
 		boolean verboset = true;
-
+		
+		
 		// Create a Parser
 		CommandLineParser cmdlparser = new DefaultParser();
 		Options options = new Options();
@@ -206,7 +209,7 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String DirPath = "/Users/liuxinyuan/DefectRepairing/Math3b/src/main/";
+		String DirPath = "/Users/liuxinyuan/DefectRepairing/Chart1b";
 		String TraceFilet = "/Users/liuxinyuan/DefectRepairing/a.txt";
 
 		if (commandLine.hasOption('D')) {
@@ -227,7 +230,7 @@ public class Instrumenter {
 
 		if (verbose)
 			filelist.add(new String(
-					"/Users/liuxinyuan/DefectRepairing/Math3b/src/main/java/org/apache/commons/math3/complex/Complex.java"));
+					"/Users/liuxinyuan/DefectRepairing/Math82b/src/main/java/org/apache/commons/math/optimization/GoalType.java"));
 		else
 			getFilelist(DirPath, filelist);
 
@@ -256,6 +259,7 @@ public class Instrumenter {
 
 				public ASTNode getparentstatement(ASTNode node) {
 					while (!(node instanceof Statement)) {
+						
 						node = node.getParent();
 					}
 					return node;
@@ -278,6 +282,9 @@ public class Instrumenter {
 				public boolean isinMethod(ASTNode node) {
 					while (node != null) {
 						node = node.getParent();
+						if (node instanceof AnonymousClassDeclaration){
+							return false;
+						}
 						if (node instanceof MethodDeclaration) {
 							if (judgePrint((MethodDeclaration) node))
 								return false;
@@ -291,54 +298,51 @@ public class Instrumenter {
 					if (verbose)
 						outputBuffer += "\ndebug:" + printMSG + "\n";
 					else
-						// outputBuffer += "\ntry {\n"
-						// +"RandomAccessFile randomFile = new
-						// RandomAccessFile(\""+TraceFile+"\", \"rw\");\n"
-						// +"long fileLength = randomFile.length();\n"
-						// +"randomFile.seek(fileLength);\n"
-						// +"randomFile.writeBytes("+ printMSG
-						// +"+\","+FilePath+"\""+"+ \"\\n\");\n"
-						// +"randomFile.close();\n"
-						// +"} catch (IOException e__e__e) {\n"
-						// +"e__e__e.printStackTrace();\n"
-						// +"}\n";
+
 						outputBuffer += "\nprintRuntimeMSG(" + printMSG + ");\n";
 				}
-
-				// 变量声明
-				public void endVisit(VariableDeclarationFragment node) {
-					String name = node.getName().toString();
-					if (verbose)
-						System.out.println(
-								"Declaration of '" + name + "' at line" + cu.getLineNumber(node.getStartPosition()));
-					
+				
+				public boolean visit(VariableDeclarationFragment node) {
 					if (!isinMethod(node))
-						return;
-					ASTNode ParentStatement = getparentstatement(node);
-					if (ParentStatement instanceof WhileStatement || ParentStatement instanceof DoStatement
-							|| ParentStatement instanceof ForStatement || ParentStatement instanceof IfStatement
-							|| ParentStatement instanceof ReturnStatement)
-						return;
-					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
-					Block scope=(Block) getparentBlock(node);
-					String LineStart = getLineNumber(cu.getLineNumber(scope.getStartPosition()));
-					String LineEnd = getLineNumber(cu.getLineNumber(scope.getStartPosition()+scope.getLength()));
-					
-					if (verbose)
-						System.out.println("VariableDeclaration:" + "line " + line + "," + name);
-					copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
-					
-					String printMSG;
-					if (node.getInitializer() != null)
-						printMSG= "\"<VariableDeclaration> " + name + "=\"+getValue_(" + name
-							+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + ",scope:"+LineStart+" to "+LineEnd+"\"";
-					else
-						printMSG= "\"<VariableDeclaration> " + name + "=\"Uninitialized\",type:\"+getType_(" + name + ")+\",Line:" + line + ",scope:"+LineStart+" to "+LineEnd+"\"";
-					
-					insertprint(printMSG);
-					return;
-	
+						return false;
+					return true;
 				}
+				// 变量声明
+//				public void endVisit(VariableDeclarationFragment node) {
+//					String name = node.getName().toString();
+//					if (verbose)
+//						System.out.println(
+//								"Declaration of '" + name + "' at line" + cu.getLineNumber(node.getStartPosition()));
+//					
+//					if (!isinMethod(node))
+//						return;
+//					
+//					ASTNode ParentStatement = getparentstatement(node);
+//					//System.out.println(ParentStatement);
+//					if (ParentStatement instanceof WhileStatement || ParentStatement instanceof DoStatement
+//							|| ParentStatement instanceof ForStatement || ParentStatement instanceof IfStatement
+//							|| ParentStatement instanceof ReturnStatement)
+//						return;
+//					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
+//					Block scope=(Block) getparentBlock(node);
+//					String LineStart = getLineNumber(cu.getLineNumber(scope.getStartPosition()));
+//					String LineEnd = getLineNumber(cu.getLineNumber(scope.getStartPosition()+scope.getLength()));
+//					
+//					if (verbose)
+//						System.out.println("VariableDeclaration:" + "line " + line + "," + name);
+//					copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
+//					
+//					String printMSG;
+//					if (node.getInitializer() != null)
+//						printMSG= "\"<VariableDeclaration> " + name + "=\"+getValue_(" + name
+//							+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + ",scope:"+LineStart+" to "+LineEnd+"\"";
+//					else
+//						printMSG= "\"<VariableDeclaration> " + name + "=Uninitialized,type:\"+getType_(" + name + ")+\",Line:" + line + ",scope:"+LineStart+" to "+LineEnd+"\"";
+//					
+//					insertprint(printMSG);
+//					return;
+//	
+//				}
 
 				public boolean visit(MethodDeclaration node) {
 					if (node.isConstructor())//
@@ -350,11 +354,14 @@ public class Instrumenter {
 					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					if (verbose)
 						System.out.println("MethodDeclaration:" + node.getName().toString() + ",Line " + line);
-
+					
 					List<SingleVariableDeclaration> parameters = node.parameters();
 					copyto(body.getStartPosition() + 1);
-
-					String printMSG = "\"<Method_invoked," + node.getName().toString() + "," + parameters.size()
+					String printMSG;
+//					String printMSG="\"<MethodInvocation,"+node.getName()+","+parameters.size()+"> Line: Thread.currentThread().getStackTrace()[1].getLineNumber()"+"\"";
+//					insertprint(printMSG);
+					
+					printMSG = "\"<Method_invoked," + node.getName().toString() + "," + parameters.size()
 							+ "> \"";
 					boolean firstVar = true;
 					if (!judgePrint(node))
@@ -568,13 +575,15 @@ public class Instrumenter {
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
-						return true;
+						body.accept(this);
+						return false;//TODO
 					} else {
 						copyto(body.getStartPosition());
 						outputBuffer += "{\n";
 						insertprint(printMSG);
-						copyto(body.getStartPosition() + body.getLength());
 						ProcessSingleStatement(body);
+						copyto(body.getStartPosition() + body.getLength());
+						
 						outputBuffer += "\n}";
 						return false;
 					}
@@ -592,13 +601,15 @@ public class Instrumenter {
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
-						return true;
+						body.accept(this);//TODO
+						return false;
 					} else {
 						copyto(body.getStartPosition());
 						outputBuffer += "{\n";
 						insertprint(printMSG);
-						copyto(body.getStartPosition() + body.getLength());
 						ProcessSingleStatement(body);
+						copyto(body.getStartPosition() + body.getLength());
+						
 						outputBuffer += "\n}";
 						return false;
 					}
@@ -618,13 +629,15 @@ public class Instrumenter {
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
-						return true;
+						body.accept(this);
+						return false;
 					} else {
 						copyto(body.getStartPosition());
 						outputBuffer += "{\n";
 						insertprint(printMSG);
-						copyto(body.getStartPosition() + body.getLength());
 						ProcessSingleStatement(body);
+						copyto(body.getStartPosition() + body.getLength());
+						
 						outputBuffer += "\n}";
 						return false;
 					}
@@ -662,13 +675,15 @@ public class Instrumenter {
 					if (body instanceof Block) {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
-						return true;
+						body.accept(this);
+						return false;
 					} else {
 						copyto(body.getStartPosition());
 						outputBuffer += "{\n";
 						insertprint(printMSG);
-						copyto(body.getStartPosition() + body.getLength());
 						ProcessSingleStatement(body);
+						copyto(body.getStartPosition() + body.getLength());
+						
 						outputBuffer += "\n}";
 						return false;
 					}
@@ -680,23 +695,15 @@ public class Instrumenter {
 
 				}
 
-				public boolean visit (MethodInvocation node) {
-					Statement s=(Statement) getparentstatement(node);
-					CopytoLabel(s);
-					String Line=getLineNumber(cu.getLineNumber(s.getStartPosition()));
-					//int paranum;
-					String printMSG="\"<MethodInvocation,"+node.getName()+","+node.arguments().size()+"> Line:"+Line+"\"";
-					insertprint(printMSG);
-					return true;
-				}
 				
 				 public boolean visit(ReturnStatement node) {
 					 String Line=getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					 if(verbose)System.out.print("ReturnStatement:line "+Line);
 					 copyto(node.getStartPosition());
+					 outputBuffer+="{";
 					 String printMSG="\"<ReturnStatement> Line:"+Line+"\"";
 					 insertprint(printMSG);
-
+					 outputBuffer+="}";
 					 return false;
 				 }
 
