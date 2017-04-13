@@ -10,6 +10,10 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+
+import DefectRepairing.Instrumenter;
+
+
 public class seperator {
 	
 	public static int curLine = 1;
@@ -64,14 +68,18 @@ public class seperator {
 		outputBuffer += source.substring(curChar);
 	}
 	
-	public static void process(){
+
+	public static void process(String filepath,String tracefile){
+
 		curLine = 1;
 		curChar = 0;
 		outputBuffer = new String();
 		
-		source="";
-		TraceFile="";
-		FilePath="";
+
+		FilePath=filepath;
+		source=Instrumenter.readFileToString(FilePath);
+		TraceFile=tracefile;
+		
 		
 		
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
@@ -95,8 +103,11 @@ public class seperator {
 			}
 			
 			public void endVisit(MethodDeclaration a){
+
+				
 				copyto(a.getStartPosition()+a.getLength()-1);
-				outputBuffer += "\nprintRuntimeMSG(" + "**************" + ");\n";
+				outputBuffer += "\nprintRuntimeMSG(" + "\"**************\"" + ");\n";
+
 			}
 			
 			public boolean visit(TypeDeclaration node) {
@@ -125,6 +136,9 @@ public class seperator {
 		});
 		copytoEnd();
 		
-		System.out.print(outputBuffer);
+
+		//System.out.print(outputBuffer);
+		Instrumenter.writeStringToFile(FilePath, outputBuffer);
+
 	}
 }

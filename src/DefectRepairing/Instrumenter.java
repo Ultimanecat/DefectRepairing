@@ -192,13 +192,15 @@ public class Instrumenter {
 	}
 	
 	public static void main(String args[]) {
-		boolean verboset = true;
-		
-		
+
+
+		boolean verboset = false;
+
 		// Create a Parser
 		CommandLineParser cmdlparser = new DefaultParser();
 		Options options = new Options();
 		options.addOption("D", "DirPath", true, "input file");
+		options.addOption("F", "FilePath", true, "input file");
 		options.addOption("T", "TraceFile", true, "output file");
 		options.addOption("v", "Verbose", false, "verbose debug");
 		// Parse the program arguments
@@ -209,11 +211,17 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
+
 		String DirPath = "/Users/liuxinyuan/DefectRepairing/Chart1b";
+
 		String TraceFilet = "/Users/liuxinyuan/DefectRepairing/a.txt";
 
 		if (commandLine.hasOption('D')) {
 			DirPath = commandLine.getOptionValue('D');
+		}
+		if (commandLine.hasOption('F')) {
+			Filename = commandLine.getOptionValue('F');
+			System.out.println(Filename);
 		}
 		if (commandLine.hasOption('T')) {
 			TraceFilet = commandLine.getOptionValue('T');
@@ -228,12 +236,21 @@ public class Instrumenter {
 		final boolean verbose = verboset;
 		List<String> filelist = new ArrayList<String>();
 
-		if (verbose)
+		/*if (verbose)
 			filelist.add(new String(
+<<<<<<< HEAD
 					"/Users/liuxinyuan/DefectRepairing/Math82b/src/main/java/org/apache/commons/math/optimization/GoalType.java"));
 		else
 			getFilelist(DirPath, filelist);
 
+=======
+					"/Users/liuxinyuan/DefectRepairing/Math3b/src/main/java/org/apache/commons/math3/complex/Complex.java"));
+		else*/
+		if (commandLine.hasOption('D'))	getFilelist(DirPath, filelist);
+		if (commandLine.hasOption('F')) {
+			filelist.add(Filename);
+		}
+>>>>>>> a84f2c6276d80732e00a3a999ea1fb9a4161a95f
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		final AST ast = AST.newAST(AST.JLS3);
 
