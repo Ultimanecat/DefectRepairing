@@ -365,6 +365,7 @@ public class parser {
 
 		public LineNumber(int _line, int _addedline) {
 			line = _line;
+			
 			addedline = _addedline;
 		}
 
@@ -676,11 +677,16 @@ public class parser {
 				}
 				break;
 			case LCS:
-				int f[][] = new int[values.size()][spec2.values.size()];
-				int prev[][] = new int[values.size()][spec2.values.size()];
-				for (int i = 1; it1.hasNext(); i++) {
+				int f[][] = new int[values.size()+1][spec2.values.size()+1];
+				int prev[][] = new int[values.size()+1][spec2.values.size()+1];
+				{
+				int i=0,j=0;
+				for ( i = 1; it1.hasNext(); i++) {
+					//System.out.println("0i="+i+"j="+j);
 					LineVariables l1 = it1.next();
-					for (int j = 1; it2.hasNext(); j++) {
+					it2=spec2.values.iterator();
+					for ( j = 1; it2.hasNext(); j++) {
+						//System.out.println("i="+i+"j="+j);
 						LineVariables l2 = it2.next();
 						if (l1.line.compareTo(l2.line)==0) {
 							prev[i][j] = 0;
@@ -694,8 +700,10 @@ public class parser {
 						}
 					}
 				}
+				System.out.println("i="+i+"j="+j);
 				ret += (min - f[values.size()][spec2.values.size()]) * diffmode.linediffw;
-				for (int i = values.size(), j = spec2.values.size();;) {
+				System.out.println("line = "+ret+"\nmin = "+min+"\n f = "+f[values.size()][spec2.values.size()]);
+				for ( i = values.size(), j = spec2.values.size();;) {
 					if (i == 0 || j == 0)
 						break;
 					if (prev[i][j] == 0) {
@@ -708,7 +716,7 @@ public class parser {
 					else if (prev[i][j] == 2)
 						j--;
 				}
-				break;
+				break;}
 			case LCS_Bestfit:
 				f = new int[values.size()][spec2.values.size()];
 				prev = new int[values.size()][spec2.values.size()];
@@ -1189,7 +1197,7 @@ public class parser {
 		for(int i=0;i<times;i++)
 		{
 			double tmp;
-			tmp = list1.get(i).diff(list2.get(i),new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0.2, 1, 2));
+			tmp = list1.get(i).diff(list2.get(i),new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0.2, 1, 2));
 			System.out.println(tmp);
 			distance.add(new Double(tmp));
 			if(tmp>ret)
