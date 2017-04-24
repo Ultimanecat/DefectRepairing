@@ -407,7 +407,7 @@ public class parser {
 
 		@Override
 		public String toString() {
-			return "LineNumber [line=" + line + ", addedline=" + addedline + "]";
+			return line+","+addedline;
 		}
 	}
 
@@ -481,16 +481,17 @@ public class parser {
 		}
 
 		void runto(LineNumber targetline) {
-			System.out.println("curLine:"+curLine+"\ntargetLine:"+targetline);
 			
+			System.out.println(curLine+" "+targetline);
 			LineVariables last = new LineVariables(curLine,new HashSet<Variable>());
 			if(values.size()!=0)
 				last= values.get(values.size() - 1);
 			else
 			{
-				System.out.println(curLine+" sdfsdf "+targetline);
+				//System.out.println(curLine+" sdfsdf "+targetline);
 			}
 			do {
+				
 				// if ((pendingjumps.isEmpty() || curLine >
 				// pendingjumps.peek().fromline) && curLine > targetline) {
 				if ((pendingjumps.isEmpty() || curLine.compareTo(pendingjumps.peek().fromline) < 0)
@@ -569,10 +570,10 @@ public class parser {
 				if (st instanceof DoStatement) {
 					LineNumber t = ((DoStatement) st).startLine;
 					if (((DoStatement) st).firsttaken) {
-						System.out.println("Dostmt 1st taken");
+						//System.out.println("Dostmt 1st taken");
 						runto(t);
 					} else {
-						System.out.println("Dosymt taken");
+						//System.out.println("Dosymt taken");
 						pendingjumps.offer(new Jump(((DoStatement) st).endLine, ((DoStatement) st).startLine));
 						runto(t);
 					}
@@ -700,9 +701,9 @@ public class parser {
 						}
 					}
 				}
-				System.out.println("i="+i+"j="+j);
+				//System.out.println("i="+i+"j="+j);
 				ret += (min - f[values.size()][spec2.values.size()]) * diffmode.linediffw;
-				System.out.println("line = "+ret+"\nmin = "+min+"\n f = "+f[values.size()][spec2.values.size()]);
+				//System.out.println("line = "+ret+"\nmin = "+min+"\n f = "+f[values.size()][spec2.values.size()]);
 				for ( i = values.size(), j = spec2.values.size();;) {
 					if (i == 0 || j == 0)
 						break;
@@ -716,6 +717,7 @@ public class parser {
 					else if (prev[i][j] == 2)
 						j--;
 				}
+				
 				break;}
 			case LCS_Bestfit:
 				f = new int[values.size()][spec2.values.size()];
@@ -1074,7 +1076,7 @@ public class parser {
 					if (s instanceof WhileStatement) {
 						if(((WhileStatement) s).startLine.compareTo(((WhileStatement) st).startLine)==0
 								&& !((WhileStatement) s).taken) {
-							System.out.println("removed:"+s);
+							
 							Stmts.remove(Stmts.size() - 1);
 							((WhileStatement) st).firsttaken = true;
 						}
@@ -1121,8 +1123,8 @@ public class parser {
 			e.printStackTrace();
 		}
 		System.out.println("done:");*/
-		String tracefile1 = "/Volumes/Unnamed/traces/Chart1b_Patch1/buggy/org.jfree.chart.renderer.category.junit.StatisticalLineAndShapeRendererTests:testDrawWithNullInfo";
-		String tracefile2 = "/Volumes/Unnamed/traces/Chart1b_Patch1/patched/org.jfree.chart.renderer.category.junit.StatisticalLineAndShapeRendererTests:testDrawWithNullInfo";
+		String tracefile1 = "/Volumes/Unnamed/Chart15b_Patch13/buggy_e/org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
+		String tracefile2 = "/Volumes/Unnamed/Chart15b_Patch13/patched_e/org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
 		parser.process(new String[] { tracefile1, tracefile2, "-D", "**************", "-r", String.valueOf(1) });
 	}
 
@@ -1154,7 +1156,7 @@ public class parser {
 		}
 		
 
-		//System.out.println("Spec1:");
+		
 		BufferedReader reader = null;
 		List<Spectrum> list1 = new LinkedList<Spectrum>(), list2 = new LinkedList<Spectrum>();
 		Spectrum spec1 = null, spec2 = null;
@@ -1163,8 +1165,9 @@ public class parser {
 			spec1 = parseheader(reader);
 			for(int i=1;i<=times;i++)
 			{
-				System.out.println(i+"times");
+				
 				Spectrum tempspec = spec1.clone();
+				
 				tempspec.form(parsetrace(reader,delimiter));
 				list1.add(tempspec);
 			}
@@ -1173,14 +1176,14 @@ public class parser {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
 		}
-		System.out.println("sdfs");
+		
 		//System.out.println("Spec2:");
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile2));
 			spec2 = parseheader(reader);
 			for(int i=1;i<=times;i++)
 			{
-				System.out.println(i+"times");
+				
 				Spectrum tempspec = spec2.clone();
 				tempspec.form(parsetrace(reader,delimiter));
 				list2.add(tempspec);
@@ -1198,7 +1201,7 @@ public class parser {
 		{
 			double tmp;
 			tmp = list1.get(i).diff(list2.get(i),new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0.2, 1, 2));
-			System.out.println(tmp);
+			
 			distance.add(new Double(tmp));
 			if(tmp>ret)
 			{

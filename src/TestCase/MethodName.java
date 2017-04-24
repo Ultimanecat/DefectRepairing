@@ -1,37 +1,4 @@
 package TestCase;
-//tar -c bin | bzip2 > bin.tar.bz2
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.DoStatement;
-import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,17 +6,20 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.CommandLine;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-public class Instrumenter {
-
+public class MethodName {
+	
 	public static String readFileToString(String filePath) {
 		StringBuilder fileData = new StringBuilder(1000);
 		BufferedReader reader;
@@ -106,7 +76,7 @@ public class Instrumenter {
 			}
 		}
 		curChar = pos;
-		// System.out.println(preChar+","+pos);
+
 		outputBuffer += source.substring(preChar, pos);
 	}
 
@@ -122,7 +92,7 @@ public class Instrumenter {
 			if (f.isDirectory()) {
 				getFilelist(f.getAbsolutePath(), FileList);
 			} else {
-				if (f.getName().endsWith(".java") || f.getName().endsWith("test.java") || f.getName().endsWith("Tests.java") || f.getName().endsWith("tests.java"))
+				if (f.getName().endsWith("Tests.java"))
 					FileList.add(f.getAbsolutePath());
 			}
 		}
@@ -140,20 +110,16 @@ public class Instrumenter {
 	public static void main(String args[]) {
 		boolean verboset = false;
 		
-		String DirPath = args[0];
+		String FilePath = args[0];
 		String TraceFilet = args[1];
-
+		final int TargetLine=Integer.valueOf(args[2]);
 		init();
 
 		final String TraceFile = TraceFilet;
 		final boolean verbose = verboset;
 		List<String> filelist = new ArrayList<String>();
 
-		if (verbose)
-			filelist.add(new String(
-					"/Volumes/Unnamed/Math2b/src/test/java/org/apache/commons/math3/fraction/FractionTest.java"));
-		else
-			getFilelist(DirPath, filelist);
+		
 
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		final AST ast = AST.newAST(AST.JLS3);
@@ -161,11 +127,9 @@ public class Instrumenter {
 		int TotalNum = filelist.size();
 		int CurNum = 0;
 
-		for (final String FilePath : filelist)
-
-		{
+		
 			init();
-			System.out.println(FilePath);
+
 			source = readFileToString(FilePath);
 
 			parser.setSource(source.toCharArray());
@@ -174,7 +138,7 @@ public class Instrumenter {
 			final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 			
 			insertimport(cu);
-			//final String PackageName=cu.getPackage().getName().toString();
+			final String PackageName=cu.getPackage().getName().toString();
 			cu.accept(new ASTVisitor() {
 
 				String ClassName;
@@ -211,60 +175,25 @@ public class Instrumenter {
 				public boolean visit(MethodDeclaration node) {
 					if (node.isConstructor())//
 						return false;
+					
 
-					boolean flag=true;
-					if(node.getName().toString().startsWith("test"))
-						flag=false;
-					else{
-						List<ASTNode> l=node.modifiers();
-						for(ASTNode n:l){
-							if(n.toString().startsWith("@Test"))
-							{
-								flag=false;
-								break;
-							}
-						}
+					if( cu.getLineNumber(node.getStartPosition())<=TargetLine && cu.getLineNumber(node.getStartPosition()+node.getLength())>=TargetLine){
+						copyto(node.getBody().getStartPosition()+1);
+						System.out.println(node.getName());
+						
+						
 					}
 					
-					if(flag)
-						return false;
-					
-					copyto(node.getBody().getStartPosition()+1);
-					String printMSG = "\"---"+ClassName+":"+node.getName()+"\"";
-					insertprint(printMSG);
 
 					return true;
 				}
 
-//			public void endVisit(MethodDeclaration node){
-//				List<Statement> l=node.getBody().statements();
-//				
-//				Statement last_stmt=null;
-//				if(l.size()>0){
-//					last_stmt=l.get(l.size()-1);
-//				}
-//				if(last_stmt instanceof ReturnStatement) {
-//					copyto(last_stmt.getStartPosition());
-//				}
-//				else {
-//					copyto(node.getBody().getStartPosition()+node.getBody().getLength()-1);
-//				}
-//				String printMSG = "\"---return---"+ClassName+":"+node.getName()+"\"";
-//				insertprint(printMSG);
-//			}
+				
 
 			});
-			copytoEnd();
-			if (verbose)
-				System.out.print(outputBuffer);
-
-			if (!verbose) {
-				writeStringToFile(FilePath, outputBuffer);
-				CurNum++;
-
-				System.out.println(CurNum + "/" + TotalNum);
-			}
+			
+			
+			
 		}
 	}
 
-}

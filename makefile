@@ -17,7 +17,7 @@ D4J = defects4j.Main
 TESTCASEINSTR = TestCase.Instrumenter
 
 LIB_DIR = ./lib/
-LIBS = $(LIB_DIR)commons-collections-3.2.1.jar:$(LIB_DIR)commons-cli-1.3.1.jar:$(LIB_DIR)commons-cli-1.3.1-javadoc.jar:$(LIB_DIR)commons-configuration-1.6.jar:$(LIB_DIR)commons-lang-2.5.jar:$(LIB_DIR)commons-logging-1.1.1.jar:$(LIB_DIR)org.eclipse.core.contenttype_3.4.1.R35x_v20090826-0451.jar:$(LIB_DIR)org.eclipse.core.jobs_3.4.100.v20090429-1800.jar:$(LIB_DIR)org.eclipse.core.resources_3.5.2.R35x_v20091203-1235.jar:$(LIB_DIR)org.eclipse.core.runtime_3.5.0.v20090525.jar:$(LIB_DIR)org.eclipse.equinox.common_3.5.1.R35x_v20090807-1100.jar:$(LIB_DIR)org.eclipse.equinox.preferences_3.2.301.R35x_v20091117.jar:$(LIB_DIR)org.eclipse.jdt.core_3.5.2.v_981_R35x.jar:$(LIB_DIR)org.eclipse.osgi_3.5.2.R35x_v20100126.jar:$(LIB_DIR)jdom-2.0.5.jar
+LIBS = $(LIB_DIR)commons-collections-3.2.1.jar:$(LIB_DIR)commons-cli-1.3.1.jar:$(LIB_DIR)commons-cli-1.3.1-javadoc.jar:$(LIB_DIR)commons-configuration-1.6.jar:$(LIB_DIR)commons-lang-2.5.jar:$(LIB_DIR)commons-logging-1.1.1.jar:$(LIB_DIR)org.eclipse.core.contenttype_3.4.1.R35x_v20090826-0451.jar:$(LIB_DIR)org.eclipse.core.jobs_3.4.100.v20090429-1800.jar:$(LIB_DIR)org.eclipse.core.resources_3.5.2.R35x_v20091203-1235.jar:$(LIB_DIR)org.eclipse.core.runtime_3.5.0.v20090525.jar:$(LIB_DIR)org.eclipse.equinox.common_3.5.1.R35x_v20090807-1100.jar:$(LIB_DIR)org.eclipse.equinox.preferences_3.2.301.R35x_v20091117.jar:$(LIB_DIR)org.eclipse.jdt.core_3.5.2.v_981_R35x.jar:$(LIB_DIR)org.eclipse.osgi_3.5.2.R35x_v20100126.jar:$(LIB_DIR)jdom-2.0.5.jar:$(LIB_DIR)diffparser.jar:$(LIB_DIR)slf4j-api-1.7.5.jar
 
 TESTFLAG=
 RUNFLAG = 
@@ -37,10 +37,9 @@ RES_DIR = no
 # 另外注意顺序，如果class A 引用 class B，那么B.java应该放在A.java前。
 SOURCE_FILES = \
 defects4j/JavaMethod.java defects4j/defects4j.java defects4j/BuggyVersion.java \
-DefectRepairing/Instrumenter.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/parser.java \
-TestCase/Instrumenter.java \
-TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java DefectRepairing/Framework.java \
-
+DefectRepairing/parser.java \
+TestCase/patchparser.java DefectRepairing/Instrumenter.java TestCase/Instrumenter.java \
+TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/Framework.java \
 
 # 设置你的java编译器
 # Set your java compiler here:

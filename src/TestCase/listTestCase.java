@@ -1,5 +1,4 @@
 package TestCase;
-//tar -c bin | bzip2 > bin.tar.bz2
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +47,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.CommandLine;
 
-public class Instrumenter {
+public class listTestCase {
 
 	public static String readFileToString(String filePath) {
 		StringBuilder fileData = new StringBuilder(1000);
@@ -88,13 +87,6 @@ public class Instrumenter {
 	public static String source = new String();
 
 
-	public static void init() {
-		curLine = 1;
-		curChar = 0;
-		outputBuffer = new String();
-		// LineNumberMap=new HashMap<Integer,String>();
-	}
-
 
 
 	public static void copyto(int pos) {
@@ -128,14 +120,7 @@ public class Instrumenter {
 		}
 	}
 
-	public static void insertimport(CompilationUnit cu) {
-		PackageDeclaration pkgdec=cu.getPackage();
-		if(pkgdec!=null)
-		{
-			copyto(pkgdec.getStartPosition() + pkgdec.getLength());
-		}
-		outputBuffer += "import java.io.IOException; \nimport java.io.RandomAccessFile;\n";
-	}
+	
 	
 	public static void main(String args[]) {
 		boolean verboset = false;
@@ -143,7 +128,7 @@ public class Instrumenter {
 		String DirPath = args[0];
 		String TraceFilet = args[1];
 
-		init();
+		
 
 		final String TraceFile = TraceFilet;
 		final boolean verbose = verboset;
@@ -164,7 +149,7 @@ public class Instrumenter {
 		for (final String FilePath : filelist)
 
 		{
-			init();
+			
 			System.out.println(FilePath);
 			source = readFileToString(FilePath);
 
@@ -173,98 +158,37 @@ public class Instrumenter {
 
 			final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 			
-			insertimport(cu);
-			//final String PackageName=cu.getPackage().getName().toString();
+			
+			
 			cu.accept(new ASTVisitor() {
 
-				String ClassName;
-				public void insertprint(String printMSG) {
-					if (verbose)
-						outputBuffer += "\ndebug:" + printMSG + "\n";
-					else
-						outputBuffer += "\nprintRuntimeMSG(" + printMSG + ");\n";
-				}
+				
 				
 				public boolean visit(TypeDeclaration node) {
+					String ClassName;
 					ClassName=node.getName().toString();
 					if (node.isInterface())
 						return false;
 					else {
-
-						copyto(((BodyDeclaration) (node.bodyDeclarations().get(0))).getStartPosition());
-						outputBuffer += "\nstatic boolean flag__lxy=false;\n"
-								+ "static public void printRuntimeMSG (String printMSG)\n" + "{\n"
-								+ "if(flag__lxy)return;\n" + "flag__lxy=true;\n" + "\ttry {\n"
-								+ "\tRandomAccessFile randomFile = new RandomAccessFile(\"" + TraceFile
-								+ "\", \"rw\");\n" + "\tlong fileLength = randomFile.length();\n"
-								+ "\trandomFile.seek(fileLength);\n" 
-								+ "\trandomFile.writeBytes(printMSG+\"\\n\");\n" 
-								+ "\trandomFile.close();\n"
-								+ "\t} catch (IOException e__e__e) {\n" + "\te__e__e.printStackTrace();\n" + "\n"
-								+ "\t}\n" + "flag__lxy=false;\n}\n";
-
-						return true;
-					}
-				}
-
-
-				public boolean visit(MethodDeclaration node) {
-					if (node.isConstructor())//
-						return false;
-
-					boolean flag=true;
-					if(node.getName().toString().startsWith("test"))
-						flag=false;
-					else{
-						List<ASTNode> l=node.modifiers();
-						for(ASTNode n:l){
-							if(n.toString().startsWith("@Test"))
-							{
-								flag=false;
-								break;
-							}
+						MethodDeclaration[] l=node.getMethods();
+						for(MethodDeclaration mthd : l){
+							outputBuffer+=ClassName+"::"+mthd.getName()+"\n";
 						}
+						return true;
+						
 					}
 					
-					if(flag)
-						return false;
-					
-					copyto(node.getBody().getStartPosition()+1);
-					String printMSG = "\"---"+ClassName+":"+node.getName()+"\"";
-					insertprint(printMSG);
-
-					return true;
 				}
 
-//			public void endVisit(MethodDeclaration node){
-//				List<Statement> l=node.getBody().statements();
-//				
-//				Statement last_stmt=null;
-//				if(l.size()>0){
-//					last_stmt=l.get(l.size()-1);
-//				}
-//				if(last_stmt instanceof ReturnStatement) {
-//					copyto(last_stmt.getStartPosition());
-//				}
-//				else {
-//					copyto(node.getBody().getStartPosition()+node.getBody().getLength()-1);
-//				}
-//				String printMSG = "\"---return---"+ClassName+":"+node.getName()+"\"";
-//				insertprint(printMSG);
-//			}
+
+				
+
+			
 
 			});
-			copytoEnd();
-			if (verbose)
-				System.out.print(outputBuffer);
-
-			if (!verbose) {
-				writeStringToFile(FilePath, outputBuffer);
-				CurNum++;
-
-				System.out.println(CurNum + "/" + TotalNum);
-			}
+			
 		}
+		writeStringToFile(TraceFilet,outputBuffer);
 	}
 
 }

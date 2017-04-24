@@ -27,6 +27,9 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+
+import DefectRepairing.parser.LineNumber;
+
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -46,6 +49,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.CommandLine;
+
+import TestCase.patchparser;
 
 public class Instrumenter {
 
@@ -85,9 +90,10 @@ public class Instrumenter {
 	public static int curChar = 0;
 	public static String outputBuffer = new String();
 	public static String source = new String();
-
-
-
+	public static Map<Integer,LineNumber> LineNumberMap=new HashMap<Integer, LineNumber>();
+	public static boolean isPatched=false;
+	public static String PatchFile = "";
+	
 	public static void init() {
 		curLine = 1;
 		curChar = 0;
@@ -95,38 +101,17 @@ public class Instrumenter {
 		
 	}
 
-	public static void ConstructMap(String FilePath) {
-//		BufferedReader br = new BufferedReader(new StringReader(source));
-//		String[] lines = source.split("\n");
-//		LineNumberMap = new String[lines.length + 1];
-//
-//		int ln = 0;
-//		int temp1 = 0, temp2 = 0;
-//		for (String line : lines) {
-//			ln++;
-//			int i = line.length() - 1;
-//			Pattern pattern = Pattern.compile(".*    //[0-9]+$");
-//			Matcher matcher = pattern.matcher(line);
-//			if (matcher.matches())
-//				for (; i >= 0; i--) {
-//					if (line.charAt(i) == '/') {
-//						temp1 = (int) Double.parseDouble(line.substring(i + 1));
-//						temp2 = 0;
-//						LineNumberMap[ln] = line.substring(i + 1);
-//						break;
-//					}
-//				}
-//			else {
-//				temp2++;
-//				outputBuffer += "//" + temp1 + "." + temp2 + "\n";
-//				LineNumberMap[ln] = temp1 + "." + temp2;
-//			}
-//		}
-//		outputBuffer += "//END\n";
+	public static void ConstructMap(int Nb_Lines) {
+		LineNumberMap=TestCase.patchparser.process(Nb_Lines, PatchFile);
+		
+
 	}
 
 	public static String getLineNumber(int ln) {
-		return String.valueOf(ln);
+		if(LineNumberMap.containsKey(ln)) 
+			return LineNumberMap.get(ln).toString();
+		else 
+			return String.valueOf(ln);
 	}
 
 	public static void copyaLine() {
@@ -192,7 +177,8 @@ public class Instrumenter {
 	}
 	
 	public static void main(String args[]) {
-		boolean verboset = true;
+		boolean verboset = false;
+		
 		
 		
 		// Create a Parser
@@ -200,6 +186,8 @@ public class Instrumenter {
 		Options options = new Options();
 		options.addOption("D", "DirPath", true, "input file");
 		options.addOption("T", "TraceFile", true, "output file");
+		options.addOption("P", "PatchFile", true, "patch file");
+		options.addOption("F", "PatchedFile", true, "patched file");
 		options.addOption("v", "Verbose", false, "verbose debug");
 		// Parse the program arguments
 		CommandLine commandLine = null;
@@ -209,9 +197,10 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String DirPath = "/Users/liuxinyuan/DefectRepairing/Chart1b";
-		String TraceFilet = "/Users/liuxinyuan/DefectRepairing/a.txt";
-
+		String DirPath = "/Volumes/Unnamed/Chart1b/source";
+		String TraceFilet = "/Volumes/Unnamed/a.txt";
+		String PatchedFile = "";
+		
 		if (commandLine.hasOption('D')) {
 			DirPath = commandLine.getOptionValue('D');
 		}
@@ -221,7 +210,14 @@ public class Instrumenter {
 		if (commandLine.hasOption('v')) {
 			verboset = true;
 		}
-
+		if (commandLine.hasOption('P')) {
+			isPatched = true;
+			PatchFile = commandLine.getOptionValue('P');
+		}
+		if (commandLine.hasOption('F')) {
+			isPatched = true;
+			PatchedFile = commandLine.getOptionValue('F');
+		}
 		init();
 
 		final String TraceFile = TraceFilet;
@@ -230,7 +226,7 @@ public class Instrumenter {
 
 		if (verbose)
 			filelist.add(new String(
-					"/Users/liuxinyuan/DefectRepairing/Math82b/src/main/java/org/apache/commons/math/optimization/GoalType.java"));
+					"/Volumes/Unnamed/instr/Chart1b_Patch1/source/org/jfree/chart/annotations/AbstractAnnotation.java"));
 		else
 			getFilelist(DirPath, filelist);
 
@@ -247,12 +243,20 @@ public class Instrumenter {
 			System.out.println(FilePath);
 			source = readFileToString(FilePath);
 
-			ConstructMap(FilePath);
+			
 
 			parser.setSource(source.toCharArray());
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
 
 			final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+			
+			if(isPatched){
+				LineNumberMap=new HashMap<Integer, LineNumber>();
+				if(FilePath.endsWith(PatchedFile))
+					System.out.println(cu.getLineNumber(cu.getLength()));
+					ConstructMap(cu.getLineNumber(cu.getLength()-1));
+			}
+			
 			
 			insertimport(cu);
 			cu.accept(new ASTVisitor() {
@@ -676,6 +680,7 @@ public class Instrumenter {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
 						body.accept(this);
+						
 						return false;
 					} else {
 						copyto(body.getStartPosition());
@@ -687,6 +692,7 @@ public class Instrumenter {
 						outputBuffer += "\n}";
 						return false;
 					}
+					
 
 				}
 
