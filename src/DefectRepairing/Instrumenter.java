@@ -680,7 +680,9 @@ public class Instrumenter {
 						copyto(body.getStartPosition() + 1);
 						insertprint(printMSG);
 						body.accept(this);
-						
+						if (node.getElseStatement() != null){
+							node.getElseStatement().accept(this);
+						}
 						return false;
 					} else {
 						copyto(body.getStartPosition());
@@ -690,6 +692,9 @@ public class Instrumenter {
 						copyto(body.getStartPosition() + body.getLength());
 						
 						outputBuffer += "\n}";
+						if (node.getElseStatement() != null){
+							node.getElseStatement().accept(this);
+						}
 						return false;
 					}
 					
@@ -709,6 +714,7 @@ public class Instrumenter {
 					 outputBuffer+="{";
 					 String printMSG="\"<ReturnStatement> Line:"+Line+"\"";
 					 insertprint(printMSG);
+					 copyto(node.getStartPosition()+node.getLength());
 					 outputBuffer+="}";
 					 return false;
 				 }
