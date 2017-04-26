@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -15,12 +16,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 public class parser {
 
@@ -525,6 +520,8 @@ public class parser {
 			pendingjumps = new LinkedList<Jump>();
 			contexts = new Stack<Context>();
 			contexts.push(new Context(new LinkedList<Jump>(), new LineNumber()));
+			addedlines=new HashMap<Integer, Integer>();
+			deletedlines=new ArrayList<Integer>();
 		}
 
 		Spectrum(Map<Integer, Integer> _addedlines, List<Integer> _deletedlines) {
@@ -597,7 +594,7 @@ public class parser {
 					tmp.addAll(values.get(values.size() - 1).Variables);
 					tmp.add(((VariableDeclaration) st).var);
 					values.remove(values.size() - 1);
-					values.add(new LineVariables(t, tmp));
+					values.add(new LineVariables(t.clone(), tmp));
 				}
 				if (st instanceof MethodInvoked) {
 					LineNumber t = ((MethodInvoked) st).Line;
@@ -607,7 +604,7 @@ public class parser {
 					curLine = contexts.peek().curLine;
 					Set<Variable> tmp = new TreeSet<Variable>();
 					tmp.addAll(((MethodInvoked) st).Parameters);
-					values.add(new LineVariables(t, tmp));
+					values.add(new LineVariables(t.clone(), tmp));
 				}
 				if (st instanceof Assignment) {
 					LineNumber t = ((Assignment) st).Line;
@@ -627,7 +624,7 @@ public class parser {
 						add.add(((Assignment) st).var);
 					}
 					values.remove(values.size() - 1);
-					values.add(new LineVariables(t, add));
+					values.add(new LineVariables(t.clone(), add));
 					curLine = t;
 				}
 				if (st instanceof ReturnStatement) {
@@ -1064,13 +1061,13 @@ public class parser {
 		return fileData.toString();
 	}
 
-	public static List<Statement> parsetrace(BufferedReader reader,String delimiter) throws IOException {
+	public static List<Statement> parsetrace(BufferedReader reader) throws IOException {
 		List<Statement> Stmts = new ArrayList<Statement>();
 		// BufferedReader reader = new BufferedReader(new FileReader(Filename));
 		String str = null;
 		while ((str = reader.readLine()) != null) {
 			//System.out.println(str);
-			if(str.startsWith(delimiter))break;
+
 			//System.out.println("not ****");
 			Statement st = getStatement(str);
 			//System.out.println(st);
@@ -1123,12 +1120,7 @@ public class parser {
 		return Stmts;
 	}
 
-	public static Spectrum parseheader(BufferedReader reader) throws IOException {
-		// TODO
-		Map<Integer, Integer> addedlines = new TreeMap<Integer, Integer>();
-		List<Integer> deletedlines = new LinkedList<Integer>();
-		return new Spectrum(addedlines, deletedlines);
-	}
+	
 
 	public static void main(String args[]) {
 		/*System.out.println("Spec1:");
@@ -1152,90 +1144,60 @@ public class parser {
 		String tracefile1=tracedir1+tracefilename2;
 		String tracefile2=tracedir2+tracefilename2;
 		
-		parser.process(new String[] { tracefile1, tracefile2, "-D", "**************", "-r", String.valueOf(1) });
+		parser.process(tracefile1, tracefile2);
 	}
 
-	public static double process(String args[]) {
+	public static double process(String TraceFile1,String TraceFile2) {
 		
-		CommandLineParser cmdlparser = new DefaultParser();
-		Options options = new Options();
-		options.addOption("D", "Delimiter", true, "Delimiter");
-		options.addOption("r", "repeats",true,"how many test cases in 1 tracefile");
-		CommandLine commandLine = null;
-		try {
-			commandLine = cmdlparser.parse(options, args);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		String TraceFile1 = "", TraceFile2 = "";
-		TraceFile1 = args[0];
-		TraceFile2 = args[1];
+		
 		String delimiter = null;
-		int times = 1;
+
 		
-		if (commandLine.hasOption('D')) {
-			delimiter = commandLine.getOptionValue('D');
-		}
-		if(commandLine.hasOption('r'))
-		{
-			times = Integer.parseInt(commandLine.getOptionValue('r'));
-		}
+		
 		
 
 		
 		BufferedReader reader = null;
-		//List<Spectrum> list1 = new LinkedList<Spectrum>(), list2 = new LinkedList<Spectrum>();
 		Spectrum spec1 = null, spec2 = null;
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile1));
-			spec1 = parseheader(reader);
-			for(int i=1;i<=times;i++)
-			{
-				
-				//Spectrum tempspec = spec1.clone();
-				
-				spec1.form(parsetrace(reader,delimiter));
-				//list1.add(tempspec);
-			}
+			spec1 = new Spectrum();
+			
+			spec1.form(parsetrace(reader));
+			
 			
 		} catch (IOException e) {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
 		}
 		
-		//System.out.println("Spec2:");
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile2));
-			spec2 = parseheader(reader);
-			for(int i=1;i<=times;i++)
-			{
-				
-				//Spectrum tempspec = spec2.clone();
-				spec2.form(parsetrace(reader,delimiter));
-				//list2.add(tempspec);
-			}
+			spec2 = new Spectrum();
+
+			spec2.form(parsetrace(reader));
+			
 		} catch (IOException e) {
 			System.out.println("parse Tracefile2 failed");
 			e.printStackTrace();
 		}
 
-		//double ret = spec1.diff(spec2, new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0.2, 1, 2));
 		double ret = 0;
 
 
 		for(LineVariables l: spec2.values){
 			System.out.println(l);
 		}
-			double LCS = spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0, 1, 2));
-			double Default=spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0, 1, 2));
-			
-			double Length=(spec1.values.size()+spec2.values.size());
-			System.out.println();
-			System.out.println(TraceFile1+" "+TraceFile2);
-			System.out.println("Length "+Length);
-			System.out.println("LCS "+(Length-LCS));
-			System.out.println("Default "+(Length-Default));
+		
+		double LCS = spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0, 1, 2));
+		double Default=spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0, 1, 2));
+		
+		double Length=(spec1.values.size()+spec2.values.size());
+		System.out.println();
+		System.out.println(TraceFile1+" "+TraceFile2);
+		System.out.println("Length "+Length);
+		System.out.println("LCS "+(Length-LCS));
+		System.out.println("Default "+(Length-Default));
 			
 		return ret;
 	}
