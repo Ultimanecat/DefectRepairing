@@ -359,7 +359,7 @@ public class parser {
 		}
 	}
 
-	public static class LineNumber implements Comparable<LineNumber> {
+	public static class LineNumber implements Cloneable, Comparable<LineNumber> {
 		int line;
 		int addedline;
 
@@ -368,7 +368,17 @@ public class parser {
 			
 			addedline = _addedline;
 		}
-
+		
+		public LineNumber clone() {
+			LineNumber o = null;
+			try {
+				o = (LineNumber) super.clone();
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+			return o;
+		}
+		
 		LineNumber() {
 			line = 0;
 			addedline = 0;
@@ -407,7 +417,7 @@ public class parser {
 
 		@Override
 		public String toString() {
-			return line+","+addedline;
+			return line+"."+addedline;
 		}
 	}
 
@@ -491,7 +501,7 @@ public class parser {
 				//System.out.println(curLine+" sdfsdf "+targetline);
 			}
 			do {
-				
+				//System.out.println(curLine+" "+targetline);
 				// if ((pendingjumps.isEmpty() || curLine >
 				// pendingjumps.peek().fromline) && curLine > targetline) {
 				if ((pendingjumps.isEmpty() || curLine.compareTo(pendingjumps.peek().fromline) < 0)
@@ -505,7 +515,7 @@ public class parser {
 					// curLine++;
 					nextline();
 				}
-				values.add(new LineVariables(curLine, last.Variables));
+				values.add(new LineVariables(curLine.clone(), last.Variables));
 			} while (curLine.compareTo(targetline)!=0);
 			//System.out.println("after:curLine:"+curLine+"\ntargetLine:"+targetline);
 		}
@@ -535,6 +545,7 @@ public class parser {
 			while (it.hasNext()) {
 				Statement st = it.next();
 				System.out.println(st.toString());
+				
 				if (st instanceof IfStatement) {
 					LineNumber t = ((IfStatement) st).startLine;
 					runto(t);
@@ -550,6 +561,7 @@ public class parser {
 						pendingjumps.offer(new Jump(curLine, ((IfStatement) st).startLine));
 						// curLine=(((IfStatement) st).startLine);
 					}
+					
 				}
 				if (st instanceof WhileStatement) {
 					LineNumber t = ((WhileStatement) st).startLine;
@@ -635,10 +647,7 @@ public class parser {
 				 * i.line + ": " + i.Variables); }
 				 */
 			}
-			for (LineVariables i : values) {
-				// if(verbose)
-				//System.out.println("Line " + i.line + ": " + i.Variables);
-			}
+			
 		}
 
 		public static class Mode {
@@ -1067,7 +1076,19 @@ public class parser {
 			//System.out.println(st);
 			if (st instanceof IfStatement) {
 				if (((IfStatement) st).taken) {
-					Stmts.remove(Stmts.size() - 1);
+					//Stmts.remove(Stmts.size() - 1);
+					for(int i=Stmts.size() - 1;i>=0;i--)
+					{
+						Statement toremove = Stmts.get(i);
+						if(toremove instanceof IfStatement)
+						{
+							if(((IfStatement) toremove).startLine.compareTo(((IfStatement) st).startLine)==0)
+							{
+								Stmts.remove(i);
+								break;
+							}
+						}
+					}
 				}
 			}
 			if (st instanceof WhileStatement) {
@@ -1123,8 +1144,14 @@ public class parser {
 			e.printStackTrace();
 		}
 		System.out.println("done:");*/
-		String tracefile1 = "/Volumes/Unnamed/Chart15b_Patch13/buggy_e/org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
-		String tracefile2 = "/Volumes/Unnamed/Chart15b_Patch13/patched_e/org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
+		String tracedir1 = "/Volumes/Unnamed/Chart15b_Patch13/buggy_e/";
+		String tracedir2 = "/Volumes/Unnamed/Chart15b_Patch13/patched_e/";
+		String tracefilename1="Randoop.RegressionTest0::test167";
+		String tracefilename2="org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
+		
+		String tracefile1=tracedir1+tracefilename2;
+		String tracefile2=tracedir2+tracefilename2;
+		
 		parser.process(new String[] { tracefile1, tracefile2, "-D", "**************", "-r", String.valueOf(1) });
 	}
 
@@ -1158,7 +1185,7 @@ public class parser {
 
 		
 		BufferedReader reader = null;
-		List<Spectrum> list1 = new LinkedList<Spectrum>(), list2 = new LinkedList<Spectrum>();
+		//List<Spectrum> list1 = new LinkedList<Spectrum>(), list2 = new LinkedList<Spectrum>();
 		Spectrum spec1 = null, spec2 = null;
 		try {
 			reader = new BufferedReader(new FileReader(TraceFile1));
@@ -1166,10 +1193,10 @@ public class parser {
 			for(int i=1;i<=times;i++)
 			{
 				
-				Spectrum tempspec = spec1.clone();
+				//Spectrum tempspec = spec1.clone();
 				
-				tempspec.form(parsetrace(reader,delimiter));
-				list1.add(tempspec);
+				spec1.form(parsetrace(reader,delimiter));
+				//list1.add(tempspec);
 			}
 			
 		} catch (IOException e) {
@@ -1184,9 +1211,9 @@ public class parser {
 			for(int i=1;i<=times;i++)
 			{
 				
-				Spectrum tempspec = spec2.clone();
-				tempspec.form(parsetrace(reader,delimiter));
-				list2.add(tempspec);
+				//Spectrum tempspec = spec2.clone();
+				spec2.form(parsetrace(reader,delimiter));
+				//list2.add(tempspec);
 			}
 		} catch (IOException e) {
 			System.out.println("parse Tracefile2 failed");
@@ -1195,25 +1222,21 @@ public class parser {
 
 		//double ret = spec1.diff(spec2, new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0.2, 1, 2));
 		double ret = 0;
-		int maxi = 0;
-		List<Double> distance = new LinkedList<Double>();
-		for(int i=0;i<times;i++)
-		{
-			double tmp;
-			tmp = list1.get(i).diff(list2.get(i),new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0.2, 1, 2));
-			
-			distance.add(new Double(tmp));
-			if(tmp>ret)
-			{
-				ret = tmp;
-				maxi = i;
-			}
+
+
+		for(LineVariables l: spec2.values){
+			System.out.println(l);
 		}
-		//System.out.println(ret);
-		if(maxi>0)
-			System.out.println("testcase "+String.valueOf(maxi-1)+" has the longest distance "+String.valueOf(ret));
-		else
-			System.out.println("the original test case has the longest distance "+String.valueOf(ret));
+			double LCS = spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0, 1, 2));
+			double Default=spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0, 1, 2));
+			
+			double Length=(spec1.values.size()+spec2.values.size());
+			System.out.println();
+			System.out.println(TraceFile1+" "+TraceFile2);
+			System.out.println("Length "+Length);
+			System.out.println("LCS "+(Length-LCS));
+			System.out.println("Default "+(Length-Default));
+			
 		return ret;
 	}
 

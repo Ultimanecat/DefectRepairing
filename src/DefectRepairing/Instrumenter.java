@@ -184,7 +184,7 @@ public class Instrumenter {
 		// Create a Parser
 		CommandLineParser cmdlparser = new DefaultParser();
 		Options options = new Options();
-		options.addOption("D", "DirPath", true, "input file");
+		options.addOption("S", "DirPath", true, "input file");
 		options.addOption("T", "TraceFile", true, "output file");
 		options.addOption("P", "PatchFile", true, "patch file");
 		options.addOption("F", "PatchedFile", true, "patched file");
@@ -197,12 +197,12 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String DirPath = "/Volumes/Unnamed/Chart1b/source";
+		String FilePatht = "/Volumes/Unnamed/Chart1b/source";
 		String TraceFilet = "/Volumes/Unnamed/a.txt";
 		String PatchedFile = "";
 		
-		if (commandLine.hasOption('D')) {
-			DirPath = commandLine.getOptionValue('D');
+		if (commandLine.hasOption('S')) {
+			FilePatht = commandLine.getOptionValue('S');
 		}
 		if (commandLine.hasOption('T')) {
 			TraceFilet = commandLine.getOptionValue('T');
@@ -219,16 +219,16 @@ public class Instrumenter {
 			PatchedFile = commandLine.getOptionValue('F');
 		}
 		init();
-
+		
 		final String TraceFile = TraceFilet;
 		final boolean verbose = verboset;
 		List<String> filelist = new ArrayList<String>();
 
 		if (verbose)
-			filelist.add(new String(
-					"/Volumes/Unnamed/instr/Chart1b_Patch1/source/org/jfree/chart/annotations/AbstractAnnotation.java"));
-		else
-			getFilelist(DirPath, filelist);
+			FilePatht=(new String(
+					"/Volumes/Unnamed/instr/pie.java"));
+		
+		final String FilePath=FilePatht;
 
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		final AST ast = AST.newAST(AST.JLS3);
@@ -236,7 +236,7 @@ public class Instrumenter {
 		int TotalNum = filelist.size();
 		int CurNum = 0;
 
-		for (final String FilePath : filelist)
+		
 
 		{
 			init();
@@ -681,6 +681,7 @@ public class Instrumenter {
 						insertprint(printMSG);
 						body.accept(this);
 						if (node.getElseStatement() != null){
+							System.out.print("aaaaa");
 							node.getElseStatement().accept(this);
 						}
 						return false;
@@ -693,6 +694,7 @@ public class Instrumenter {
 						
 						outputBuffer += "\n}";
 						if (node.getElseStatement() != null){
+							System.out.print("aaaaa");
 							node.getElseStatement().accept(this);
 						}
 						return false;
