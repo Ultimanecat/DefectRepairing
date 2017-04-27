@@ -90,7 +90,7 @@ public class Instrumenter {
 	public static int curChar = 0;
 	public static String outputBuffer = new String();
 	public static String source = new String();
-	public static Map<Integer,LineNumber> LineNumberMap=new HashMap<Integer, LineNumber>();
+	public static Map<Integer,String> LineNumberMap=new HashMap<Integer, String>();
 	public static boolean isPatched=false;
 	public static String PatchFile = "";
 	
@@ -177,7 +177,7 @@ public class Instrumenter {
 	}
 	
 	public static void main(String args[]) {
-		boolean verboset = false;
+		boolean verboset = true;
 		
 		
 		
@@ -197,7 +197,7 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String FilePatht = "/Volumes/Unnamed/Chart1b/source";
+		String FilePatht = "/Volumes/Unnamed/Chart1b/source/org/jfree/chart/PolarChartPanel.java";
 		String TraceFilet = "/Volumes/Unnamed/a.txt";
 		String PatchedFile = "";
 		
@@ -249,9 +249,9 @@ public class Instrumenter {
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
 
 			final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-			
+			System.out.println(cu.getLineNumber(0));
 			if(isPatched){
-				LineNumberMap=new HashMap<Integer, LineNumber>();
+				LineNumberMap=new HashMap<Integer, String>();
 				if(FilePath.endsWith(PatchedFile))
 					System.out.println(cu.getLineNumber(cu.getLength()));
 					ConstructMap(cu.getLineNumber(cu.getLength()-1));
@@ -349,15 +349,26 @@ public class Instrumenter {
 //				}
 
 				public boolean visit(MethodDeclaration node) {
+//					List<SingleVariableDeclaration> l=node.parameters();
+//					for(SingleVariableDeclaration o:l){
+//						System.out.println("flag1223"+o.getType());
+//					}
 					if (node.isConstructor())//
 						return true;
 					Block body = node.getBody();
 					if (body == null)
 						return true;
-
+					
+					String methodname=node.getName().toString();
+					List<SingleVariableDeclaration> l=node.parameters();
+					for(SingleVariableDeclaration o:l){
+						methodname+="_"+o.getType();
+					}
+					methodname+="," + node.parameters().size();
+					
 					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					if (verbose)
-						System.out.println("MethodDeclaration:" + node.getName().toString() + ",Line " + line);
+						System.out.println("MethodDeclaration:" + methodname + ",Line " + line);
 					
 					List<SingleVariableDeclaration> parameters = node.parameters();
 					copyto(body.getStartPosition() + 1);
@@ -365,7 +376,7 @@ public class Instrumenter {
 //					String printMSG="\"<MethodInvocation,"+node.getName()+","+parameters.size()+"> Line: Thread.currentThread().getStackTrace()[1].getLineNumber()"+"\"";
 //					insertprint(printMSG);
 					
-					printMSG = "\"<Method_invoked," + node.getName().toString() + "," + parameters.size()
+					printMSG = "\"<Method_invoked," + methodname
 							+ "> \"";
 					boolean firstVar = true;
 					if (!judgePrint(node))
@@ -711,7 +722,7 @@ public class Instrumenter {
 				
 				 public boolean visit(ReturnStatement node) {
 					 String Line=getLineNumber(cu.getLineNumber(node.getStartPosition()));
-					 if(verbose)System.out.print("ReturnStatement:line "+Line);
+					 if(verbose)System.out.println("ReturnStatement:line "+Line);
 					 copyto(node.getStartPosition());
 					 outputBuffer+="{";
 					 String printMSG="\"<ReturnStatement> Line:"+Line+"\"";

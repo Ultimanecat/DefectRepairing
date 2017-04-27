@@ -13,10 +13,10 @@ public class Framework {
 		Instrumenter.main(args);
 	}
 
-	public double getdiff(String file1, String file2) {
-		String[] args = { file1, file2 };
-		return parser.process(args);
-	}
+//	public double getdiff(String file1, String file2) {
+//		String[] args = { file1, file2 };
+//		//return parser.process(args);
+//	}
 
 	public static void main(String[] args) {
 		// parse cmdline

@@ -1114,49 +1114,25 @@ public class parser {
 			}
 			Stmts.add(st);
 		}
-		/*
-		 * for (Statement st : Stmts) { System.out.println(st); }
-		 */
+
 		return Stmts;
 	}
 
 	
 
 	public static void main(String args[]) {
-		/*System.out.println("Spec1:");
-		BufferedReader reader = null;
-		Spectrum spec1 = null, spec2 = null;
-		try {
-			String testf = "/home/akarin/workspace/test/test1.txt";
-			reader = new BufferedReader(new FileReader(testf));
-			spec1 = parseheader(reader);
-			spec1.form(parsetrace(reader,null));
-		} catch (IOException e) {
-			System.out.println("parse Tracefile1 failed");
-			e.printStackTrace();
-		}
-		System.out.println("done:");*/
-		String tracedir1 = "/Volumes/Unnamed/Chart15b_Patch13/buggy_e/";
-		String tracedir2 = "/Volumes/Unnamed/Chart15b_Patch13/patched_e/";
-		String tracefilename1="Randoop.RegressionTest0::test167";
+		String tracedir1 = "/Volumes/Unnamed/Chart5b_Patch7/buggy_e/";
+		String tracedir2 = "/Volumes/Unnamed/Chart5b_Patch7/patched_e/";
+		String tracefilename1="org.jfree.data.xy.junit.XYSeriesTests:testBug1955483";
 		String tracefilename2="org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
 		
-		String tracefile1=tracedir1+tracefilename2;
-		String tracefile2=tracedir2+tracefilename2;
+		String tracefile1=tracedir1+tracefilename1;
+		String tracefile2=tracedir2+tracefilename1;
 		
 		parser.process(tracefile1, tracefile2);
 	}
 
 	public static double process(String TraceFile1,String TraceFile2) {
-		
-		
-		String delimiter = null;
-
-		
-		
-		
-
-		
 		BufferedReader reader = null;
 		Spectrum spec1 = null, spec2 = null;
 		try {
@@ -1164,8 +1140,6 @@ public class parser {
 			spec1 = new Spectrum();
 			
 			spec1.form(parsetrace(reader));
-			
-			
 		} catch (IOException e) {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
@@ -1182,7 +1156,7 @@ public class parser {
 			e.printStackTrace();
 		}
 
-		double ret = 0;
+		
 
 
 		for(LineVariables l: spec2.values){
@@ -1199,7 +1173,7 @@ public class parser {
 		System.out.println("LCS "+(Length-LCS));
 		System.out.println("Default "+(Length-Default));
 			
-		return ret;
+		return LCS;
 	}
 
 }

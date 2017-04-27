@@ -14,12 +14,13 @@ import org.wickedsource.diffparser.api.model.Diff;
 import org.wickedsource.diffparser.api.model.Hunk;
 import org.wickedsource.diffparser.api.model.Line;
 
-import DefectRepairing.parser.LineNumber;
-
 
 public class patchparser {
 
-	public static Map<Integer, LineNumber> process(int alllines, String filepath) {
+	static String getLineNumber(int line,int addedline){
+		return String.valueOf(line)+"."+String.valueOf(addedline);
+	}
+	public static Map<Integer, String> process(int alllines, String filepath) {
 		// TODO Auto-generated method stub
 		DiffParser parser = new UnifiedDiffParser();
 		InputStream in = null;
@@ -31,7 +32,7 @@ public class patchparser {
 		}
 		List<Diff> diff = parser.parse(in);
 		Diff d = diff.get(0);
-		Map<Integer, LineNumber> lnmap = new HashMap<Integer, LineNumber>();
+		Map<Integer, String> lnmap = new HashMap<Integer, String>();
 		List<Hunk> hunks = d.getHunks();
 		int fromp = -1, top = -1, addedlines = -1, lastfromp = -1;
 		for (Iterator<Hunk> it = hunks.iterator(); it.hasNext();) {
@@ -45,7 +46,7 @@ public class patchparser {
 			 */
 			if (fromp != -1) {
 				while (fromp < h.getFromFileRange().getLineStart() - 1) {
-					lnmap.put(++top, new LineNumber(++fromp, 0));
+					lnmap.put(++top, getLineNumber(++fromp, 0));
 				}
 			} else {
 				fromp = h.getFromFileRange().getLineStart() - 1;
@@ -58,10 +59,10 @@ public class patchparser {
 					fromp++;
 					break;
 				case TO:
-					lnmap.put(++top, new LineNumber(lastfromp, ++addedlines));
+					lnmap.put(++top, getLineNumber(lastfromp, ++addedlines));
 					break;
 				case NEUTRAL:
-					lnmap.put(++top, new LineNumber(++fromp, 0));
+					lnmap.put(++top, getLineNumber(++fromp, 0));
 					lastfromp = fromp;
 					addedlines = 0;
 					break;
@@ -69,19 +70,30 @@ public class patchparser {
 			}
 		}
 		// run to end
-		while (top < alllines - 1) {
-			lnmap.put(++top, new LineNumber(++fromp, 0));
+		while (top < alllines) {
+			lnmap.put(++top, getLineNumber(++fromp, 0));
 		}
 		// debug
-		for (Integer i : lnmap.keySet()) {
-			System.out.println(i + " " + lnmap.get(i).toString());
+//		for (Integer i : lnmap.keySet()) {
+//			System.out.println(i + " " + lnmap.get(i).toString());
+//		}
+		//System.out.println(diff.size());
+		for(int i=1;i<=alllines;i++)
+		{
+			
+			if(!lnmap.containsKey(i)){
+				lnmap.put(i, getLineNumber(i,0));
+			}
+			
 		}
-		System.out.println(diff.size());
 		return lnmap;
 	}
 
 	public static void main(String[] args) {
-		process(2000, "/Volumes/Unnamed/source/patches/Patch1");
+		Map<Integer, String>m=process(2000, "/Volumes/Unnamed/instr/patches/Patch1");
+		System.out.println(m.size());
+		for (Integer i : m.keySet()) {
+			System.out.println(i + " " + m.get(i).toString());
+		}
 	}
-
 }

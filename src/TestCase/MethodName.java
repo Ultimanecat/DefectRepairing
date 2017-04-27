@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public class MethodName {
@@ -56,7 +57,7 @@ public class MethodName {
 	public static int curChar = 0;
 	public static String outputBuffer = new String();
 	public static String source = new String();
-
+        public static String methodname="";
 
 	public static void init() {
 		curLine = 1;
@@ -179,8 +180,14 @@ public class MethodName {
 
 					if( cu.getLineNumber(node.getStartPosition())<=TargetLine && cu.getLineNumber(node.getStartPosition()+node.getLength())>=TargetLine){
 						copyto(node.getBody().getStartPosition()+1);
-						System.out.println(node.getName());
 						
+						
+						methodname=node.getName().toString();
+						List<SingleVariableDeclaration> l=node.parameters();
+						for(SingleVariableDeclaration o:l){
+							methodname+="_"+o.getType();
+						}
+						methodname+="," + node.parameters().size();
 						
 					}
 					
@@ -193,7 +200,7 @@ public class MethodName {
 			});
 			
 			
-			
+writeStringToFile(TraceFilet, methodname);			
 		}
 	}
 
