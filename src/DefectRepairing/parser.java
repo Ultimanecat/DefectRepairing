@@ -637,6 +637,7 @@ public class parser {
 					runto(t);
 					contexts.pop();
 					pendingjumps = contexts.peek().pendingjumps;
+					
 					curLine = contexts.peek().curLine;
 				}
 				if (st instanceof MethodInvocation) {
@@ -1149,10 +1150,22 @@ public class parser {
 //		parser.process(tracefile1, tracefile2);
 		debug=true;
 		List<String>l=new ArrayList<String>();
-		//getFilelist("/Volumes/Unnamed/traces",l);
-		l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
+		if(!debug)
+			getFilelist("/Volumes/Unnamed/traces",l);
+		else
+			l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.plot.junit.CategoryPlotTests:test1654215");
+		List<String>buggy_list=new ArrayList<String>();
+		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedBarChart3DTests:testDrawWithNullInfo");
+		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedAreaChartTests:testDrawWithNullInfo");
+		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.plot.junit.XYPlotTests:testDrawRangeGridlines");
+		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.XYStepChartTests:testDrawWithNullInfo");
+		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testDrawWithNullInfo");
+		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.GanttChartTests:testDrawWithNullInfo");
+		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
 		for (String filepath:l){
 			if(filepath.contains("patched"))
+				continue;
+			if(buggy_list.contains(filepath)||filepath.contains("testDrawWithNullInfo"))
 				continue;
 			System.out.println(filepath);
 			
