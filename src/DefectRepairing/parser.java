@@ -1,6 +1,7 @@
 package DefectRepairing;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class parser {
+	public static boolean debug=false;
 
 	private static class Variable implements Cloneable, Comparable<Variable> {
 		String Name;
@@ -487,7 +489,8 @@ public class parser {
 
 		void runto(LineNumber targetline) {
 			
-			System.out.println(curLine+" "+targetline);
+			if(debug)
+				System.out.println(curLine+" "+targetline);
 			LineVariables last = new LineVariables(curLine,new HashSet<Variable>());
 			if(values.size()!=0)
 				last= values.get(values.size() - 1);
@@ -541,7 +544,8 @@ public class parser {
 			Iterator<Statement> it = Stmts.iterator();
 			while (it.hasNext()) {
 				Statement st = it.next();
-				System.out.println(st.toString());
+				if(debug)
+					System.out.println(st.toString());
 				
 				if (st instanceof IfStatement) {
 					LineNumber t = ((IfStatement) st).startLine;
@@ -933,7 +937,7 @@ public class parser {
 				ret.Defined = true;
 			}
 			break;
-		case "string":
+		case "String":
 			if (value.equals("Uninitialized")) {
 				ret = new VarString(name, type, "");
 				ret.Defined = false;
@@ -1118,18 +1122,48 @@ public class parser {
 		return Stmts;
 	}
 
-	
+	public static void getFilelist(String DirPath, List<String> FileList) {
+		File RootDir = new File(DirPath);
+		File[] files = RootDir.listFiles();
+
+		for (File f : files) {
+			if (f.isDirectory()) {
+				getFilelist(f.getAbsolutePath(), FileList);
+			} else {
+				if (true)
+					FileList.add(f.getAbsolutePath());
+			}
+		}
+	}
 
 	public static void main(String args[]) {
-		String tracedir1 = "/Volumes/Unnamed/Chart5b_Patch7/buggy_e/";
-		String tracedir2 = "/Volumes/Unnamed/Chart5b_Patch7/patched_e/";
-		String tracefilename1="org.jfree.data.xy.junit.XYSeriesTests:testBug1955483";
-		String tracefilename2="org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
-		
-		String tracefile1=tracedir1+tracefilename1;
-		String tracefile2=tracedir2+tracefilename1;
-		
-		parser.process(tracefile1, tracefile2);
+//		String tracedir1 = "/Volumes/Unnamed/Chart5b_Patch7/buggy_e/";
+//		String tracedir2 = "/Volumes/Unnamed/Chart5b_Patch7/patched_e/";
+//		String tracefilename1="org.jfree.data.xy.junit.XYSeriesTests:testBug1955483";
+//		String tracefilename2="org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
+//		
+//		String tracefile1=tracedir1+tracefilename1;
+//		String tracefile2=tracedir2+tracefilename1;
+//		
+//		parser.process(tracefile1, tracefile2);
+		debug=true;
+		List<String>l=new ArrayList<String>();
+		//getFilelist("/Volumes/Unnamed/traces",l);
+		l.add("/Volumes/Unnamed/traces/Chart3b_Patch3/patched/org.jfree.data.time.junit.TimeSeriesTests:testDelete_RegularTimePeriod");
+		for (String filepath:l){
+			System.out.println(filepath);
+			
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(filepath));
+				Spectrum spec = new Spectrum();
+				
+				spec.form(parsetrace(reader));
+			} catch (IOException e) {
+				System.out.println("parse Tracefile1 failed");
+				e.printStackTrace();
+			}
+			
+		}
 	}
 
 	public static double process(String TraceFile1,String TraceFile2) {
