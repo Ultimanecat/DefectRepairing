@@ -474,17 +474,18 @@ public class parser {
 			return o;
 		}
 		void nextline() {
-			if (addedlines.get(curLine.line) == null) {
-				curLine.line++;
-				return;
-			} else {
-				if (curLine.addedline == addedlines.get(curLine.line)) {
-					curLine.line++;
-					curLine.addedline = 0;
-				} else {
-					curLine.addedline++;
-				}
-			}
+			curLine.line++;
+//			if (addedlines.get(curLine.line) == null) {
+//				
+//				return;
+//			} else {
+//				if (curLine.addedline == addedlines.get(curLine.line)) {
+//					curLine.line++;
+//					curLine.addedline = 0;
+//				} else {
+//					curLine.addedline++;
+//				}
+//			}
 		}
 
 		void runto(LineNumber targetline) {
@@ -1149,8 +1150,10 @@ public class parser {
 		debug=true;
 		List<String>l=new ArrayList<String>();
 		//getFilelist("/Volumes/Unnamed/traces",l);
-		l.add("/Volumes/Unnamed/traces/Chart3b_Patch3/patched/org.jfree.data.time.junit.TimeSeriesTests:testDelete_RegularTimePeriod");
+		l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
 		for (String filepath:l){
+			if(filepath.contains("patched"))
+				continue;
 			System.out.println(filepath);
 			
 			try {
