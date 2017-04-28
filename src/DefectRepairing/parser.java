@@ -603,7 +603,7 @@ public class parser {
 				}
 				if (st instanceof MethodInvoked) {
 					LineNumber t = ((MethodInvoked) st).Line;
-
+					contexts.peek().curLine=curLine;
 					contexts.push(new Context(new LinkedList<Jump>(), t));
 					pendingjumps = contexts.peek().pendingjumps;
 					curLine = contexts.peek().curLine;
@@ -635,7 +635,10 @@ public class parser {
 				if (st instanceof ReturnStatement) {
 					LineNumber t = ((ReturnStatement) st).Line;
 					runto(t);
+					
 					contexts.pop();
+					if(debug)
+						System.out.println(contexts.peek().curLine);
 					pendingjumps = contexts.peek().pendingjumps;
 					
 					curLine = contexts.peek().curLine;
@@ -1148,12 +1151,12 @@ public class parser {
 //		String tracefile2=tracedir2+tracefilename1;
 //		
 //		parser.process(tracefile1, tracefile2);
-		debug=true;
+		debug=false;
 		List<String>l=new ArrayList<String>();
 		if(!debug)
 			getFilelist("/Volumes/Unnamed/traces",l);
 		else
-			l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.plot.junit.CategoryPlotTests:test1654215");
+			l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
 		List<String>buggy_list=new ArrayList<String>();
 		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedBarChart3DTests:testDrawWithNullInfo");
 		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedAreaChartTests:testDrawWithNullInfo");
@@ -1165,8 +1168,7 @@ public class parser {
 		for (String filepath:l){
 			if(filepath.contains("patched"))
 				continue;
-			if(buggy_list.contains(filepath)||filepath.contains("testDrawWithNullInfo"))
-				continue;
+
 			System.out.println(filepath);
 			
 			try {
