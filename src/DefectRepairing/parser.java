@@ -2,6 +2,7 @@ package DefectRepairing;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class parser {
 	public static boolean debug=false;
@@ -356,67 +359,6 @@ public class parser {
 		}
 	}
 
-	public static class LineNumber implements Cloneable, Comparable<LineNumber> {
-		int line;
-		int addedline;
-
-		public LineNumber(int _line, int _addedline) {
-			line = _line;
-			
-			addedline = _addedline;
-		}
-		
-		public LineNumber clone() {
-			LineNumber o = null;
-			try {
-				o = (LineNumber) super.clone();
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
-			return o;
-		}
-		
-		LineNumber() {
-			line = 0;
-			addedline = 0;
-		}
-
-		public static LineNumber parserLineNumber(String s) {
-			int line;// = Integer.parseInt(s);
-			int addedline = 0;
-			if (s.indexOf(".") != -1) {
-				addedline = Integer.parseInt(s.substring(s.indexOf(".")+1));
-				line=Integer.parseInt(s.substring(0,s.indexOf(".")));
-			}
-			else {
-				line=Integer.parseInt(s);
-			}
-			return new LineNumber(line, addedline);
-		}
-
-		@Override
-		public int compareTo(LineNumber o) {
-			if (this.line == o.line) {
-				if (this.addedline < o.addedline)
-					return -1;
-				else if (this.addedline > o.addedline)
-					return 1;
-				else
-					return 0;
-			} else {
-				if (this.line < o.line)
-					return -1;
-				else
-					return 1;
-			}
-
-		}
-
-		@Override
-		public String toString() {
-			return line+"."+addedline;
-		}
-	}
 
 	private static class LineVariables {
 		public LineVariables(LineNumber line, Set<Variable> variables) {
@@ -463,7 +405,8 @@ public class parser {
 		Stack<Context> contexts;
 		Map<Integer, Integer> addedlines;
 		List<Integer> deletedlines;// TODO
-
+		Map<LineNumber,LineNumber>Lines=null;
+		
 		public Spectrum clone() {
 			Spectrum o = null;
 			try {
@@ -474,18 +417,14 @@ public class parser {
 			return o;
 		}
 		void nextline() {
-			curLine.line++;
-//			if (addedlines.get(curLine.line) == null) {
-//				
-//				return;
-//			} else {
-//				if (curLine.addedline == addedlines.get(curLine.line)) {
-//					curLine.line++;
-//					curLine.addedline = 0;
-//				} else {
-//					curLine.addedline++;
-//				}
-//			}
+			if(Lines==null){
+				curLine.line++;
+			}
+			else{
+				//System.out.println(curLine);
+				curLine=Lines.get(curLine);
+				//System.out.println(curLine);
+			}
 		}
 
 		void runto(LineNumber targetline) {
@@ -514,6 +453,7 @@ public class parser {
 					// curLine++;
 					nextline();
 				}
+				
 				values.add(new LineVariables(curLine.clone(), last.Variables));
 			} while (curLine.compareTo(targetline)!=0);
 			//System.out.println("after:curLine:"+curLine+"\ntargetLine:"+targetline);
@@ -526,6 +466,17 @@ public class parser {
 			contexts.push(new Context(new LinkedList<Jump>(), new LineNumber()));
 			addedlines=new HashMap<Integer, Integer>();
 			deletedlines=new ArrayList<Integer>();
+		}
+		
+		Spectrum(String PatchFile) {
+			this();
+			Map<Integer, LineNumber>m=TestCase.patchparser.process(5000, PatchFile);//TODO real Number of lines
+			Lines=new TreeMap<LineNumber,LineNumber>();
+			int len=m.size();
+			Lines.put(new LineNumber(0,0), m.get(1));
+			for(int i=1;i<len;i++){
+				Lines.put(m.get(i), m.get(i+1));
+			}
 		}
 
 		Spectrum(Map<Integer, Integer> _addedlines, List<Integer> _deletedlines) {
@@ -1127,6 +1078,28 @@ public class parser {
 		return Stmts;
 	}
 
+	public static List<String> get_failing_tests(String Project,int Bug_id)
+	{
+		List<String>l=new ArrayList<String>();
+		String filepath="/Users/liuxinyuan/DefectRepairing/defects4j/"+"framework/projects/"+Project+"/trigger_tests/"+Bug_id;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(filepath));
+			String line;
+			Pattern pattern=Pattern.compile("^--- (.)*$");
+			
+			while((line=reader.readLine())!=null) {
+				Matcher matcher = pattern.matcher(line);
+				if(matcher.matches())
+					l.add(line.substring(4,line.length()));
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return l;
+	}
+	
 	public static void getFilelist(String DirPath, List<String> FileList) {
 		File RootDir = new File(DirPath);
 		File[] files = RootDir.listFiles();
@@ -1142,19 +1115,34 @@ public class parser {
 	}
 
 	public static void main(String args[]) {
-//		String tracedir1 = "/Volumes/Unnamed/Chart5b_Patch7/buggy_e/";
-//		String tracedir2 = "/Volumes/Unnamed/Chart5b_Patch7/patched_e/";
-//		String tracefilename1="org.jfree.data.xy.junit.XYSeriesTests:testBug1955483";
-//		String tracefilename2="org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
-//		
-//		String tracefile1=tracedir1+tracefilename1;
-//		String tracefile2=tracedir2+tracefilename1;
-//		
-//		parser.process(tracefile1, tracefile2);
+		String project=args[0];
+		String bugid=args[1];
+		String patch_no=args[2];
+		String tracedir=args[3];
+		tracedir=new File(tracedir, project+bugid+"b_"+patch_no).toString();
+		List<String>l_buggy=new ArrayList<String>();
+		List<String>l_patched=new ArrayList<String>();
+		getFilelist(new File(tracedir, "buggy_e").toString(),l_buggy);
+		getFilelist(new File(tracedir, "patched_e").toString(),l_patched);
+		System.out.println(l_buggy.equals(l_patched));
+		
+	}
+
+	public static void test(String args[]){
+		String tracedir1 = "/Volumes/Unnamed/Chart5b_Patch7/buggy_e/";
+		String tracedir2 = "/Volumes/Unnamed/Chart5b_Patch7/patched_e/";
+		String tracefilename1="org.jfree.data.xy.junit.XYSeriesTests:testBug1955483";
+		String tracefilename2="org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
+		
+		String tracefile1=tracedir1+tracefilename1;
+		String tracefile2=tracedir2+tracefilename1;
+		
+		parser.process(tracefile1, tracefile2);
+		String PatchFile="/Volumes/Unnamed/instr/patches/Patch12";
 		debug=false;
 		List<String>l=new ArrayList<String>();
 		if(!debug)
-			getFilelist("/Volumes/Unnamed/traces",l);
+			getFilelist("/Volumes/Unnamed/traces/Chart15b_Patch12/patched",l);
 		else
 			l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
 		List<String>buggy_list=new ArrayList<String>();
@@ -1166,14 +1154,15 @@ public class parser {
 		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.GanttChartTests:testDrawWithNullInfo");
 		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
 		for (String filepath:l){
-			if(filepath.contains("patched"))
-				continue;
+			//if(filepath.contains("patched"))
+			//	continue;
 
 			System.out.println(filepath);
 			
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(filepath));
-				Spectrum spec = new Spectrum();
+				Spectrum spec = new Spectrum(PatchFile);
+				
 				
 				spec.form(parsetrace(reader));
 			} catch (IOException e) {
@@ -1183,7 +1172,7 @@ public class parser {
 			
 		}
 	}
-
+	
 	public static double process(String TraceFile1,String TraceFile2) {
 		BufferedReader reader = null;
 		Spectrum spec1 = null, spec2 = null;

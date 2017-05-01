@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import DefectRepairing.parser.LineNumber;
+import DefectRepairing.LineNumber;
 
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
@@ -90,7 +90,7 @@ public class Instrumenter {
 	public static int curChar = 0;
 	public static String outputBuffer = new String();
 	public static String source = new String();
-	public static Map<Integer,String> LineNumberMap=new HashMap<Integer, String>();
+	public static Map<Integer,LineNumber> LineNumberMap=new HashMap<Integer, LineNumber>();
 	public static boolean isPatched=false;
 	public static String PatchFile = "";
 	
@@ -251,7 +251,7 @@ public class Instrumenter {
 			final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 			System.out.println(cu.getLineNumber(0));
 			if(isPatched){
-				LineNumberMap=new HashMap<Integer, String>();
+				LineNumberMap=new HashMap<Integer, LineNumber>();
 				if(FilePath.endsWith(PatchedFile))
 					System.out.println(cu.getLineNumber(cu.getLength()));
 					ConstructMap(cu.getLineNumber(cu.getLength()-1));

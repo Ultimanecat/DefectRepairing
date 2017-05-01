@@ -14,13 +14,16 @@ import org.wickedsource.diffparser.api.model.Diff;
 import org.wickedsource.diffparser.api.model.Hunk;
 import org.wickedsource.diffparser.api.model.Line;
 
+import DefectRepairing.LineNumber;
+
 
 public class patchparser {
 
-	static String getLineNumber(int line,int addedline){
-		return String.valueOf(line)+"."+String.valueOf(addedline);
+	static LineNumber getLineNumber(int line,int addedline){
+		return new LineNumber(line,addedline);
 	}
-	public static Map<Integer, String> process(int alllines, String filepath) {
+	
+	public static Map<Integer, LineNumber> process(int alllines, String filepath) {
 		// TODO Auto-generated method stub
 		DiffParser parser = new UnifiedDiffParser();
 		InputStream in = null;
@@ -32,7 +35,7 @@ public class patchparser {
 		}
 		List<Diff> diff = parser.parse(in);
 		Diff d = diff.get(0);
-		Map<Integer, String> lnmap = new HashMap<Integer, String>();
+		Map<Integer, LineNumber> lnmap = new HashMap<Integer, LineNumber>();
 		List<Hunk> hunks = d.getHunks();
 		int fromp = -1, top = -1, addedlines = -1, lastfromp = -1;
 		for (Iterator<Hunk> it = hunks.iterator(); it.hasNext();) {
@@ -90,7 +93,7 @@ public class patchparser {
 	}
 
 	public static void main(String[] args) {
-		Map<Integer, String>m=process(2000, "/Volumes/Unnamed/instr/patches/Patch1");
+		Map<Integer, LineNumber>m=process(2000, "/Volumes/Unnamed/instr/patches/Patch1");
 		System.out.println(m.size());
 		for (Integer i : m.keySet()) {
 			System.out.println(i + " " + m.get(i).toString());
