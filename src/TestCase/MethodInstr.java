@@ -176,7 +176,7 @@ public class MethodInstr {
 					if (node.isConstructor())//
 						return false;
 					
-					System.out.println(cu.getLineNumber(node.getStartPosition()));
+					//System.out.println(cu.getLineNumber(node.getStartPosition()));
 					if( cu.getLineNumber(node.getStartPosition())<=TargetLine && cu.getLineNumber(node.getStartPosition()+node.getLength())>=TargetLine){
 						copyto(node.getBody().getStartPosition()+1);
 						String printMSG = "\"---covered\"";

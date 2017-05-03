@@ -36,10 +36,15 @@ RES_DIR = no
 # 建议一行一个。
 # 另外注意顺序，如果class A 引用 class B，那么B.java应该放在A.java前。
 SOURCE_FILES = \
+DefectRepairing/LineNumber.java \
 defects4j/JavaMethod.java defects4j/defects4j.java defects4j/BuggyVersion.java \
+TestCase/patchparser.java \
 DefectRepairing/parser.java \
-TestCase/patchparser.java DefectRepairing/Instrumenter.java TestCase/Instrumenter.java \
+DefectRepairing/Instrumenter.java TestCase/Instrumenter.java \
 TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/Framework.java \
+TestCase/GetSingleTest_Chart.java \
+TestCase/listTestCase.java \
+
 
 # 设置你的java编译器
 # Set your java compiler here:
@@ -127,3 +132,11 @@ d4j:
 	java -cp bin/:$(LIBS) $(D4J) $(D4JFLAG)
 TestCaseInstr:
 	java -cp bin/:$(LIBS) $(TESTCASEINSTR) $(TCIFLAG)
+GetSingleTest_Chart:
+	java -cp bin/:$(LIBS) TestCase.GetSingleTest_Chart $(ARGS)
+instru_class:
+	java -cp bin/:$(LIBS) DefectRepairing.Instrumenter_class $(ARGS)
+listTestCase:
+	java -cp bin/:$(LIBS) TestCase.listTestCase $(ARGS)
+parse:
+	java -cp bin/:$(LIBS) DefectRepairing.parser $(ARGS)

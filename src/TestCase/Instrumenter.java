@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.internal.resources.Project;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -122,7 +123,7 @@ public class Instrumenter {
 			if (f.isDirectory()) {
 				getFilelist(f.getAbsolutePath(), FileList);
 			} else {
-				if (f.getName().endsWith(".java") || f.getName().endsWith("test.java") || f.getName().endsWith("Tests.java") || f.getName().endsWith("tests.java"))
+				if (f.getName().endsWith(".java") && (f.getName().contains("Test")|| f.getName().contains("test")))
 					FileList.add(f.getAbsolutePath());
 			}
 		}
@@ -142,7 +143,7 @@ public class Instrumenter {
 		
 		String DirPath = args[0];
 		String TraceFilet = args[1];
-
+		final String Project = args[2];
 		init();
 
 		final String TraceFile = TraceFilet;
@@ -174,7 +175,11 @@ public class Instrumenter {
 			final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 			
 			insertimport(cu);
-			//final String PackageName=cu.getPackage().getName().toString();
+			String PackageNamet = null;
+			if(!Project.equals("Randoop")) {
+				PackageNamet=cu.getPackage().getName().toString();
+			}
+			final String PackageName=PackageNamet;
 			cu.accept(new ASTVisitor() {
 
 				String ClassName;
@@ -230,28 +235,18 @@ public class Instrumenter {
 						return false;
 					
 					copyto(node.getBody().getStartPosition()+1);
-					String printMSG = "\"---"+ClassName+":"+node.getName()+"\"";
+					String printMSG;
+					if(Project.equals("Randoop"))
+						printMSG = "\"---"+ClassName+":"+node.getName()+"\"";
+					else {
+						printMSG = "\"---"+PackageName+"."+ClassName+":"+node.getName()+"\"";
+					}
 					insertprint(printMSG);
 
 					return true;
 				}
 
-//			public void endVisit(MethodDeclaration node){
-//				List<Statement> l=node.getBody().statements();
-//				
-//				Statement last_stmt=null;
-//				if(l.size()>0){
-//					last_stmt=l.get(l.size()-1);
-//				}
-//				if(last_stmt instanceof ReturnStatement) {
-//					copyto(last_stmt.getStartPosition());
-//				}
-//				else {
-//					copyto(node.getBody().getStartPosition()+node.getBody().getLength()-1);
-//				}
-//				String printMSG = "\"---return---"+ClassName+":"+node.getName()+"\"";
-//				insertprint(printMSG);
-//			}
+
 
 			});
 			copytoEnd();

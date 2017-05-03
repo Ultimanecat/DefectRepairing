@@ -398,8 +398,8 @@ public class parser {
 		}
 	}
 
-	private static class Spectrum implements Cloneable{
-		List<LineVariables> values;
+	public static class Spectrum implements Cloneable{
+		public List<LineVariables> values;
 		LineNumber curLine;
 		Queue<Jump> pendingjumps;
 		Stack<Context> contexts;
@@ -459,7 +459,7 @@ public class parser {
 			//System.out.println("after:curLine:"+curLine+"\ntargetLine:"+targetline);
 		}
 
-		Spectrum() {
+		public Spectrum() {
 			values = new ArrayList<LineVariables>();
 			pendingjumps = new LinkedList<Jump>();
 			contexts = new Stack<Context>();
@@ -468,7 +468,7 @@ public class parser {
 			deletedlines=new ArrayList<Integer>();
 		}
 		
-		Spectrum(String PatchFile) {
+		public Spectrum(String PatchFile) {
 			this();
 			Map<Integer, LineNumber>m=TestCase.patchparser.process(5000, PatchFile);//TODO real Number of lines
 			Lines=new TreeMap<LineNumber,LineNumber>();
@@ -488,7 +488,7 @@ public class parser {
 			deletedlines = _deletedlines;
 		}
 
-		void form(List<Statement> Stmts) {
+		public void form(List<Statement> Stmts) {
 			values = new ArrayList<LineVariables>();
 			// pendingjumps = new LinkedList<Jump>();
 			pendingjumps = contexts.peek().pendingjumps;
@@ -617,7 +617,7 @@ public class parser {
 			double sizediffw;
 			double linediffw;
 
-			Mode(ModeEnum _mode, double _varw, double _sizediffw, double _linediffw) {
+			public Mode(ModeEnum _mode, double _varw, double _sizediffw, double _linediffw) {
 				mode = _mode;
 				varw = _varw;
 				sizediffw = _sizediffw;
@@ -1078,57 +1078,9 @@ public class parser {
 		return Stmts;
 	}
 
-	public static List<String> get_failing_tests(String Project,int Bug_id)
-	{
-		List<String>l=new ArrayList<String>();
-		String filepath="/Users/liuxinyuan/DefectRepairing/defects4j/"+"framework/projects/"+Project+"/trigger_tests/"+Bug_id;
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(filepath));
-			String line;
-			Pattern pattern=Pattern.compile("^--- (.)*$");
-			
-			while((line=reader.readLine())!=null) {
-				Matcher matcher = pattern.matcher(line);
-				if(matcher.matches())
-					l.add(line.substring(4,line.length()));
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return l;
-	}
 	
-	public static void getFilelist(String DirPath, List<String> FileList) {
-		File RootDir = new File(DirPath);
-		File[] files = RootDir.listFiles();
 
-		for (File f : files) {
-			if (f.isDirectory()) {
-				getFilelist(f.getAbsolutePath(), FileList);
-			} else {
-				if (true)
-					FileList.add(f.getAbsolutePath());
-			}
-		}
-	}
-
-	public static void main(String args[]) {
-		String project=args[0];
-		String bugid=args[1];
-		String patch_no=args[2];
-		String tracedir=args[3];
-		tracedir=new File(tracedir, project+bugid+"b_"+patch_no).toString();
-		List<String>l_buggy=new ArrayList<String>();
-		List<String>l_patched=new ArrayList<String>();
-		getFilelist(new File(tracedir, "buggy_e").toString(),l_buggy);
-		getFilelist(new File(tracedir, "patched_e").toString(),l_patched);
-		System.out.println(l_buggy.equals(l_patched));
-		
-	}
-
-	public static void test(String args[]){
+	public static void main(String args[]){
 		String tracedir1 = "/Volumes/Unnamed/Chart5b_Patch7/buggy_e/";
 		String tracedir2 = "/Volumes/Unnamed/Chart5b_Patch7/patched_e/";
 		String tracefilename1="org.jfree.data.xy.junit.XYSeriesTests:testBug1955483";
@@ -1140,37 +1092,37 @@ public class parser {
 		parser.process(tracefile1, tracefile2);
 		String PatchFile="/Volumes/Unnamed/instr/patches/Patch12";
 		debug=false;
-		List<String>l=new ArrayList<String>();
-		if(!debug)
-			getFilelist("/Volumes/Unnamed/traces/Chart15b_Patch12/patched",l);
-		else
-			l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
-		List<String>buggy_list=new ArrayList<String>();
-		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedBarChart3DTests:testDrawWithNullInfo");
-		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedAreaChartTests:testDrawWithNullInfo");
-		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.plot.junit.XYPlotTests:testDrawRangeGridlines");
-		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.XYStepChartTests:testDrawWithNullInfo");
-		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testDrawWithNullInfo");
-		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.GanttChartTests:testDrawWithNullInfo");
-		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
-		for (String filepath:l){
-			//if(filepath.contains("patched"))
-			//	continue;
-
-			System.out.println(filepath);
-			
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader(filepath));
-				Spectrum spec = new Spectrum(PatchFile);
-				
-				
-				spec.form(parsetrace(reader));
-			} catch (IOException e) {
-				System.out.println("parse Tracefile1 failed");
-				e.printStackTrace();
-			}
-			
-		}
+//		List<String>l=new ArrayList<String>();
+////		if(!debug)
+////			getFilelist("/Volumes/Unnamed/traces/Chart15b_Patch12/patched",l);
+////		else
+//			l.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
+//		List<String>buggy_list=new ArrayList<String>();
+//		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedBarChart3DTests:testDrawWithNullInfo");
+//		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.StackedAreaChartTests:testDrawWithNullInfo");
+//		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.plot.junit.XYPlotTests:testDrawRangeGridlines");
+//		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.XYStepChartTests:testDrawWithNullInfo");
+//		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testDrawWithNullInfo");
+//		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.junit.GanttChartTests:testDrawWithNullInfo");
+//		buggy_list.add("/Volumes/Unnamed/traces/Chart15b_Patch12/buggy/org.jfree.chart.renderer.xy.junit.StackedXYAreaRendererTests:testBug1593156");
+//		for (String filepath:l){
+//			//if(filepath.contains("patched"))
+//			//	continue;
+//
+//			System.out.println(filepath);
+//			
+//			try {
+//				BufferedReader reader = new BufferedReader(new FileReader(filepath));
+//				Spectrum spec = new Spectrum(PatchFile);
+//				
+//				
+//				spec.form(parsetrace(reader));
+//			} catch (IOException e) {
+//				System.out.println("parse Tracefile1 failed");
+//				e.printStackTrace();
+//			}
+//			
+//		}
 	}
 	
 	public static double process(String TraceFile1,String TraceFile2) {

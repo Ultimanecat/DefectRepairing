@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -99,7 +100,7 @@ public class GetSingleTest_Chart {
 		boolean verboset = false;
 		
 		String FilePath = args[0];
-		String MethodName= args[1];
+		final String MethodName= args[1];
 		init();
 
 
@@ -138,8 +139,20 @@ public class GetSingleTest_Chart {
 					else {
 						MethodDeclaration[] l=node.getMethods();
 						for(MethodDeclaration mthd : l){
-							if(!mthd.getName().toString().equals(MethodName) && mthd.getName().toString().startsWith("test")){
-								mthd.delete();
+							if(!mthd.getName().toString().equals(MethodName)){
+								if(mthd.getName().toString().startsWith("test")){
+									mthd.delete();
+								} else {
+									List<ASTNode> list=node.modifiers();
+									for(ASTNode n:list){
+										if(n.toString().startsWith("@Test"))
+										{
+											mthd.delete();
+											break;
+										}
+									}
+								}
+								
 							}
 						}
 						return true;
