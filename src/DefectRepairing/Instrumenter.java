@@ -177,7 +177,7 @@ public class Instrumenter {
 	}
 	
 	public static void main(String args[]) {
-		boolean verboset = true;
+		boolean verboset = false;
 		
 		
 		
