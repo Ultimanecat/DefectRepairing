@@ -455,7 +455,7 @@ public class Instrumenter {
 								+ "static public String getValue_(char c){return String.valueOf(c);}\n"
 								+ "static public String getValue_(float f){return String.valueOf(f);}\n"
 								+ "static public String getValue_(double d){return String.valueOf(d);}\n"
-								+ "static public String getValue_(String str){return str;}\n";
+								+ "static public String getValue_(String str){return \"String\";}\n";
 
 						return true;
 					}

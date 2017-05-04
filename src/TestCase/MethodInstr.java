@@ -66,7 +66,7 @@ public class MethodInstr {
 	}
 
 
-
+//889174xxzA
 	public static void copyto(int pos) {
 
 		int preChar = curChar;

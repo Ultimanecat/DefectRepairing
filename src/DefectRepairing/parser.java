@@ -644,6 +644,7 @@ public class parser {
 				}
 				break;
 			case LCS:
+				//System.out.println(values.size()+" "+spec2.values.size());
 				int f[][] = new int[values.size()+1][spec2.values.size()+1];
 				int prev[][] = new int[values.size()+1][spec2.values.size()+1];
 				{

@@ -36,6 +36,7 @@ RES_DIR = no
 # 建议一行一个。
 # 另外注意顺序，如果class A 引用 class B，那么B.java应该放在A.java前。
 SOURCE_FILES = \
+TestCase/MethodInstr.java \
 DefectRepairing/LineNumber.java \
 defects4j/JavaMethod.java defects4j/defects4j.java defects4j/BuggyVersion.java \
 TestCase/patchparser.java \
@@ -44,6 +45,7 @@ DefectRepairing/Instrumenter.java TestCase/Instrumenter.java \
 TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/Framework.java \
 TestCase/GetSingleTest_Chart.java \
 TestCase/listTestCase.java \
+TestCase/classifier.java
 
 
 # 设置你的java编译器
@@ -139,4 +141,6 @@ instru_class:
 listTestCase:
 	java -cp bin/:$(LIBS) TestCase.listTestCase $(ARGS)
 parse:
-	java -cp bin/:$(LIBS) DefectRepairing.parser $(ARGS)
+	java -Xms32m -Xmx7000m -cp bin/:$(LIBS) TestCase.classifier $(ARGS)
+MthdInstr:
+	java -cp bin/:$(LIBS) TestCase.MethodInstr $(ARGS)
