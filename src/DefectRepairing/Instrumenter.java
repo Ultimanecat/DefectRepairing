@@ -452,7 +452,7 @@ public class Instrumenter {
 								+ "static public String getValue_(int i){return String.valueOf(i);}\n"
 								+ "static public String getValue_(long l){return String.valueOf(l);}\n"
 								+ "static public String getValue_(boolean b){return String.valueOf(b);}\n"
-								+ "static public String getValue_(char c){return String.valueOf(c);}\n"
+								+ "static public String getValue_(char c){return \"char\";}\n"
 								+ "static public String getValue_(float f){return String.valueOf(f);}\n"
 								+ "static public String getValue_(double d){return String.valueOf(d);}\n"
 								+ "static public String getValue_(String str){return \"String\";}\n";

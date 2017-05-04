@@ -416,9 +416,12 @@ public class parser {
 			}
 			return o;
 		}
-		void nextline() {
+		void nextline() throws Exception {
 			if(Lines==null){
 				curLine.line++;
+				if(curLine.line>20000){
+					throw(new Exception());
+				}
 			}
 			else{
 				//System.out.println(curLine);
@@ -427,7 +430,7 @@ public class parser {
 			}
 		}
 
-		void runto(LineNumber targetline) {
+		void runto(LineNumber targetline) throws Exception {
 			
 			if(debug)
 				System.out.println(curLine+" "+targetline);
@@ -453,7 +456,7 @@ public class parser {
 					// curLine++;
 					nextline();
 				}
-				
+				//System.out.println(curLine);
 				values.add(new LineVariables(curLine.clone(), last.Variables));
 			} while (curLine.compareTo(targetline)!=0);
 			//System.out.println("after:curLine:"+curLine+"\ntargetLine:"+targetline);
@@ -470,7 +473,7 @@ public class parser {
 		
 		public Spectrum(String PatchFile) {
 			this();
-			Map<Integer, LineNumber>m=TestCase.patchparser.process(5000, PatchFile);//TODO real Number of lines
+			Map<Integer, LineNumber>m=TestCase.patchparser.process(10000, PatchFile);//TODO real Number of lines
 			Lines=new TreeMap<LineNumber,LineNumber>();
 			int len=m.size();
 			Lines.put(new LineNumber(0,0), m.get(1));
@@ -488,7 +491,7 @@ public class parser {
 			deletedlines = _deletedlines;
 		}
 
-		public void form(List<Statement> Stmts) {
+		public void form(List<Statement> Stmts) throws Exception {
 			values = new ArrayList<LineVariables>();
 			// pendingjumps = new LinkedList<Jump>();
 			pendingjumps = contexts.peek().pendingjumps;
@@ -553,6 +556,7 @@ public class parser {
 					values.add(new LineVariables(t.clone(), tmp));
 				}
 				if (st instanceof MethodInvoked) {
+					
 					LineNumber t = ((MethodInvoked) st).Line;
 					contexts.peek().curLine=curLine;
 					contexts.push(new Context(new LinkedList<Jump>(), t));
@@ -586,6 +590,7 @@ public class parser {
 				if (st instanceof ReturnStatement) {
 					LineNumber t = ((ReturnStatement) st).Line;
 					runto(t);
+					
 					
 					contexts.pop();
 					if(debug)
@@ -927,6 +932,7 @@ public class parser {
 			Set<Variable> Parameters = new TreeSet<Variable>();
 			for (int i = 0; i < parac; i++) {
 				Variable par = getVariable(labelsc);
+				//System.out.println(par);
 				Parameters.add(par);
 			}
 			LineNumber line = getLine(labelsc.next());
@@ -1031,6 +1037,7 @@ public class parser {
 
 			//System.out.println("not ****");
 			Statement st = getStatement(str);
+			//System.out.println(st.toString());
 			//System.out.println(st);
 			if (st instanceof IfStatement) {
 				if (((IfStatement) st).taken) {
@@ -1082,15 +1089,15 @@ public class parser {
 	
 
 	public static void main(String args[]){
-		String tracedir1 = "/Volumes/Unnamed/Chart5b_Patch7/buggy_e/";
-		String tracedir2 = "/Volumes/Unnamed/Chart5b_Patch7/patched_e/";
-		String tracefilename1="org.jfree.data.xy.junit.XYSeriesTests:testBug1955483";
+		String tracedir1 = "/Volumes/Unnamed/traces/Chart13b_Patch9/buggy_e/";
+		String tracedir2 = "/Volumes/Unnamed/traces/Chart13b_Patch9/patched_e/";
+		String tracefilename1="Randoop.RegressionTest0__test258";
 		String tracefilename2="org.jfree.chart.junit.PieChart3DTests:testNullValueInDataset";
 		
 		String tracefile1=tracedir1+tracefilename1;
 		String tracefile2=tracedir2+tracefilename1;
 		
-		parser.process(tracefile1, tracefile2);
+		//parser.process("/Volumes/Unnamed/traces/Lang39b_Patch20/buggy_e/Randoop.RegressionTest117__test027", "/Volumes/Unnamed/traces/Lang39b_Patch20/buggy_e/Randoop.RegressionTest117__test027");
 		String PatchFile="/Volumes/Unnamed/instr/patches/Patch12";
 		debug=false;
 //		List<String>l=new ArrayList<String>();
@@ -1112,18 +1119,22 @@ public class parser {
 //
 //			System.out.println(filepath);
 //			
-//			try {
-//				BufferedReader reader = new BufferedReader(new FileReader(filepath));
-//				Spectrum spec = new Spectrum(PatchFile);
-//				
-//				
-//				spec.form(parsetrace(reader));
-//			} catch (IOException e) {
-//				System.out.println("parse Tracefile1 failed");
-//				e.printStackTrace();
-//			}
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader("/Volumes/Unnamed/Lang46b_Patch22/buggy/org.apache.commons.lang.StringEscapeUtilsTest__testUnescapeJava"));
+				Spectrum spec = new Spectrum();
+				
+				System.out.println(111);
+				spec.form(parsetrace(reader));
+			} catch (IOException e) {
+				System.out.println("parse Tracefile1 failed");
+				e.printStackTrace();
+			}
 //			
 //		}
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 	
 	public static double process(String TraceFile1,String TraceFile2) {
@@ -1134,7 +1145,7 @@ public class parser {
 			spec1 = new Spectrum();
 			
 			spec1.form(parsetrace(reader));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println("parse Tracefile1 failed");
 			e.printStackTrace();
 		}
@@ -1145,7 +1156,7 @@ public class parser {
 
 			spec2.form(parsetrace(reader));
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println("parse Tracefile2 failed");
 			e.printStackTrace();
 		}

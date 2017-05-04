@@ -80,9 +80,9 @@ public class classifier {
 	}
 	
 	public static void main(String args[]) throws FileNotFoundException, IOException {
-		boolean verbose=true;
+		boolean verbose=false;
 		String project,bugid,patch_no;
-		String tracedir="/Volumes/Unnamed/traces";//args[3];
+		String tracedir="/Volumes/Unnamed/";//args[3];
 		String patchdir="/Volumes/Unnamed/instr/patches";//args[4]
 		project=args[0];
 		bugid=args[1];
@@ -92,9 +92,9 @@ public class classifier {
 		System.out.print("\n"+patch_no+":");
 		
 		run( project, bugid, patch_no, tracedir, patchdir, verbose);
-		//run( "Chart", "5", "Patch7", tracedir, patchdir, verbose);
+		//run( "Lang", "46", "Patch22", tracedir, patchdir, verbose);
 		
-			
+		//run( "Chart", "15", "Patch13", tracedir, patchdir, verbose);
 		
 		
 		
@@ -153,16 +153,31 @@ public class classifier {
 			}
 			index++;
 		}
+		//System.out.println(pass);
+		List<Integer>remove_list=new ArrayList<Integer>();
 		Spectrum[] SpecArray_buggy=new Spectrum[len];
 		Spectrum[] SpecArray_patched=new Spectrum[len];
 		for(int i=0;i<len;i++) {
 			SpecArray_buggy[i]=new Spectrum();
-			String TraceFile=new File(tracedir_buggy, dict[i]).toString();;
-			SpecArray_buggy[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+			String TraceFile=new File(tracedir_buggy, dict[i]).toString();
+			//System.out.println(TraceFile);
+			try {
+				SpecArray_buggy[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+			} catch (Exception e) {
+				remove_list.add(i);
+				continue;
+			}
+			
 			
 			SpecArray_patched[i]=new Spectrum(new File(patchdir, patch_no).toString());
 			TraceFile=new File(tracedir_patched, dict[i]).toString();
-			SpecArray_patched[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+			
+			try {
+				SpecArray_patched[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+			} catch (Exception e) {
+				remove_list.add(i);
+				continue;
+			}
 		}
 		for(int i=0;i<len;i++){
 			for(int j=0;j<len;j++){
@@ -181,14 +196,14 @@ public class classifier {
 		
 		
 		//filter
-		List<Integer>remove_list=new ArrayList<Integer>();
+		
 		for(int j=0;j<len;j++){
 			if(SpecArray_buggy[j].values.size()==0 && SpecArray_patched[j].values.size()==0)
 			{
 				remove_list.add(j);
 			}
 		}
-		
+		//System.out.println(remove_list);
 		//merge similar execution, completely equal
 		
 		for(Iterator<Integer> it1=gen.iterator();it1.hasNext();){
@@ -203,6 +218,7 @@ public class classifier {
 			}
 		}
 		
+		//System.out.println(remove_list);
 		double[] dis_2=new double[len];
 		for(int i=0;i<len;i++){
 			if(remove_list.contains(i)){
@@ -210,13 +226,25 @@ public class classifier {
 			}
 			//System.out.println(dict[i]);
 			Spectrum spec1=new Spectrum();
-			String TraceFile=new File(new File(tracedir, "buggy").toString(), dict[i]).toString();;
-			spec1.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+			String TraceFile=new File(new File(tracedir, "buggy").toString(), dict[i]).toString();
+			//System.out.println(TraceFile);
+			try{
+				spec1.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+			} catch(Exception e){
+				remove_list.add(i);
+				continue;
+			}
+			
 			
 			Spectrum spec2=new Spectrum(new File(patchdir, patch_no).toString());
 			TraceFile=new File(new File(tracedir, "patched").toString(), dict[i]).toString();
-			spec2.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
-			if(spec1.values.size()*spec2.values.size()>100000000){
+			try{
+				spec2.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+			} catch(Exception e){
+				remove_list.add(i);
+				continue;
+			}
+			if(spec1.values.size()*spec2.values.size()>1000000000){
 				remove_list.add(i);
 				continue;
 			}
@@ -227,6 +255,7 @@ public class classifier {
 			
 			
 		}
+		//System.out.println(remove_list);
 		
 		if(verbose){
 			for(int i=0;i<len;i++){
