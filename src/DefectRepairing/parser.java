@@ -449,7 +449,7 @@ public class parser {
 				//System.out.println(curLine+" "+targetline);
 				// if ((pendingjumps.isEmpty() || curLine >
 				// pendingjumps.peek().fromline) && curLine > targetline) {
-				if ((pendingjumps.isEmpty() || curLine.compareTo(pendingjumps.peek().fromline) < 0)
+				if ((pendingjumps.isEmpty() || curLine.compareTo(pendingjumps.peek().fromline) > 0)
 						&& curLine.compareTo(targetline) > 0) {
 					break;
 					// throw new Exception("wild line");
@@ -519,6 +519,7 @@ public class parser {
 						}
 					} else {
 						pendingjumps.offer(new Jump(curLine, ((IfStatement) st).startLine));
+						runto(curLine);
 						// curLine=(((IfStatement) st).startLine);
 					}
 					
@@ -534,7 +535,8 @@ public class parser {
 						} else {
 							pendingjumps
 									.offer(new Jump(((WhileStatement) st).endLine, ((WhileStatement) st).startLine));
-							System.out.println(pendingjumps);
+							if(debug)
+								System.out.println(pendingjumps);
 							try{
 							runto(t);
 							}
@@ -1216,7 +1218,7 @@ public class parser {
 //			System.out.println(l);
 //		}
 		
-		double LCS = spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0, 1, 2));
+		double LCS = spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS_simple, 0, 1, 2));
 		double Default=spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0, 1, 2));
 		
 		double Length=(spec1.values.size()+spec2.values.size());
