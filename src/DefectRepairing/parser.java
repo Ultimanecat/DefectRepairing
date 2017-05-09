@@ -393,10 +393,10 @@ public class parser {
 	}
 
 	private static class Context {
-		Queue<Jump> pendingjumps;
+		Stack<Jump> pendingjumps;
 		LineNumber curLine;
 
-		Context(Queue<Jump> _pendingjumps, LineNumber _curLine) {
+		Context(Stack<Jump> _pendingjumps, LineNumber _curLine) {
 			pendingjumps = _pendingjumps;
 			curLine = _curLine;
 		}
@@ -405,7 +405,7 @@ public class parser {
 	public static class Spectrum implements Cloneable{
 		public List<LineVariables> values;
 		LineNumber curLine;
-		Queue<Jump> pendingjumps;
+		Stack<Jump> pendingjumps;
 		Stack<Context> contexts;
 		Map<Integer, Integer> addedlines;
 		List<Integer> deletedlines;// TODO
@@ -455,7 +455,7 @@ public class parser {
 					// throw new Exception("wild line");
 				}
 				if (!pendingjumps.isEmpty() && pendingjumps.peek().fromline.compareTo(curLine) == 0) {
-					curLine = pendingjumps.poll().toline;
+					curLine = pendingjumps.pop().toline;
 				} else {
 					// curLine++;
 					nextline();
@@ -468,9 +468,9 @@ public class parser {
 
 		public Spectrum() {
 			values = new ArrayList<LineVariables>();
-			pendingjumps = new LinkedList<Jump>();
+			pendingjumps = new Stack<Jump>();
 			contexts = new Stack<Context>();
-			contexts.push(new Context(new LinkedList<Jump>(), new LineNumber()));
+			contexts.push(new Context(new Stack<Jump>(), new LineNumber()));
 			addedlines=new HashMap<Integer, Integer>();
 			deletedlines=new ArrayList<Integer>();
 		}
@@ -488,9 +488,9 @@ public class parser {
 
 		Spectrum(Map<Integer, Integer> _addedlines, List<Integer> _deletedlines) {
 			values = new ArrayList<LineVariables>();
-			pendingjumps = new LinkedList<Jump>();
+			pendingjumps = new Stack<Jump>();
 			contexts = new Stack<Context>();
-			contexts.push(new Context(new LinkedList<Jump>(), new LineNumber()));
+			contexts.push(new Context(new Stack<Jump>(), new LineNumber()));
 			addedlines = _addedlines;
 			deletedlines = _deletedlines;
 		}
@@ -511,14 +511,14 @@ public class parser {
 					runto(t);
 					if (!((IfStatement) st).taken) {
 						if (!((IfStatement) st).hasElse)
-							pendingjumps.offer(new Jump(curLine, ((IfStatement) st).endLine));
+							pendingjumps.push(new Jump(curLine, ((IfStatement) st).endLine));
 						// curLine = ((IfStatement) st).endLine;
 						else {
-							pendingjumps.offer(new Jump(curLine, ((IfStatement) st).elseStartLine));
+							pendingjumps.push(new Jump(curLine, ((IfStatement) st).elseStartLine));
 							// curLine = ((IfStatement) st).elseStartLine;
 						}
 					} else {
-						pendingjumps.offer(new Jump(curLine, ((IfStatement) st).startLine));
+						pendingjumps.push(new Jump(curLine, ((IfStatement) st).startLine));
 						runto(curLine);
 						// curLine=(((IfStatement) st).startLine);
 					}
@@ -527,14 +527,14 @@ public class parser {
 				if (st instanceof WhileStatement) {
 					LineNumber t = ((WhileStatement) st).startLine;
 					if (!((WhileStatement) st).taken) {
-						pendingjumps.offer(new Jump(curLine, ((WhileStatement) st).endLine));
+						pendingjumps.push(new Jump(curLine, ((WhileStatement) st).endLine));
 						runto(t);
 					} else {
 						if (((WhileStatement) st).firsttaken) {
 							runto(t);
 						} else {
 							pendingjumps
-									.offer(new Jump(((WhileStatement) st).endLine, ((WhileStatement) st).startLine));
+									.push(new Jump(((WhileStatement) st).endLine, ((WhileStatement) st).startLine));
 							if(debug)
 								System.out.println(pendingjumps);
 							try{
@@ -555,7 +555,7 @@ public class parser {
 						runto(t);
 					} else {
 						//System.out.println("Dosymt taken");
-						pendingjumps.offer(new Jump(((DoStatement) st).endLine, ((DoStatement) st).startLine));
+						pendingjumps.push(new Jump(((DoStatement) st).endLine, ((DoStatement) st).startLine));
 						runto(t);
 					}
 				}
@@ -572,7 +572,7 @@ public class parser {
 					
 					LineNumber t = ((MethodInvoked) st).Line;
 					contexts.peek().curLine=curLine;
-					contexts.push(new Context(new LinkedList<Jump>(), t));
+					contexts.push(new Context(new Stack<Jump>(), t));
 					pendingjumps = contexts.peek().pendingjumps;
 					curLine = contexts.peek().curLine;
 					Set<Variable> tmp = new TreeSet<Variable>();

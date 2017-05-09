@@ -93,7 +93,7 @@ public class classifier {
 //		System.out.print("\n"+patch_no+":");
 //		
 //		run( project, bugid, patch_no, tracedir, patchdir, verbose);
-		run( "Math", "32", "Patch34", tracedir, patchdir, verbose);
+		run( "Math", "80", "Patch59", tracedir, patchdir, verbose);
 		
 		//run( "Chart", "15", "Patch13", tracedir, patchdir, verbose);
 		
