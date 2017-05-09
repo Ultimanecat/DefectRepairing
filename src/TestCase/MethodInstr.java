@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -110,9 +111,9 @@ public class MethodInstr {
 	public static void main(String args[]) {
 		boolean verboset = false;
 		
-		String FilePath = args[0];
-		String TraceFilet = args[1];
-		final int TargetLine=Integer.valueOf(args[2]);
+		String FilePath = "/Users/liuxinyuan/git/DefectRepairing/Closure1b/src/com/google/javascript/rhino/Node.java";//args[0];
+		String TraceFilet = "";//args[1];
+		final int TargetLine=1410;//Integer.valueOf(args[2]);
 		init();
 
 		final String TraceFile = TraceFilet;
@@ -149,10 +150,23 @@ public class MethodInstr {
 						outputBuffer += "\nprintRuntimeMSG(" + printMSG + ");\n";
 				}
 				
+				public boolean isInnerClass(ASTNode node) {
+					while (node != null) {
+						node = node.getParent();
+						if (node instanceof TypeDeclaration)
+							if (((TypeDeclaration) node).isInterface() == false)
+								return true;
+					}
+					return false;
+				}
+				
 				public boolean visit(TypeDeclaration node) {
 					ClassName=node.getName().toString();
+					
 					if (node.isInterface())
 						return false;
+					if (isInnerClass(node))
+						return true;
 					else {
 
 						copyto(((BodyDeclaration) (node.bodyDeclarations().get(0))).getStartPosition());

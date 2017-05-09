@@ -14,7 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import DefectRepairing.parser.Spectrum;
-
+import DefectRepairing.parser.Spectrum.Mode.ModeEnum;
+import DefectRepairing.jPickle;
 public class classifier {
 
 	
@@ -80,19 +81,19 @@ public class classifier {
 	}
 	
 	public static void main(String args[]) throws FileNotFoundException, IOException {
-		boolean verbose=false;
+		boolean verbose=true;
 		String project,bugid,patch_no;
-		String tracedir="/Volumes/Unnamed/";//args[3];
-		String patchdir="/Volumes/Unnamed/instr/patches";//args[4]
-		project=args[0];
-		bugid=args[1];
-		patch_no=args[2];
-		
-		
-		System.out.print("\n"+patch_no+":");
-		
-		run( project, bugid, patch_no, tracedir, patchdir, verbose);
-		//run( "Lang", "46", "Patch22", tracedir, patchdir, verbose);
+		String tracedir="/Volumes/Unnamed/tracesold";//args[3];
+		String patchdir="/Users/liuxinyuan/Downloads/source_bak/patches";//args[4]
+//		project=args[0];
+//		bugid=args[1];
+//		patch_no=args[2];
+//		
+//		
+//		System.out.print("\n"+patch_no+":");
+//		
+//		run( project, bugid, patch_no, tracedir, patchdir, verbose);
+		run( "Math", "32", "Patch34", tracedir, patchdir, verbose);
 		
 		//run( "Chart", "15", "Patch13", tracedir, patchdir, verbose);
 		
@@ -103,6 +104,7 @@ public class classifier {
 	
 	
 	public static void run(String project,String bugid,String patch_no,String tracedir,String patchdir,boolean verbose) throws FileNotFoundException, IOException{
+		ModeEnum mode = Spectrum.Mode.ModeEnum.LCS_simple;
 		tracedir=new File(tracedir, project+bugid+"b_"+patch_no).toString();
 		
 		List<String>l_buggy=new ArrayList<String>();
@@ -125,6 +127,7 @@ public class classifier {
 			
 		}
 		List<String> failing_tests=get_failing_tests(project,bugid);
+//		System.out.println(failing_tests);
 //		for(String s:failing_tests){
 //				System.out.println(s);
 //		}
@@ -153,6 +156,10 @@ public class classifier {
 			}
 			index++;
 		}
+		if(verbose){
+		System.out.println(fail);
+		System.out.println(pass);
+		}
 		//System.out.println(pass);
 		List<Integer>remove_list=new ArrayList<Integer>();
 		Spectrum[] SpecArray_buggy=new Spectrum[len];
@@ -164,6 +171,9 @@ public class classifier {
 			try {
 				SpecArray_buggy[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
 			} catch (Exception e) {
+				e.printStackTrace();
+				//System.out.println(TraceFile);
+				//System.exit(1);
 				remove_list.add(i);
 				continue;
 			}
@@ -175,10 +185,13 @@ public class classifier {
 			try {
 				SpecArray_patched[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
 			} catch (Exception e) {
+				e.printStackTrace();
 				remove_list.add(i);
 				continue;
 			}
 		}
+		if(verbose)
+		System.out.println("1 "+remove_list);
 		for(int i=0;i<len;i++){
 			for(int j=0;j<len;j++){
 				if(i==j){
@@ -186,26 +199,44 @@ public class classifier {
 					continue;
 				}
 					
-				double Length=(SpecArray_buggy[i].values.size()+SpecArray_buggy[j].values.size());
-				double LCS=SpecArray_buggy[i].diff(SpecArray_buggy[j],new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0, 1, 2));
-				
+				double Length=Math.max(SpecArray_buggy[i].values.size(),SpecArray_buggy[j].values.size());
+				if(Length==0){
+					dis[i][j]=1;
+					continue;
+				}
+				double LCS;
+				if(SpecArray_buggy[i].values.size()*SpecArray_buggy[j].values.size()>2147483647){
+					remove_list.add(i);
+					continue;
+				}
+				try{
+					LCS=SpecArray_buggy[i].diff(SpecArray_buggy[j],new Spectrum.Mode(mode, 0, 1, 2));
+				} catch(Exception e){
+					e.printStackTrace();
+					remove_list.add(i);
+					continue;
+				}
 				dis[i][j]=LCS/Length;
 						
 			}
 		}
-		
-		
+		if(verbose)
+		System.out.println(2+" "+remove_list);
 		//filter
 		
-		for(int j=0;j<len;j++){
-			if(SpecArray_buggy[j].values.size()==0 && SpecArray_patched[j].values.size()==0)
-			{
-				remove_list.add(j);
-			}
-		}
+//		for(int j=0;j<len;j++){
+//			if(remove_list.contains(j)){
+//				continue;
+//			}
+//			if(SpecArray_buggy[j].values.size()==0 && SpecArray_patched[j].values.size()==0)
+//			{
+//				remove_list.add(j);
+//			}
+//		}
 		//System.out.println(remove_list);
 		//merge similar execution, completely equal
-		
+		if(verbose)
+		System.out.println(3+" "+remove_list);
 		for(Iterator<Integer> it1=gen.iterator();it1.hasNext();){
 			int i=it1.next();
 			for(Iterator<Integer> it2=gen.iterator();it2.hasNext();){
@@ -217,7 +248,7 @@ public class classifier {
 					remove_list.add(j);
 			}
 		}
-		
+		//System.out.println(4+" "+remove_list);
 		//System.out.println(remove_list);
 		double[] dis_2=new double[len];
 		for(int i=0;i<len;i++){
@@ -231,6 +262,9 @@ public class classifier {
 			try{
 				spec1.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
 			} catch(Exception e){
+				e.printStackTrace();
+				System.out.println(i);
+				System.out.println(TraceFile);
 				remove_list.add(i);
 				continue;
 			}
@@ -241,20 +275,26 @@ public class classifier {
 			try{
 				spec2.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
 			} catch(Exception e){
+				e.printStackTrace();
+				
 				remove_list.add(i);
 				continue;
 			}
-			if(spec1.values.size()*spec2.values.size()>1000000000){
+//			System.out.println(i);
+//			System.out.println(spec1.values.size());
+//			System.out.println(spec2.values.size());
+			if((double)spec1.values.size()*(double)spec2.values.size()>5e9 && ! (fail.contains(i) && fail.size()==1)){
 				remove_list.add(i);
 				continue;
 			}
-			double Length=(spec1.values.size()+spec2.values.size());
-			double LCS=spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0, 1, 2));
+			double Length=Math.max(spec1.values.size(),spec2.values.size());
+			double LCS=spec1.diff(spec2,new Spectrum.Mode(mode, 0, 1, 2));
 			dis_2[i]=LCS/Length;
 			
 			
 			
 		}
+		//System.out.println(5+" "+remove_list);
 		//System.out.println(remove_list);
 		
 		if(verbose){
@@ -302,6 +342,14 @@ public class classifier {
 			if(gen.contains(j))
 				gen.remove(j);
 		}
+//		jPickle.dump(pass, patch_no+"/pass");
+//		jPickle.dump(fail, patch_no+"/fail");
+//		jPickle.dump(gen, patch_no+"/gen");
+//		jPickle.dump(dis, patch_no+"/dis");
+//		jPickle.dump(dis_2, patch_no+"/dis_2");
+//		jPickle.dump(dict, patch_no+"/dict");
+		
+		
 		double dis_pass=0,dis_fail=0,w_pass=0,w_fail=0;
 		if(pass.size()!=0&&fail.size()!=0){
 			for(int i:pass){

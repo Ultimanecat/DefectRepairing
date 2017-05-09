@@ -385,6 +385,10 @@ public class parser {
 
 		LineNumber fromline;
 		LineNumber toline;
+		
+		public String toString(){
+			return fromline+"->"+toline;
+		}
 
 	}
 
@@ -530,7 +534,14 @@ public class parser {
 						} else {
 							pendingjumps
 									.offer(new Jump(((WhileStatement) st).endLine, ((WhileStatement) st).startLine));
+							System.out.println(pendingjumps);
+							try{
 							runto(t);
+							}
+							catch(Exception e){
+								System.out.println(st.toString());
+								throw(e);
+							}
 						}
 
 					}
@@ -614,7 +625,7 @@ public class parser {
 
 		public static class Mode {
 			public enum ModeEnum {
-				Default, LCS, LCS_Bestfit;
+				Default, LCS, LCS_Bestfit, LCS_simple;
 			}
 
 			ModeEnum mode;
@@ -636,6 +647,7 @@ public class parser {
 			int min = spec2.values.size() < values.size() ? spec2.values.size() : values.size();
 			int max = spec2.values.size() > values.size() ? spec2.values.size() : values.size();
 			ret += (max - min) * diffmode.sizediffw;
+			int f[][];
 			switch (diffmode.mode) {
 			case Default:
 				while (it1.hasNext() && it2.hasNext()) {
@@ -648,9 +660,27 @@ public class parser {
 					}
 				}
 				break;
+			case LCS_simple:
+				f = new int[2][spec2.values.size()+1];
+				for (int i = 1; it1.hasNext(); i++) {
+					LineVariables l1 = it1.next();
+					it2=spec2.values.iterator();
+					for (int j = 1; it2.hasNext(); j++) {
+						LineVariables l2 = it2.next();
+						if (l1.line.compareTo(l2.line)==0) {
+							f[i%2][j] = f[(i - 1)%2][j - 1] + 1;
+						} else if (f[(i - 1)%2][j] <= f[i%2][j - 1]) {// 优先让spec2失配
+							f[i%2][j] = f[i%2][j - 1];
+						} else {
+							f[i%2][j] = f[(i - 1)%2][j];
+						}
+					}
+				}
+				ret += (min - f[values.size()%2][spec2.values.size()]) * diffmode.linediffw;
+				break;
 			case LCS:
 				//System.out.println(values.size()+" "+spec2.values.size());
-				int f[][] = new int[values.size()+1][spec2.values.size()+1];
+				f = new int[values.size()+1][spec2.values.size()+1];
 				int prev[][] = new int[values.size()+1][spec2.values.size()+1];
 				{
 				int i=0,j=0;
@@ -1058,15 +1088,33 @@ public class parser {
 			}
 			if (st instanceof WhileStatement) {
 				if (((WhileStatement) st).taken) {
-					Statement s = Stmts.get(Stmts.size() - 1);
-					if (s instanceof WhileStatement) {
-						if(((WhileStatement) s).startLine.compareTo(((WhileStatement) st).startLine)==0
-								&& !((WhileStatement) s).taken) {
-							
-							Stmts.remove(Stmts.size() - 1);
-							((WhileStatement) st).firsttaken = true;
+					//Statement s = Stmts.get(Stmts.size() - 1);
+					//if (s instanceof WhileStatement) {
+//						if(((WhileStatement) s).startLine.compareTo(((WhileStatement) st).startLine)==0
+//								&& !((WhileStatement) s).taken) {
+//							
+//							Stmts.remove(Stmts.size() - 1);
+//							((WhileStatement) st).firsttaken = true;
+//						}
+						for(int i=Stmts.size() - 1;i>=0;i--)
+						{
+							Statement toremove = Stmts.get(i);
+							if(toremove instanceof WhileStatement)
+							{
+								if(((WhileStatement) toremove).startLine.compareTo(((WhileStatement) st).startLine)==0
+										&& !((WhileStatement) toremove).taken) {
+									Stmts.remove(i);
+									((WhileStatement) st).firsttaken = true;
+									break;
+								}
+								if(((WhileStatement) toremove).startLine.compareTo(((WhileStatement) st).startLine)==0
+										&& ((WhileStatement) toremove).taken) {
+									
+									break;
+								}
+							}
 						}
-					}
+//					}
 				}
 			}
 			if (st instanceof DoStatement) {
@@ -1097,7 +1145,7 @@ public class parser {
 		String tracefile1=tracedir1+tracefilename1;
 		String tracefile2=tracedir2+tracefilename1;
 		
-		//parser.process("/Volumes/Unnamed/traces/Lang39b_Patch20/buggy_e/Randoop.RegressionTest117__test027", "/Volumes/Unnamed/traces/Lang39b_Patch20/buggy_e/Randoop.RegressionTest117__test027");
+		parser.process("/Volumes/Unnamed/tracesold/Math32b_Patch34/buggy/org.apache.commons.math3.geometry.euclidean.threed.PolyhedronsSetTest__testIssue780", "/Volumes/Unnamed/tracesold/Math32b_Patch34/buggy/org.apache.commons.math3.geometry.euclidean.threed.PolyhedronsSetTest__testIssue780");
 		String PatchFile="/Volumes/Unnamed/instr/patches/Patch12";
 		debug=false;
 //		List<String>l=new ArrayList<String>();
@@ -1119,22 +1167,22 @@ public class parser {
 //
 //			System.out.println(filepath);
 //			
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader("/Volumes/Unnamed/Lang46b_Patch22/buggy/org.apache.commons.lang.StringEscapeUtilsTest__testUnescapeJava"));
-				Spectrum spec = new Spectrum();
-				
-				System.out.println(111);
-				spec.form(parsetrace(reader));
-			} catch (IOException e) {
-				System.out.println("parse Tracefile1 failed");
-				e.printStackTrace();
-			}
-//			
-//		}
-			catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				BufferedReader reader = new BufferedReader(new FileReader("/Volumes/Unnamed/Lang46b_Patch22/buggy/org.apache.commons.lang.StringEscapeUtilsTest__testUnescapeJava"));
+//				Spectrum spec = new Spectrum();
+//				
+//				System.out.println(111);
+//				spec.form(parsetrace(reader));
+//			} catch (IOException e) {
+//				System.out.println("parse Tracefile1 failed");
+//				e.printStackTrace();
+//			}
+////			
+////		}
+//			catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 	}
 	
 	public static double process(String TraceFile1,String TraceFile2) {
@@ -1164,9 +1212,9 @@ public class parser {
 		
 
 
-		for(LineVariables l: spec2.values){
-			System.out.println(l);
-		}
+//		for(LineVariables l: spec2.values){
+//			System.out.println(l);
+//		}
 		
 		double LCS = spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.LCS, 0, 1, 2));
 		double Default=spec1.diff(spec2,new Spectrum.Mode(Spectrum.Mode.ModeEnum.Default, 0, 1, 2));

@@ -141,9 +141,9 @@ public class Instrumenter {
 	public static void main(String args[]) {
 		boolean verboset = false;
 		
-		String DirPath = args[0];
-		String TraceFilet = args[1];
-		final String Project = args[2];
+		String DirPath = "/Users/liuxinyuan/DefectRepairing/Chart1b/tests";//args[0];
+		String TraceFilet = "/Volumes/Unnamed/c.txt";//args[1];
+		final String Project = "Chart";//args[2];
 		init();
 
 		final String TraceFile = TraceFilet;
@@ -190,8 +190,20 @@ public class Instrumenter {
 						outputBuffer += "\nprintRuntimeMSG(" + printMSG + ");\n";
 				}
 				
+				public boolean isInnerClass(ASTNode node) {
+					while (node != null) {
+						node = node.getParent();
+						if (node instanceof TypeDeclaration)
+							if (((TypeDeclaration) node).isInterface() == false)
+								return true;
+					}
+					return false;
+				}
+				
 				public boolean visit(TypeDeclaration node) {
 					ClassName=node.getName().toString();
+					if (isInnerClass(node))
+						return true;
 					if (node.isInterface())
 						return false;
 					else {

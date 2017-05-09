@@ -197,7 +197,7 @@ public class Instrumenter {
 			e1.printStackTrace();
 		}
 		// Set the appropriate variables based on supplied options
-		String FilePatht = "/Volumes/Unnamed/Chart1b/source/org/jfree/chart/PolarChartPanel.java";
+		String FilePatht = "/Users/liuxinyuan/git/DefectRepairing/Closure1b/src/com/google/javascript/rhino/Node.java";
 		String TraceFilet = "/Volumes/Unnamed/a.txt";
 		String PatchedFile = "";
 		
@@ -226,7 +226,7 @@ public class Instrumenter {
 
 		if (verbose)
 			FilePatht=(new String(
-					"/Volumes/Unnamed/instr/pie.java"));
+					"/Users/liuxinyuan/git/DefectRepairing/Closure1b/src/com/google/javascript/rhino/Node.java"));
 		
 		final String FilePath=FilePatht;
 
@@ -366,6 +366,9 @@ public class Instrumenter {
 					}
 					methodname+="," + node.parameters().size();
 					
+					methodname=methodname.replace('<', '(');
+					methodname=methodname.replace('>', ')');
+					
 					String line = getLineNumber(cu.getLineNumber(node.getStartPosition()));
 					if (verbose)
 						System.out.println("MethodDeclaration:" + methodname + ",Line " + line);
@@ -416,6 +419,7 @@ public class Instrumenter {
 				}
 
 				public boolean visit(TypeDeclaration node) {
+					
 					if (verbose)
 						System.out.println("TypeDeclaration:Line " + cu.getLineNumber(node.getStartPosition()));
 					if (node.isInterface())
@@ -425,7 +429,7 @@ public class Instrumenter {
 							return true;
 						if (node.bodyDeclarations().isEmpty())
 							return false;
-
+						
 						copyto(((BodyDeclaration) (node.bodyDeclarations().get(0))).getStartPosition());
 						outputBuffer += "\nstatic boolean flag__lxy=false;\n"
 								+ "static public void printRuntimeMSG (String printMSG)\n" + "{\n"
@@ -477,7 +481,7 @@ public class Instrumenter {
 					if (verbose)
 						System.out.println("Assignment:" + "line " + line + "," + name);
 					copyto(ParentStatement.getStartPosition() + ParentStatement.getLength());
-					String printMSG = "\"<Assignment> " + name + "=\"+getValue_(" + name
+					String printMSG = "\"<Assignment> " + name.replace(' ','_') + "=\"+getValue_(" + name
 							+ ")+\",type:\"+getType_(" + name + ")+\",Line:" + line + "\"";
 					insertprint(printMSG);
 					return;
@@ -737,7 +741,7 @@ public class Instrumenter {
 			if (verbose)
 				System.out.print(outputBuffer);
 
-			if (!verbose) {
+			if (false) {
 				writeStringToFile(FilePath, outputBuffer);
 				CurNum++;
 

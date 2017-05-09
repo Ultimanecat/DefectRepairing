@@ -45,8 +45,8 @@ DefectRepairing/Instrumenter.java TestCase/Instrumenter.java \
 TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/Framework.java \
 TestCase/GetSingleTest_Chart.java \
 TestCase/listTestCase.java \
-TestCase/classifier.java
-
+TestCase/classifier.java \
+TestCase/MethodName.java
 
 # 设置你的java编译器
 # Set your java compiler here:
@@ -133,7 +133,7 @@ mutate:
 d4j:
 	java -cp bin/:$(LIBS) $(D4J) $(D4JFLAG)
 TestCaseInstr:
-	java -cp bin/:$(LIBS) $(TESTCASEINSTR) $(TCIFLAG)
+	java -cp bin/:$(LIBS) $(TESTCASEINSTR) $(ARGS)
 GetSingleTest_Chart:
 	java -cp bin/:$(LIBS) TestCase.GetSingleTest_Chart $(ARGS)
 instru_class:
@@ -144,3 +144,5 @@ parse:
 	java -Xms32m -Xmx7000m -cp bin/:$(LIBS) TestCase.classifier $(ARGS)
 MthdInstr:
 	java -cp bin/:$(LIBS) TestCase.MethodInstr $(ARGS)
+methodname:
+	java -cp bin/:$(LIBS) TestCase.MethodName $(ARGS)

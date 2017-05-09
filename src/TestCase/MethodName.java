@@ -57,8 +57,10 @@ public class MethodName {
 	public static int curChar = 0;
 	public static String outputBuffer = new String();
 	public static String source = new String();
-        public static String methodname="";
-
+    public static String methodname="";
+    public static String StartLine="";
+    public static String EndLine="";
+    public static String ClassName="";
 	public static void init() {
 		curLine = 1;
 		curChar = 0;
@@ -140,9 +142,11 @@ public class MethodName {
 			
 			insertimport(cu);
 			final String PackageName=cu.getPackage().getName().toString();
+			if(PackageName!=null)
+				ClassName=PackageName+".";
 			cu.accept(new ASTVisitor() {
 
-				String ClassName;
+				
 				public void insertprint(String printMSG) {
 					if (verbose)
 						outputBuffer += "\ndebug:" + printMSG + "\n";
@@ -151,7 +155,7 @@ public class MethodName {
 				}
 				
 				public boolean visit(TypeDeclaration node) {
-					ClassName=node.getName().toString();
+					ClassName+=node.getName().toString();
 					if (node.isInterface())
 						return false;
 					else {
@@ -183,11 +187,16 @@ public class MethodName {
 						
 						
 						methodname=node.getName().toString();
-						List<SingleVariableDeclaration> l=node.parameters();
-						for(SingleVariableDeclaration o:l){
-							methodname+="_"+o.getType();
-						}
-						methodname+="," + node.parameters().size();
+						StartLine=String.valueOf(cu.getLineNumber(node.getStartPosition()));
+						EndLine=String.valueOf(cu.getLineNumber(node.getStartPosition()+node.getLength()));
+//						List<SingleVariableDeclaration> l=node.parameters();
+//						for(SingleVariableDeclaration o:l){
+//							methodname+="_"+o.getType();
+//						}
+//						methodname+="," + node.parameters().size();
+//						methodname=methodname.replace('<', '(');
+//						methodname=methodname.replace('>', ')');
+						
 						
 					}
 					
@@ -200,7 +209,7 @@ public class MethodName {
 			});
 			
 			
-writeStringToFile(TraceFilet, methodname);			
+writeStringToFile(TraceFilet, methodname+"\n"+ClassName+"\n"+StartLine+"\n"+EndLine);			
 		}
 	}
 
