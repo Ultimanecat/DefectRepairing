@@ -111,9 +111,14 @@ public class MethodInstr {
 	public static void main(String args[]) {
 		boolean verboset = false;
 		
-		String FilePath = "/Users/liuxinyuan/git/DefectRepairing/Closure1b/src/com/google/javascript/rhino/Node.java";//args[0];
-		String TraceFilet = "";//args[1];
-		final int TargetLine=1410;//Integer.valueOf(args[2]);
+		String FilePath = args[0];
+		String TraceFilet = args[1];
+		//final int TargetLine=;
+		final List<Integer>TargetLineList=new ArrayList<Integer>();
+		String lines=args[2].substring(1, args[2].length()-1);
+		String[] a=lines.split(", ");
+		for(String line :a)
+			TargetLineList.add(Integer.valueOf(line));
 		init();
 
 		final String TraceFile = TraceFilet;
@@ -191,11 +196,12 @@ public class MethodInstr {
 						return false;
 					
 					//System.out.println(cu.getLineNumber(node.getStartPosition()));
+					for(Integer TargetLine: TargetLineList)
 					if( cu.getLineNumber(node.getStartPosition())<=TargetLine && cu.getLineNumber(node.getStartPosition()+node.getLength())>=TargetLine){
 						copyto(node.getBody().getStartPosition()+1);
 						String printMSG = "\"---covered\"";
 						insertprint(printMSG);
-						
+						break;
 					}
 					
 

@@ -93,7 +93,7 @@ public class classifier {
 //		System.out.print("\n"+patch_no+":");
 //		
 //		run( project, bugid, patch_no, tracedir, patchdir, verbose);
-		run( "Math", "80", "Patch59", tracedir, patchdir, verbose);
+		run( "Lang", "55", "Patch25", tracedir, patchdir, verbose);
 		
 		//run( "Chart", "15", "Patch13", tracedir, patchdir, verbose);
 		
@@ -172,7 +172,7 @@ public class classifier {
 				SpecArray_buggy[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
 			} catch (Exception e) {
 				e.printStackTrace();
-				//System.out.println(TraceFile);
+				System.out.println(TraceFile);
 				//System.exit(1);
 				remove_list.add(i);
 				continue;
@@ -185,6 +185,7 @@ public class classifier {
 			try {
 				SpecArray_patched[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
 			} catch (Exception e) {
+				System.out.println(TraceFile);
 				e.printStackTrace();
 				remove_list.add(i);
 				continue;
@@ -201,7 +202,7 @@ public class classifier {
 					
 				double Length=Math.max(SpecArray_buggy[i].values.size(),SpecArray_buggy[j].values.size());
 				if(Length==0){
-					dis[i][j]=1;
+					dis[i][j]=0;
 					continue;
 				}
 				double LCS;
@@ -250,6 +251,8 @@ public class classifier {
 		}
 		//System.out.println(4+" "+remove_list);
 		//System.out.println(remove_list);
+		double length_array[]=new double[len];
+		double LCS_array[]=new double[len];
 		double[] dis_2=new double[len];
 		for(int i=0;i<len;i++){
 			if(remove_list.contains(i)){
@@ -290,8 +293,8 @@ public class classifier {
 			double Length=Math.max(spec1.values.size(),spec2.values.size());
 			double LCS=spec1.diff(spec2,new Spectrum.Mode(mode, 0, 1, 1));
 			dis_2[i]=LCS/Length;
-			
-			
+			length_array[i]=Length;
+			LCS_array[i]=LCS;
 			
 		}
 		//System.out.println(5+" "+remove_list);
@@ -333,6 +336,20 @@ public class classifier {
 					System.out.print("     gen ");
 			}
 			System.out.println();
+			for(int j=0;j<len;j++){
+				if(remove_list.contains(j)){
+					continue;
+				}
+				System.out.printf("%08d ",(int)length_array[j]);
+			}
+			System.out.println();
+			for(int j=0;j<len;j++){
+				if(remove_list.contains(j)){
+					continue;
+				}
+				System.out.printf("%08d ",(int)LCS_array[j]);
+			}
+			System.out.println();
 		}
 		for (Integer j:remove_list){
 			if(pass.contains(j))
@@ -351,43 +368,60 @@ public class classifier {
 		
 		
 		double dis_pass=0,dis_fail=0,w_pass=0,w_fail=0;
-		if(pass.size()!=0&&fail.size()!=0){
+		if(true){
 			for(int i:pass){
-				dis_pass+=dis_2[i];
-				w_pass+=1;
+				
+				dis_pass=Math.max(dis_pass, dis_2[i]);
 			}
 			for(int i:fail){
-				dis_fail+=dis_2[i]/fail.size();
+				dis_fail+=dis_2[i];
 				w_fail+=1;
 			}
 			if(gen.size()!=0){
 				for(int i:gen){
 					double dis_p=1,dis_f=1;
+					double dis_p_aver=0,dis_f_aver=0;
 					for(int j:pass){
 						if(dis_2[j]<dis_p)
 							dis_p=dis[i][j];
+						dis_p_aver+=dis[i][j];
 					}
+					dis_p_aver/=pass.size();
 					for(int j:fail){
 						if(dis_2[j]<dis_f)
 							dis_f=dis[i][j];
+						dis_f_aver+=dis[i][j];
 					}
-					if(dis_p<dis_f){
-						//pass
-						dis_pass+=dis_2[i]*(1-dis_p);
-						w_pass+=1-dis_p;
+					dis_f_aver/=fail.size();
+					if(pass.size()!=0){
+						if(dis_p>0.8 && dis_f>0.8){
+							continue;
+						}
+						if(dis_p<dis_f){
+							//pass
+							System.out.println("pass:"+dict[i]);
+							dis_pass=Math.max(dis_pass, dis_2[i]);
+							
+						} else if(dis_p>dis_f) {
+							//fail
+							System.out.println("fail:"+dict[i]);
+							dis_fail+=dis_2[i];
+							w_fail+=1;
+						}
 					} else {
-						//fail
-						dis_fail+=dis_2[i]*(1-dis_f);
-						w_fail+=1-dis_f;
+						if(dis_f<0.5 && dis_f!=0) {
+							dis_pass=Math.max(dis_pass, dis_2[i]);
+						}
 					}
+					
 				}
 			}
 		}
 		
-		dis_pass=dis_pass/w_pass;
-		dis_fail=dis_fail/w_fail;
-		
-		if(dis_pass>dis_fail){
+		dis_pass=dis_pass;
+		if(w_fail!=0)
+			dis_fail=dis_fail/w_fail;
+		if(dis_pass>=dis_fail || dis_pass >= 0.15){
 			System.out.println("Incorrect");
 		} else System.out.println("Correct");
 		System.out.printf("%.4f %.4f\n",dis_pass,dis_fail);

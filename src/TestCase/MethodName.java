@@ -115,7 +115,11 @@ public class MethodName {
 		
 		String FilePath = args[0];
 		String TraceFilet = args[1];
-		final int TargetLine=Integer.valueOf(args[2]);
+		final List<Integer>TargetLineList=new ArrayList<Integer>();
+		
+		String[] a=args[2].split(",");
+		for(String line :a)
+			TargetLineList.add(Integer.valueOf(line));
 		init();
 
 		final String TraceFile = TraceFilet;
@@ -181,7 +185,7 @@ public class MethodName {
 					if (node.isConstructor())//
 						return false;
 					
-
+					for(Integer TargetLine: TargetLineList)
 					if( cu.getLineNumber(node.getStartPosition())<=TargetLine && cu.getLineNumber(node.getStartPosition()+node.getLength())>=TargetLine){
 						copyto(node.getBody().getStartPosition()+1);
 						
@@ -189,13 +193,13 @@ public class MethodName {
 						methodname=node.getName().toString();
 						StartLine=String.valueOf(cu.getLineNumber(node.getStartPosition()));
 						EndLine=String.valueOf(cu.getLineNumber(node.getStartPosition()+node.getLength()));
-//						List<SingleVariableDeclaration> l=node.parameters();
-//						for(SingleVariableDeclaration o:l){
-//							methodname+="_"+o.getType();
-//						}
-//						methodname+="," + node.parameters().size();
-//						methodname=methodname.replace('<', '(');
-//						methodname=methodname.replace('>', ')');
+						List<SingleVariableDeclaration> l=node.parameters();
+						for(SingleVariableDeclaration o:l){
+							methodname+="_"+o.getType();
+						}
+						methodname+="," + node.parameters().size()+"\n";
+						methodname=methodname.replace('<', '(');
+						methodname=methodname.replace('>', ')');
 						
 						
 					}
@@ -209,7 +213,7 @@ public class MethodName {
 			});
 			
 			
-writeStringToFile(TraceFilet, methodname+"\n"+ClassName+"\n"+StartLine+"\n"+EndLine);			
+writeStringToFile(TraceFilet, methodname);			
 		}
 	}
 
