@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -260,7 +261,15 @@ public class Instrumenter {
 			
 			insertimport(cu);
 			cu.accept(new ASTVisitor() {
-
+				public boolean visit(SwitchStatement node){
+					try {
+						throw new Exception("SwitchStatement");
+					} catch (Exception e) {
+						
+						e.printStackTrace();
+					}
+					return false;
+				}
 				public ASTNode getparentstatement(ASTNode node) {
 					while (!(node instanceof Statement)) {
 						

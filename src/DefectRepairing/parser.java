@@ -518,8 +518,8 @@ public class parser {
 							// curLine = ((IfStatement) st).elseStartLine;
 						}
 					} else {
-						pendingjumps.push(new Jump(curLine, ((IfStatement) st).startLine));
-						runto(curLine);
+//						pendingjumps.push(new Jump(curLine, ((IfStatement) st).startLine));
+//						runto(curLine);
 						// curLine=(((IfStatement) st).startLine);
 					}
 					
@@ -580,8 +580,10 @@ public class parser {
 					values.add(new LineVariables(t.clone(), tmp));
 				}
 				if (st instanceof Assignment) {
+					
 					LineNumber t = ((Assignment) st).Line;
-					runto(t);
+					if(curLine.compareTo(t)!=0)
+						runto(t);
 					LineVariables tmp = values.get(values.size() - 1);
 					Set<Variable> add = new TreeSet<Variable>();
 					String s = ((Assignment) st).var.Name;
@@ -1147,9 +1149,9 @@ public class parser {
 		String tracefile1=tracedir1+tracefilename1;
 		String tracefile2=tracedir2+tracefilename1;
 		
-		parser.process("/Volumes/Unnamed/tracesold/Math32b_Patch34/buggy/org.apache.commons.math3.geometry.euclidean.threed.PolyhedronsSetTest__testIssue780", "/Volumes/Unnamed/tracesold/Math32b_Patch34/buggy/org.apache.commons.math3.geometry.euclidean.threed.PolyhedronsSetTest__testIssue780");
-		String PatchFile="/Volumes/Unnamed/instr/patches/Patch12";
-		debug=false;
+//		parser.process("/Volumes/Unnamed/tracesold/Math32b_Patch34/buggy/org.apache.commons.math3.geometry.euclidean.threed.PolyhedronsSetTest__testIssue780", "/Volumes/Unnamed/tracesold/Math32b_Patch34/buggy/org.apache.commons.math3.geometry.euclidean.threed.PolyhedronsSetTest__testIssue780");
+//		String PatchFile="/Volumes/Unnamed/instr/patches/Patch12";
+//		debug=false;
 //		List<String>l=new ArrayList<String>();
 ////		if(!debug)
 ////			getFilelist("/Volumes/Unnamed/traces/Chart15b_Patch12/patched",l);
@@ -1169,22 +1171,25 @@ public class parser {
 //
 //			System.out.println(filepath);
 //			
-//			try {
-//				BufferedReader reader = new BufferedReader(new FileReader("/Volumes/Unnamed/Lang46b_Patch22/buggy/org.apache.commons.lang.StringEscapeUtilsTest__testUnescapeJava"));
-//				Spectrum spec = new Spectrum();
-//				
-//				System.out.println(111);
-//				spec.form(parsetrace(reader));
-//			} catch (IOException e) {
-//				System.out.println("parse Tracefile1 failed");
-//				e.printStackTrace();
-//			}
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader("/Volumes/Unnamed/tracesold/Math50b_Patch44/patched/org.apache.commons.math.ode.events.EventStateTest__closeEvents"));
+				Spectrum spec = new Spectrum("/Users/liuxinyuan/Downloads/source_bak/patches/Patch44");
+				
+				System.out.println(111);
+				spec.form(parsetrace(reader));
+				for(LineVariables lv:spec.values){
+					System.out.println(lv);
+				}
+			} catch (IOException e) {
+				System.out.println("parse Tracefile1 failed");
+				e.printStackTrace();
+			}
 ////			
-////		}
-//			catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+//		}
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 	
 	public static double process(String TraceFile1,String TraceFile2) {

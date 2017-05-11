@@ -93,7 +93,7 @@ public class classifier {
 //		System.out.print("\n"+patch_no+":");
 //		
 //		run( project, bugid, patch_no, tracedir, patchdir, verbose);
-		run( "Lang", "55", "Patch25", tracedir, patchdir, verbose);
+		run( "Lang", "53", "Patch24", tracedir, patchdir, verbose);
 		
 		//run( "Chart", "15", "Patch13", tracedir, patchdir, verbose);
 		
@@ -255,6 +255,7 @@ public class classifier {
 		double LCS_array[]=new double[len];
 		double[] dis_2=new double[len];
 		for(int i=0;i<len;i++){
+			
 			if(remove_list.contains(i)){
 				continue;
 			}
@@ -402,7 +403,7 @@ public class classifier {
 							System.out.println("pass:"+dict[i]);
 							dis_pass=Math.max(dis_pass, dis_2[i]);
 							
-						} else if(dis_p>dis_f) {
+						} else if(dis_p>=dis_f) {
 							//fail
 							System.out.println("fail:"+dict[i]);
 							dis_fail+=dis_2[i];
