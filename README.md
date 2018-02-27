@@ -1,4 +1,5 @@
-# DefectRepairing
-A tool to identify patch correctness
+The source code and some necessary scripts of our tool are in `./tool`
 
-We are still refactoring the code; A new stable version will come up soon
+All the patch we collected are in `./tool/patches`
+
+The detailed result of our experiment are in `./results`

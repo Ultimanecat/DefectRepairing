@@ -1,0 +1,11 @@
+diff -r -u -w Math34b/src/main/java/org/apache/commons/math3/genetics/ListPopulation.java Math34b_PatchHDReapir4/src/main/java/org/apache/commons/math3/genetics/ListPopulation.java
+--- Math34b/src/main/java/org/apache/commons/math3/genetics/ListPopulation.java	2017-08-23 00:23:12.085150146 +0800
++++ Math34b_PatchHDReapir4/src/main/java/org/apache/commons/math3/genetics/ListPopulation.java	2017-08-23 12:20:54.570227480 +0800
+@@ -206,6 +206,6 @@
+      * @return chromosome iterator
+      */
+     public Iterator<Chromosome> iterator() {
+-        return chromosomes.iterator();
++        return getChromosomes().iterator();
+     }
+ }

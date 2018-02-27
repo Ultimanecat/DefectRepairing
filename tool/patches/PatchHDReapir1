@@ -1,0 +1,12 @@
+diff -r -u -w Lang57b/src/java/org/apache/commons/lang/LocaleUtils.java Lang57b_PatchHDReapir1/src/java/org/apache/commons/lang/LocaleUtils.java
+--- Lang57b/src/java/org/apache/commons/lang/LocaleUtils.java	2017-08-23 00:18:52.709143656 +0800
++++ Lang57b_PatchHDReapir1/src/java/org/apache/commons/lang/LocaleUtils.java	2017-08-23 12:19:54.054225966 +0800
+@@ -220,7 +220,7 @@
+      * @return true if the locale is a known locale
+      */
+     public static boolean isAvailableLocale(Locale locale) {
+-        return cAvailableLocaleSet.contains(locale);
++        return availableLocaleList().contains(locale);
+     }
+ 
+     //-----------------------------------------------------------------------
