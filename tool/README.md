@@ -19,4 +19,4 @@ eg:
 ```
     python3 run.py Chart 1 Patch1
 ```
-Some intermediate result will be stored in your disk, be sure you have adequete disk space. The patch must have been stored in `../patches` in unidiff format before running.
+Some intermediate result will be stored in your disk, make sure you have enough disk space available. The patch must have been stored in `../patches` in unidiff format before running.
