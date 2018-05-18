@@ -233,6 +233,36 @@ public class classifier {
 //              }
                 //System.out.println(remove_list);
                 //merge similar execution, completely equal
+                double[][] distest=new double[len][len];
+                for(int i=0;i<len;i++){
+                        for(int j=0;j<len;j++){
+                                if(i==j){
+                                        distest[i][j]=0.0;
+                                        continue;
+                                }
+                                        
+                                double Length=Math.max(SpecArray_buggy[i].values.size(),SpecArray_patched[j].values.size());
+                                if(Length==0){
+                                        distest[i][j]=0;
+                                        continue;
+                                }
+                                double LCS;
+                                if(SpecArray_buggy[i].values.size()*SpecArray_patched[j].values.size()>2147483647){
+                                        remove_list.add(i);
+                                        continue;
+                                }
+                                try{
+                                        LCS=SpecArray_buggy[i].diff(SpecArray_patched[j],new Spectrum.Mode(mode, 0, 1, 1));
+                                } catch(Exception e){
+                                        e.printStackTrace();
+                                        remove_list.add(i);
+                                        continue;
+                                }
+                                distest[i][j]=LCS/Length;
+                                                
+                        }
+                }
+
                 if(verbose)
                 System.out.println(3+" "+remove_list);
                 if(false)
@@ -349,6 +379,7 @@ public class classifier {
               jPickle.dump(gen, patch_no+"/gen");
               jPickle.dump(dis, patch_no+"/dis");
               jPickle.dump(dis_2, patch_no+"/dis_2");
+              jPickle.dump(distest,patch_no+"/dis_test");
               jPickle.dump(dict, patch_no+"/dict");
               jPickle.dump(length_array, patch_no+"/Length_array");
               jPickle.dump(LCS_array, patch_no+"/LCS_array");  
