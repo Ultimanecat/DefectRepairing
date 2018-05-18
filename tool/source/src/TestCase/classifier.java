@@ -233,14 +233,9 @@ public class classifier {
 //              }
                 //System.out.println(remove_list);
                 //merge similar execution, completely equal
-                double[][] distest=new double[len][len];
+                double[][] distest=new double[len][len];//distest[i][j] is the distance between (buggy,test[i]) and (patched,test[j])
                 for(int i=0;i<len;i++){
-                        for(int j=0;j<len;j++){
-                                if(i==j){
-                                        distest[i][j]=0.0;
-                                        continue;
-                                }
-                                        
+                        for(int j=0;j<len;j++){        
                                 double Length=Math.max(SpecArray_buggy[i].values.size(),SpecArray_patched[j].values.size());
                                 if(Length==0){
                                         distest[i][j]=0;
