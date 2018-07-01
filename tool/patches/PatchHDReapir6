@@ -1,0 +1,12 @@
+diff -r -u -w Math53b/src/main/java/org/apache/commons/math/complex/Complex.java Math53b_PatchHDReapir6/src/main/java/org/apache/commons/math/complex/Complex.java
+--- Math53b/src/main/java/org/apache/commons/math/complex/Complex.java	2017-08-23 00:23:27.949150542 +0800
++++ Math53b_PatchHDReapir6/src/main/java/org/apache/commons/math/complex/Complex.java	2017-08-23 12:21:31.230228397 +0800
+@@ -150,7 +150,7 @@
+     public Complex add(Complex rhs)
+         throws NullArgumentException {
+         MathUtils.checkNotNull(rhs);
+-        return createComplex(real + rhs.getReal(),
++        return createComplex(real + rhs.getArgument(),
+             imaginary + rhs.getImaginary());
+     }
+ 

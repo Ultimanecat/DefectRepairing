@@ -1,0 +1,12 @@
+diff -r -u -w Time19b/src/main/java/org/joda/time/DateTimeZone.java Time19b_PatchHDReapir10/src/main/java/org/joda/time/DateTimeZone.java
+--- Time19b/src/main/java/org/joda/time/DateTimeZone.java	2017-08-23 00:21:33.961147691 +0800
++++ Time19b_PatchHDReapir10/src/main/java/org/joda/time/DateTimeZone.java	2017-08-23 12:22:41.306230150 +0800
+@@ -897,7 +897,7 @@
+                     return offsetLocal;
+                 }
+             }
+-        } else if (offsetLocal > 0) {
++        } else if (offsetLocal >= 0) {
+             long prev = previousTransition(instantAdjusted);
+             if (prev < instantAdjusted) {
+                 int offsetPrev = getOffset(prev);

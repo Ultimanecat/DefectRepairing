@@ -1,0 +1,12 @@
+diff -r -u -w Lang6b/src/main/java/org/apache/commons/lang3/text/translate/CharSequenceTranslator.java Lang6b_PatchHDReapir2/src/main/java/org/apache/commons/lang3/text/translate/CharSequenceTranslator.java
+--- Lang6b/src/main/java/org/apache/commons/lang3/text/translate/CharSequenceTranslator.java	2017-08-23 00:17:57.157142267 +0800
++++ Lang6b_PatchHDReapir2/src/main/java/org/apache/commons/lang3/text/translate/CharSequenceTranslator.java	2017-08-23 12:20:21.662226657 +0800
+@@ -73,7 +73,7 @@
+      * @throws IOException if and only if the Writer produces an IOException
+      */
+     public final void translate(CharSequence input, Writer out) throws IOException {
+-        if (out == null) {
++        if (out != null) {
+             throw new IllegalArgumentException("The Writer must not be null");
+         }
+         if (input == null) {
