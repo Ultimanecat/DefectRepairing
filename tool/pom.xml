@@ -16,6 +16,16 @@
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
   
+  <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+            </plugin>
+        </plugins>
+    </build>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

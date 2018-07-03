@@ -52,9 +52,11 @@ def parse_trace(project,bugid,patch_no):
     return
 
 def classify(patch_id):
-    os.system('javac classifier.java 2>/dev/null')
-    os.system('java classifier '+patch_id+'>'+patch_id+'/result')
-    f=open(patch_id+'/result')
+    #os.system('javac classifier.java 2>/dev/null')
+    #os.system('java classifier '+patch_id+'>'+patch_id+'/result')
+	args = ''+patch_id+'>'+patch_id+'/result'
+	os.system('mvn exec:java -Dexec.mainClass="defectrepairing.patchcorrectness.TestCase.identifier" [-Dexec.args='+args+']')    
+	f=open(patch_id+'/result')
     res=f.readline().strip()
     f.close()
     return res

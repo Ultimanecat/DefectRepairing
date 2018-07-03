@@ -1,3 +1,5 @@
+package defectrepairing.patchcorrectness.TestCase;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,7 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 
-public class classifier {
+public class identifier {
 	public static Object load(String FilePath){
     	Object o = null;
         try {
