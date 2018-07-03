@@ -46,7 +46,10 @@ def parse_trace(project,bugid,patch_no):
     print('parsing traces')
     if os.path.exists(os.path.join(patch_no,'LCS_array')):
         return
-    val=os.system('timeout 3600 make parse ARGS="'+project+' '+bugid+' '+patch_no+' '+os.path.join(os.getcwd(),'../traces')+' '+os.path.join(os.getcwd(),'../patches')+' '+os.path.join(os.getcwd(),'pylib/projects/')+'" 2>/dev/null >/dev/null')
+    #val=os.system('timeout 3600 make parse ARGS="'+project+' '+bugid+' '+patch_no+' '+os.path.join(os.getcwd(),'../traces')+' '+os.path.join(os.getcwd(),'../patches')+' '+os.path.join(os.getcwd(),'pylib/projects/')+'" 2>/dev/null >/dev/null')
+    args = ''+project+' '+bugid+' '+patch_no+' '+os.path.join(os.getcwd(),'../traces')+' '+os.path.join(os.getcwd(),'../patches')+' '+os.path.join(os.getcwd(),'pylib/projects/')+'" 2>/dev/null >/dev/null'
+#-Xms32m -Xmx8192m
+    val = os.system('mvn exec:java -Dexec.mainClass=\"defectrepairing.patchcorrectness.TestCase.identifier\" [-Dexec.args='+args+']')
     if val!=0:
         print('error')
     return
@@ -54,9 +57,9 @@ def parse_trace(project,bugid,patch_no):
 def classify(patch_id):
     #os.system('javac classifier.java 2>/dev/null')
     #os.system('java classifier '+patch_id+'>'+patch_id+'/result')
-	args = ''+patch_id+'>'+patch_id+'/result'
-	os.system('mvn exec:java -Dexec.mainClass="defectrepairing.patchcorrectness.TestCase.identifier" [-Dexec.args='+args+']')    
-	f=open(patch_id+'/result')
+    args = ''+patch_id+'>'+patch_id+'/result'
+    os.system('mvn exec:java -Dexec.mainClass=\"defectrepairing.patchcorrectness.TestCase.identifier\" [-Dexec.args='+args+']')
+    f=open(patch_id+'/result')
     res=f.readline().strip()
     f.close()
     return res
