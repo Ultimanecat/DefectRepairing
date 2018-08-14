@@ -4,7 +4,6 @@ JAR_PKG = DefectRepairing.Instrumenter.jar
 ENTRY_POINT = DefectRepairing.Instrumenter # should change to Framework 
 TEST = DefectRepairing.Instrumenter
 PARSER = DefectRepairing.parser
-MUTATE = TestCaseMutation.MutateTest
 D4J = defects4j.Main
 TESTCASEINSTR = TestCase.Instrumenter
 
@@ -24,7 +23,7 @@ defects4j/JavaMethod.java defects4j/defects4j.java defects4j/BuggyVersion.java \
 TestCase/patchparser.java \
 DefectRepairing/parser.java \
 DefectRepairing/Instrumenter.java TestCase/Instrumenter.java \
-TestCaseMutation/MutateOperator.java TestCaseMutation/Mutator.java defects4j/Main.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/Framework.java \
+defects4j/Main.java DefectRepairing/LineNumberPreProcessor.java DefectRepairing/Framework.java \
 TestCase/GetSingleTest_Chart.java \
 TestCase/listTestCase.java \
 TestCase/classifier.java \
@@ -110,8 +109,6 @@ test:
 	java -cp bin/:$(LIBS) $(TEST) $(TESTFLAG)
 parser:
 	java -cp bin/:$(LIBS) $(PARSER) $(PARSERFLAG)
-mutate:
-	java -cp bin/:$(LIBS) $(MUTATE) $(MUTATEFLAG)
 d4j:
 	java -cp bin/:$(LIBS) $(D4J) $(D4JFLAG)
 TestCaseInstr:

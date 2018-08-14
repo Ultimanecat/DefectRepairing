@@ -90,9 +90,9 @@ public class classifier {
 	}
 	
 	public static void main(String args[]){
-		boolean verbose=false;
+		boolean verbose=true;
 		String patch_no=args[0];
-		Set<Integer> pass=(Set<Integer>) load(patch_no+"/pass");
+		Set<Integer> pass=(Set<Integer>) load(patch_no+"/pass"); 
 		Set<Integer> gen=(Set<Integer>) load(patch_no+"/gen");
 		Set<Integer> fail=(Set<Integer>) load(patch_no+"/fail");
 		String[] dict=(String[]) load(patch_no+"/dict");
@@ -136,6 +136,29 @@ public class classifier {
                 }
                 System.out.println();
         }
+        if(false){
+        for (int i:pass){
+            for(int j:fail){
+                System.out.println(dis[i][j]);
+            }
+        }
+        System.out.println();
+        for (int i:pass){
+            for(int j:pass){
+                if(i<=j)
+                    continue;
+                System.out.println(dis[i][j]);
+            }
+        }
+        System.out.println();
+        for(int i:fail){
+            for (int j:fail){
+                if(i<=j)
+                    continue;
+                System.out.println(dis[i][j]);
+            }
+        }
+        }
         List<Double> pass_distances=new ArrayList<Double>();
 		List<Double> fail_distances=new ArrayList<Double>();
 		if(true){
@@ -165,15 +188,9 @@ public class classifier {
 					dis_f_aver/=fail.size();
 					if(pass.size()!=0){
 						//useless
-//						if(dis_p>=0.4 && dis_f>=0.4){
-//							//pass_distances.add(dis_2[i]);
-//							continue;
-//							
-//						}
 						if(dis_p<dis_f){
 							//pass
 							pass_distances.add(dis_2[i]);
-							//dis_pass_max=Math.max(dis_pass_max, dis_2[i]);
 							
 						} else if(dis_p>dis_f) {
 							fail_distances.add(dis_2[i]);
@@ -190,18 +207,16 @@ public class classifier {
 		}
 		
 		
-//        if(fail.size()==0 && pass.size()==0){
-//            System.out.println("Incorrect");
-//            System.exit(1);
-//        }
-		// || 
         double dis_pass,dis_fail;
 		dis_pass=max(pass_distances);
-		pass_distances.addAll(fail_distances);
+		
+		
+
 		dis_fail=mean(fail_distances);
 		int l=fail_distances.size();
-		if(dis_pass>=0.25 || dis_pass>=dis_fail){
-			System.out.println("Incorrect");
-		} else System.out.println("Correct");
+                if(dis_pass>=0.25 || dis_pass>=dis_fail){
+                        System.out.println("Incorrect");
+                } else System.out.println("Correct");		
+                //System.out.println(fail_distances.size()+pass_distances.size());
 	}
 }
