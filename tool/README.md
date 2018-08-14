@@ -1,5 +1,5 @@
 ## Requirement
-Java 1.8
+Java 1.7
 
 Python3
 
