@@ -199,7 +199,7 @@ public class classifier {
                                         
                                 double Length=Math.max(SpecArray_buggy[i].values.size(),SpecArray_buggy[j].values.size());
                                 if(Length==0){
-                                        dis[i][j]=0;
+                                        dis[i][j]=1;
                                         continue;
                                 }
                                 double LCS;
@@ -214,7 +214,7 @@ public class classifier {
                                         remove_list.add(i);
                                         continue;
                                 }
-                                dis[i][j]=LCS/Length;
+                                dis[i][j]=1-LCS/Length;
                                                 
                         }
                 }
@@ -253,7 +253,7 @@ public class classifier {
                                         remove_list.add(i);
                                         continue;
                                 }
-                                distest[i][j]=LCS/Length;
+                                distest[i][j]=1-LCS/Length;
                                                 
                         }
                 }
@@ -315,7 +315,7 @@ public class classifier {
                         }
                         double Length=Math.max(spec1.values.size(),spec2.values.size());
                         double LCS=spec1.diff(spec2,new Spectrum.Mode(mode, 0, 1, 1));
-                        dis_2[i]=LCS/Length;
+                        dis_2[i]=1-LCS/Length;
                         length_array[i]=Length;
                         LCS_array[i]=LCS;
                         
