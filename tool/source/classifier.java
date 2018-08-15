@@ -90,7 +90,7 @@ public class classifier {
 	}
 	
 	public static void main(String args[]){
-		boolean verbose=true;
+		boolean verbose=false;
 		String patch_no=args[0];
 		Set<Integer> pass=(Set<Integer>) load(patch_no+"/pass"); 
 		Set<Integer> gen=(Set<Integer>) load(patch_no+"/gen");
@@ -209,12 +209,8 @@ public class classifier {
 		
         double dis_pass,dis_fail;
 		dis_pass=max(pass_distances);
-		
-		
-
 		dis_fail=mean(fail_distances);
-		int l=fail_distances.size();
-                if(dis_pass>=0.25 || dis_pass>=dis_fail){
+                if(dis_pass>=0.25 || dis_pass>dis_fail){
                         System.out.println("Incorrect");
                 } else System.out.println("Correct");		
                 //System.out.println(fail_distances.size()+pass_distances.size());
