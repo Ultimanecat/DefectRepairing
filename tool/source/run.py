@@ -25,8 +25,7 @@ def trace(project,bugid,patch_no):
         os.system('mkdir ../traces')
     
     if not os.path.exists('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt"):
-        pylib.get_randoop_coverage.run(project,bugid,patch_no)
-    
+        pylib.get_randoop_coverage.run(project,bugid,patch_no)    
     if not os.path.exists('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt"):
         print('error')
         return 0
@@ -40,6 +39,7 @@ def trace(project,bugid,patch_no):
     pylib.run_trace_randoop.run(project,bugid,patch_no,pylib.coverage.process_cover_trace('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt",20))
     extract_trace(project,bugid,patch_no)
     return 1
+
 def extract_trace(project,bugid,patch_no):
     os.system('cd pylib && python3 call.py ../../traces/'+project+bugid+'b_'+patch_no)
 def parse_trace(project,bugid,patch_no):

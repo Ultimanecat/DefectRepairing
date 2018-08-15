@@ -57,3 +57,5 @@ def run(project,bugid,patch_no,tmp_tracefile='tmp_a'):
         for source_file in souce_file_list:
             os.system('rm '+source_file)
             os.system('mv '+source_file+'.bak '+source_file)
+        os.system('rm -rf '+w_buggy)
+        os.system('defects4j checkout -p '+project+' -v '+bugid+'b -w '+project+bugid+'b')

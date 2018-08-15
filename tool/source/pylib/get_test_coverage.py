@@ -54,3 +54,6 @@ def run(project,bugid,patch_no,tmp_tracefile='tmp_b'):
             os.system('mv '+source_file+'.bak '+source_file)
         os.system('rm -rf '+testdir)
         os.system('mv '+testdir+'_bak '+testdir)
+        
+        os.system('rm -rf '+w_buggy)
+        os.system('defects4j checkout -p '+project+' -v '+bugid+'b -w '+project+bugid+'b')
