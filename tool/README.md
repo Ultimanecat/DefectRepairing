@@ -9,7 +9,14 @@ unidiff (Python3 package)
 pip3 install unidiff
 ```
 
-defects4j 1.1
+defects4j 1.1 (Defects4JPath/framework/bin must be in $PATH)
+
+## Check out the source code
+[destinationPath] must contain no space
+```
+    git clone https://github.com/Ultimanecat/DefectRepairing.git [destinationPath]
+    cd [destinationPath]/tool
+```
 
 ## Build
 ```
@@ -19,7 +26,7 @@ defects4j 1.1
 ## Defects4j 
 	Modify defects4j with files in `defects4j-mod`.
 ```
-	cp -frap defects4j-mod/framework/ "PathtoDefects4j/"
+	cp -frap defects4j-mod/framework/ [PathtoDefects4j]/
 ```
 ## Usage
 ```
