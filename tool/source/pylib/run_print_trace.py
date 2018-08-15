@@ -10,6 +10,27 @@ def get_path_to_test(path_to_project):
             line=line.strip()
             return line.split('=')[1]
 
+def run_btrace(project,bugid,patch_no,tests,tmp_tracefile='tmp_c'):
+    tmp_tracefile+=project+bugid+patch_no+'run_print_trace'
+    tmp_tracefile=os.path.join(os.getcwd(),tmp_tracefile)
+    w_buggy=project+str(bugid)+'b'
+    w_patched=w_buggy+'_'+patch_no
+
+    patchfile=os.path.join('../patches',patch_no)
+    patch = PatchSet.from_filename(patchfile)
+
+    source_file=patch[0].source_file
+    target_file=patch[0].target_file
+
+    dir_path='../traces/'+w_patched
+    if(os.path.exists(tmp_tracefile)):
+        os.system('rm '+tmp_tracefile)
+    os.system('mkdir '+dir_path)
+    os.system('mkdir '+os.path.join(dir_path,'buggy'))
+    os.system('mkdir '+os.path.join(dir_path,'patched'))
+
+	
+
 def run(project,bugid,patch_no,tests,tmp_tracefile='tmp_c'):
 
     tmp_tracefile+=project+bugid+patch_no+'run_print_trace'
