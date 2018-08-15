@@ -45,3 +45,8 @@ Analyze the results
     Java classifier [patch_no]
 ```
 The last line of the output indicates whether the patch is correct or incorrect.
+
+## Troubleshooting
+* The tool identifiers more patches as "incorrect" than reported in the ICSE'18 paper.
+
+  One of the possible cause is the difference in hardware. The experiment was carried on a high-performance desktop PC. If you are running the experiment on a laptop or a PC with low-voltage CPU, the result will probably change. In such case, you may increase the timeout limit for Randoop, which is located in line 17 of run.py, and the original value is 180. Based on our experience, when the timeout limit is larger than a certain threshold, the output will be stable.
