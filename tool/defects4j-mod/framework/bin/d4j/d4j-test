@@ -107,10 +107,7 @@ my $SINGLE_TEST = $cmd_opts{t};
 my $TEST_SUITE = $cmd_opts{s};
 my $ARGS = $cmd_opts{a};
 $ARGS = "" unless defined $ARGS;
-#print($cmd_opts{a});
-if (defined $ARGS)
-   { print($ARGS);
-    print("123124");}
+
 if ((defined $SINGLE_TEST || defined $TEST_SUITE) && $REL_TESTS==1) {
     pod2usage( { -verbose => 1, -input => __FILE__} );
 }

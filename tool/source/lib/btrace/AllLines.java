@@ -38,7 +38,8 @@ import static com.sun.btrace.BTraceUtils.*;
 @BTrace
 public class AllLines {
     @OnMethod(
-        clazz="foo",
+        //clazz="foo",
+        clazz="org.jfree.chart.renderer.category.AbstractCategoryItemRenderer",
         location=@Location(value=Kind.LINE, line=-1)
     )
     public static void online(@ProbeClassName String pcn, @ProbeMethodName String pmn, int line) {

@@ -1084,7 +1084,7 @@ sub _ant_call {
                 " -Dbasedir=$self->{prog_root} ${option_str} $target 2>&1";
     my $log;
     my $ret = Utils::exec_cmd($cmd, "Running ant ($target)", \$log);
-    print($log);
+    #print($log);
     if (defined $log_file) {
         open(OUT, ">>$log_file") or die "Cannot open log file: $!";
         print(OUT "$log");
