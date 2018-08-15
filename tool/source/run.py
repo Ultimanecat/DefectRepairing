@@ -35,7 +35,7 @@ def trace(project,bugid,patch_no):
     if not os.path.exists('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"):
         print('error')
         return 0
-    exit()
+    
     pylib.run_print_trace.run(project,bugid,patch_no,set(list(pylib.coverage.get_trgr_tests(project,bugid))+list(pylib.coverage.process_cover_trace('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"))))
     pylib.run_trace_randoop.run(project,bugid,patch_no,pylib.coverage.process_cover_trace('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt",20))
     extract_trace(project,bugid,patch_no)

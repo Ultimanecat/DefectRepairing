@@ -38,7 +38,7 @@ def run_btrace(project,bugid,patch_no,tests,tmp_tracefile='tmp_c'):
     os.system('mkdir '+os.path.join(dir_path,'patched'))
 
     patch_info_file="fdsa.txt"
-    os.system("rf -rf "+patch_info_file)
+    os.system("rm -rf "+patch_info_file)
     os.system('make PatchInfo ARGS="'+os.path.join('../source/',source_file)+' '+patch_info_file+' '+','.join(line_no_list)+'" >/dev/null')
     f=open(patch_info_file)
     patched_class=f.readlines()[-1].strip()
