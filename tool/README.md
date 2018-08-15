@@ -24,7 +24,7 @@ defects4j 1.1 (Defects4JPath/framework/bin must be in $PATH)
 ```
 
 ## Defects4j 
-	Modify defects4j with files in `defects4j-mod`.
+Modify defects4j with files in `defects4j-mod`.
 ```
 	cp -frap defects4j-mod/framework/ [PathtoDefects4j]/
 ```
