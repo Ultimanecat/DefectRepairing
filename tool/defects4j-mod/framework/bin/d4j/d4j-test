@@ -55,6 +55,10 @@ tests of the checked-out project version are executed.
 Only run this single test method (optional). By default all tests are executed.
 Format: <test_class>::<test_method>.
 
+=item -a C<args>
+
+Ant arguments.
+
 =item -s F<test_suite>
 
 The archive file name of an external test suite (optional). The default test suite is the
@@ -94,13 +98,19 @@ use Getopt::Std;
 use Pod::Usage;
 
 my %cmd_opts;
-getopts('t:w:rs:n', \%cmd_opts) or pod2usage( { -verbose => 1, -input => __FILE__} );
+getopts('t:w:rs:n:a:', \%cmd_opts) or pod2usage( { -verbose => 1, -input => __FILE__} );
 
 my $WORK_DIR = Utils::get_abs_path($cmd_opts{w} // ".");
 my $REL_TESTS = defined $cmd_opts{r} ? 1 : 0;
 my $COMPILE_FLAG = defined $cmd_opts{n} ? 0 : 1;
 my $SINGLE_TEST = $cmd_opts{t};
 my $TEST_SUITE = $cmd_opts{s};
+my $ARGS = $cmd_opts{a};
+$ARGS = "" unless defined $ARGS;
+#print($cmd_opts{a});
+if (defined $ARGS)
+   { print($ARGS);
+    print("123124");}
 if ((defined $SINGLE_TEST || defined $TEST_SUITE) && $REL_TESTS==1) {
     pod2usage( { -verbose => 1, -input => __FILE__} );
 }
@@ -127,19 +137,19 @@ if (defined $TEST_SUITE){
         Utils::extract_test_suite($TEST_SUITE, $test_dir) or die;
         $project->compile_ext_tests($test_dir) or die "Cannot compile extracted test suite!";
     }
-    $project->run_ext_tests($test_dir, "*.java", $tmp, $SINGLE_TEST) or die "Cannot run tests!";
+    $project->run_ext_tests($test_dir, "*.java", $tmp, $ARGS, $SINGLE_TEST) or die "Cannot run tests!";
 } elsif ($REL_TESTS) {
     # Compile and run only relevant developer-written tests
     if($COMPILE_FLAG){
         $project->compile_tests() or die "Cannot compile test suite!";
     }
-    $project->run_relevant_tests($tmp) or die "Cannot run tests!";
+    $project->run_relevant_tests($tmp, $ARGS) or die "Cannot run tests!";
 } else {
     # Compile and run developer-written tests
     if($COMPILE_FLAG){
         $project->compile_tests() or die "Cannot compile test suite!";
     }
-    $project->run_tests($tmp, $SINGLE_TEST) or die "Cannot run tests!";
+    $project->run_tests($tmp, $ARGS, $SINGLE_TEST) or die "Cannot run tests!";
 }
 
 my $trigger = Utils::get_failing_tests($tmp) or die "Cannot determine triggering tests!";
