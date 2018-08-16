@@ -70,7 +70,7 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     f.close()
     os.system("cd %s && ./btracec AllLines.java"%(btrace_home))
 
-    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/AllLines.class -n" % (btrace_home, tmp_tracefile, btrace_home)
+    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/AllLines.class" % (btrace_home, tmp_tracefile, btrace_home)
 
     for test in tests:
         test=test.strip()
@@ -106,42 +106,3 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
         cmpl_flag=False
 
-def run_method():
-
-    f=open("%s/TargetMethod_pattern.java"%(btrace_home))
-    s=f.read()
-    f.close()
-    s=s.replace('__CLASS__NAME__',patched_class)
-    s=s.replace('__METHOD__NAME__',patched_method)
-    s=s.replace('__SIGNATURE__',method_signature)
-    f=open("%s/TargetMethod.java"%(btrace_home),'w')
-    f.write(s)
-    f.close()
-    os.system("cd %s && ./btracec TargetMethod.java"%(btrace_home))
-
-    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/TargetMethod.class -n" % (btrace_home, tmp_tracefile, btrace_home)
-
-
-    for test in tests:
-        test=test.strip()
-
-        status=os.system('timeout 90 defects4j test -t '+test+' -w '+w_buggy+jvmargs)
-        if status==0:
-            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))))
-
-        status=os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
-        if status==0:
-            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched_e','__'.join(test.split('::'))))
-    
-    testfile='../test_gen_randoop/'+project+'/randoop/'+bugid+'/'+project+'-'+bugid+'b-randoop.'+bugid+'.tar.bz2'
-    
-    for Test_Case in randoop_tests:
-        test='Randoop.'+Test_Case.strip()
-
-        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
-        if status==0:
-            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))))
-
-        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
-        if status==0:
-            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched_e','__'.join(test.split('::'))))
