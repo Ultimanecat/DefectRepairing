@@ -25,7 +25,8 @@ DefectRepairing/LineNumberPreProcessor.java \
 TestCase/GetSingleTest_Chart.java \
 TestCase/listTestCase.java \
 TestCase/classifier.java \
-TestCase/MethodName.java
+TestCase/MethodName.java \
+TestCase/TraceParser.java
 
 # 设置你的java编译器
 # Set your java compiler here:
@@ -116,7 +117,7 @@ instru_class:
 listTestCase:
 	java -cp bin/:$(LIBS) TestCase.listTestCase $(ARGS)
 parse:
-	java -Xms32m -Xmx8192m -cp bin/:$(LIBS) TestCase.classifier $(ARGS)
+	java -Xms32m -Xmx8192m -cp bin/:$(LIBS) TestCase.TraceParser $(ARGS)
 MthdInstr:
 	java -cp bin/:$(LIBS) TestCase.MethodInstr $(ARGS)
 PatchInfo:
