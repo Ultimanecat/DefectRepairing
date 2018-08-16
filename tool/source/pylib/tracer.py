@@ -4,6 +4,21 @@ from unidiff import PatchSet
 
 btrace_home=os.path.abspath("./lib/btrace")
 
+def extract_trace(src,tgt,start,end):
+    s=''
+    f=open(src)
+    for line in f:
+        if line.startswith('---'):
+            cur=line.strip().split(':')[1]
+            cur=int(cur)
+            if cur>=start and cur<=end:
+                s+=line
+    f.close()
+    f=open(tgt,'w')
+    f.write(s)
+    f.close()
+
+
 def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     tmp_tracefile+=project+bugid+patch_no+'run_print_trace'
     tmp_tracefile=os.path.join(os.getcwd(),tmp_tracefile)
@@ -37,8 +52,10 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     f=open(patch_info_file)
     lines=f.readlines()
     patched_class=lines[-1].strip()
-    patched_method,method_signature=lines[0].strip().split('\t')
+    patched_method,method_signature,start_line,end_line=lines[0].strip().split('\t')
     f.close()
+    start_line=int(start_line)
+    end_line=int(end_line)
 
     os.system('defects4j compile -w '+w_buggy)
     os.system('defects4j compile -w '+w_patched)
@@ -58,23 +75,28 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     for test in tests:
         test=test.strip()
         
-        status=os.system('timeout 90 defects4j test -t '+test+' -w '+w_buggy+jvmargs)
-        if status==0:
+        os.system('timeout 90 defects4j test -t '+test+' -w '+w_buggy+jvmargs)
+        if os.path.exists(tmp_tracefile):
+            extract_trace(tmp_tracefile,os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))),start_line,end_line)
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy','__'.join(test.split('::'))))
-        
-        status=os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
-        if status==0:
+
+
+        os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
+        if os.path.exists(tmp_tracefile):
+            extract_trace(tmp_tracefile,os.path.join(dir_path,'patched_e','__'.join(test.split('::'))),start_line,end_line)
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
 
     for Test_Case in randoop_tests:
         test='Randoop.'+Test_Case.strip()
 
         status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
-        if status==0:
+        if os.path.exists(tmp_tracefile):
+            extract_trace(tmp_tracefile,os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))),start_line,end_line)
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy','__'.join(test.split('::'))))
 
         status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
-        if status==0:
+        if os.path.exists(tmp_tracefile):
+            extract_trace(tmp_tracefile,os.path.join(dir_path,'patched_e','__'.join(test.split('::'))),start_line,end_line)
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
 
 def run_method():
