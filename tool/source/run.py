@@ -7,6 +7,8 @@ import pylib.coverage
 import time
 def checkout(project,bugid,patch_no):
     os.system('defects4j checkout -p '+project+' -v '+bugid+'b -w '+project+bugid+'b')
+    if os.path.exists('./'+project+bugid+'b_'+patch_no):
+        return
     os.system('cp -r '+project+bugid+'b'+' '+project+bugid+'b_bak')
     os.system('patch -u -p0 < ../patches/'+patch_no)
     os.system('mv '+project+bugid+'b '+project+bugid+'b_'+patch_no)
@@ -14,7 +16,7 @@ def checkout(project,bugid,patch_no):
 
 def gen_test_randoop(project,bug_id):
     if not os.path.exists('../test_gen_randoop/'+project+'/randoop/'+str(bug_id)):
-        os.system('run_randoop.pl -p '+project+' -v '+str(bug_id)+'b -n '+str(bug_id)+' -o ../test_gen_randoop -b 180')
+        os.system('run_randoop.pl -p '+project+' -v '+str(bug_id)+'b -n '+str(bug_id)+' -o ../test_gen_randoop -b 420')
 
 def trace(project,bugid,patch_no):
     if not os.path.exists('../randoop_cover'):

@@ -28,12 +28,16 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     os.system('mkdir '+dir_path)
     os.system('mkdir '+os.path.join(dir_path,'buggy'))
     os.system('mkdir '+os.path.join(dir_path,'patched'))
+    os.system('mkdir '+os.path.join(dir_path,'buggy_e'))
+    os.system('mkdir '+os.path.join(dir_path,'patched_e'))
 
     patch_info_file="fdsa.txt"
     os.system("rm -rf "+patch_info_file)
     os.system('make PatchInfo ARGS="'+os.path.join('../source/',source_file)+' '+patch_info_file+' '+','.join(line_no_list)+'" >/dev/null')
     f=open(patch_info_file)
-    patched_class=f.readlines()[-1].strip()
+    lines=f.readlines()
+    patched_class=lines[-1].strip()
+    patched_method,signature=lines[0].strip().split('\t')
     f.close()
 
     f=open("%s/AllLines_pattern.java"%(btrace_home))
@@ -57,7 +61,7 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
         status=os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
-    
+
     for Test_Case in randoop_tests:
         test='Randoop.'+Test_Case.strip()
 
@@ -69,4 +73,38 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
 
+    f=open("%s/TargetMethod_pattern.java"%(btrace_home))
+    s=f.read()
+    f.close()
+    s=s.replace('__CLASS__NAME__',patched_class)
+    s=s.replace('__METHOD__NAME__',patched_method)
+    s=s.replace('__SIGNATURE__',method_signature)
+    f=open("%s/TargetMethod.java"%(btrace_home),'w')
+    f.write(s)
+    f.close()
+    os.system("cd %s && ./btracec TargetMethod.java"%(btrace_home))
 
+    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/TargetMethod.class" % (btrace_home, tmp_tracefile, btrace_home)
+
+
+    for test in tests:
+        test=test.strip()
+
+        status=os.system('timeout 90 defects4j test -t '+test+' -w '+w_buggy+jvmargs)
+        if status==0:
+            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))))
+
+        status=os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
+        if status==0:
+            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched_e','__'.join(test.split('::'))))
+
+    for Test_Case in randoop_tests:
+        test='Randoop.'+Test_Case.strip()
+
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
+        if status==0:
+            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))))
+
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
+        if status==0:
+            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched_e','__'.join(test.split('::'))))
