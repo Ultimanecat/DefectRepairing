@@ -4,7 +4,7 @@ from unidiff import PatchSet
 
 btrace_home=os.path.abspath("./lib/btrace")
 
-def run(project,bugid,patch_no,tests,tmp_tracefile='tmp_c'):
+def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     tmp_tracefile+=project+bugid+patch_no+'run_print_trace'
     tmp_tracefile=os.path.join(os.getcwd(),tmp_tracefile)
     w_buggy=project+str(bugid)+'b'
@@ -36,7 +36,7 @@ def run(project,bugid,patch_no,tests,tmp_tracefile='tmp_c'):
     patched_class=f.readlines()[-1].strip()
     f.close()
 
-    f=open("%s/pattern.java"%(btrace_home))
+    f=open("%s/AllLines_pattern.java"%(btrace_home))
     s=f.read()
     f.close()
     s=s.replace('__CLASS__NAME__',patched_class)
@@ -49,9 +49,24 @@ def run(project,bugid,patch_no,tests,tmp_tracefile='tmp_c'):
 
     for test in tests:
         test=test.strip()
+        
         status=os.system('timeout 90 defects4j test -t '+test+' -w '+w_buggy+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy','__'.join(test.split('::'))))
+        
         status=os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
+    
+    for Test_Case in randoop_tests:
+        test='Randoop.'+Test_Case.strip()
+
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
+        if status==0:
+            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy','__'.join(test.split('::'))))
+
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
+        if status==0:
+            os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
+
+
