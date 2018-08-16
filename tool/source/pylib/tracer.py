@@ -70,7 +70,7 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     f.close()
     os.system("cd %s && ./btracec AllLines.java"%(btrace_home))
 
-    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/AllLines.class" % (btrace_home, tmp_tracefile, btrace_home)
+    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/AllLines.class -n" % (btrace_home, tmp_tracefile, btrace_home)
 
     for test in tests:
         test=test.strip()
@@ -113,7 +113,7 @@ def run_method():
     f.close()
     os.system("cd %s && ./btracec TargetMethod.java"%(btrace_home))
 
-    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/TargetMethod.class" % (btrace_home, tmp_tracefile, btrace_home)
+    jvmargs=" -a -Djvmargs=\-javaagent:%s/btrace\-agent.jar=noserver,debug=true,scriptOutputFile=%s,script=%s/TargetMethod.class -n" % (btrace_home, tmp_tracefile, btrace_home)
 
 
     for test in tests:
