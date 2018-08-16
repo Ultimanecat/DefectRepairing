@@ -98,7 +98,7 @@ use Getopt::Std;
 use Pod::Usage;
 
 my %cmd_opts;
-getopts('t:w:rs:n:a:', \%cmd_opts) or pod2usage( { -verbose => 1, -input => __FILE__} );
+getopts('t:w:rs:a:n', \%cmd_opts) or pod2usage( { -verbose => 1, -input => __FILE__} );
 
 my $WORK_DIR = Utils::get_abs_path($cmd_opts{w} // ".");
 my $REL_TESTS = defined $cmd_opts{r} ? 1 : 0;
