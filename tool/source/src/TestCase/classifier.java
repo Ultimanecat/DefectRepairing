@@ -111,6 +111,8 @@ public class classifier {
                 String tracedir_patched=new File(tracedir, "patched_e").toString();
                 getFilelist(tracedir_buggy,l_buggy);
                 getFilelist(tracedir_patched,l_patched);
+                
+                //Match traces of tests in both patched and buggy version
                 List<String>l=new ArrayList<String>();
                 for(String s:l_buggy){
                         String[] a=s.split("/");
@@ -125,14 +127,6 @@ public class classifier {
                         
                 }
                 List<String> failing_tests=get_failing_tests(project,bugid);
-//              System.out.println(failing_tests);
-//              for(String s:failing_tests){
-//                              System.out.println(s);
-//              }
-//              for(String s:l){
-//                      if(in_list(failing_tests,s))
-//                              System.out.println(s);
-//              }
                 
                 int len=l.size();
                 double[][] dis=new double[len][len];
@@ -158,7 +152,7 @@ public class classifier {
                 System.out.println(fail);
                 System.out.println(pass);
                 }
-                //System.out.println(pass);
+                
                 List<Integer>remove_list=new ArrayList<Integer>();
                 Spectrum[] SpecArray_buggy=new Spectrum[len];
                 Spectrum[] SpecArray_patched=new Spectrum[len];
@@ -232,31 +226,6 @@ public class classifier {
 //                      }
 //              }
                 //System.out.println(remove_list);
-                //merge similar execution, completely equal
-                double[][] distest=new double[len][len];//distest[i][j] is the distance between (buggy,test[i]) and (patched,test[j])
-                for(int i=0;i<len;i++){
-                        for(int j=0;j<len;j++){        
-                                double Length=Math.max(SpecArray_buggy[i].values.size(),SpecArray_patched[j].values.size());
-                                if(Length==0){
-                                        distest[i][j]=0;
-                                        continue;
-                                }
-                                double LCS;
-                                if(SpecArray_buggy[i].values.size()*SpecArray_patched[j].values.size()>2147483647){
-                                        remove_list.add(i);
-                                        continue;
-                                }
-                                try{
-                                        LCS=SpecArray_buggy[i].diff(SpecArray_patched[j],new Spectrum.Mode(mode, 0, 1, 1));
-                                } catch(Exception e){
-                                        e.printStackTrace();
-                                        remove_list.add(i);
-                                        continue;
-                                }
-                                distest[i][j]=1-LCS/Length;
-                                                
-                        }
-                }
 
                 if(verbose)
                 System.out.println(3+" "+remove_list);
@@ -306,9 +275,6 @@ public class classifier {
                                 remove_list.add(i);
                                 continue;
                         }
-//                      System.out.println(i);
-//                      System.out.println(spec1.values.size());
-//                      System.out.println(spec2.values.size());
                         if((double)spec1.values.size()*(double)spec2.values.size()>5e9 && ! (fail.contains(i) && fail.size()==1)){
                                 remove_list.add(i);
                                 continue;
@@ -321,8 +287,6 @@ public class classifier {
                         
                         
                 }
-                //System.out.println(5+" "+remove_list);
-                //System.out.println(remove_list);
                 
                 if(verbose){
                         for(int i=0;i<len;i++){
@@ -374,7 +338,6 @@ public class classifier {
               jPickle.dump(gen, patch_no+"/gen");
               jPickle.dump(dis, patch_no+"/dis");
               jPickle.dump(dis_2, patch_no+"/dis_2");
-              jPickle.dump(distest,patch_no+"/dis_test");
               jPickle.dump(dict, patch_no+"/dict");
               jPickle.dump(length_array, patch_no+"/Length_array");
               jPickle.dump(LCS_array, patch_no+"/LCS_array");  
