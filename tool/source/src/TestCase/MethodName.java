@@ -177,7 +177,7 @@ public class MethodName {
 
 						if(types.size()!=0)
 							signature=signature+" ("+StringUtils.join(types.toArray(), ", ")+")";
-						result+=methodname+"\t"+signature+"\n";
+						result+=methodname+"\t"+signature+"\t"+StartLine+"\t"+EndLine+"\n";
 						
 					}
 					

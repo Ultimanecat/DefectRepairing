@@ -77,6 +77,8 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
 
+def run_method():
+
     f=open("%s/TargetMethod_pattern.java"%(btrace_home))
     s=f.read()
     f.close()
