@@ -174,8 +174,9 @@ public class MethodName {
 						for(SingleVariableDeclaration o:l){
 							types.add(o.getType().toString());
 						}
-						
-						signature=signature+" ("+StringUtils.join(types.toArray(), ", ")+")";
+
+						if(types.size()!=0)
+							signature=signature+" ("+StringUtils.join(types.toArray(), ", ")+")";
 						result+=methodname+"\t"+signature+"\n";
 						
 					}
