@@ -2,21 +2,130 @@ package TestCase;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import DefectRepairing.parser.Spectrum;
-import DefectRepairing.parser.Spectrum.Mode.ModeEnum;
+import org.wickedsource.diffparser.api.DiffParser;
+import org.wickedsource.diffparser.api.UnifiedDiffParser;
+import org.wickedsource.diffparser.api.model.Diff;
+import org.wickedsource.diffparser.api.model.Hunk;
+import org.wickedsource.diffparser.api.model.Line;
+
+
 import DefectRepairing.jPickle;
 public class TraceParser {
+	
+	public static int diff(ArrayList<Integer>spec1,ArrayList<Integer>spec2){
+		int f[][]= new int[2][spec2.size()+1];
+		int min = spec2.size() < spec1.size() ? spec2.size() : spec1.size();
+		Iterator<Integer> it1 = spec1.iterator(), it2 = spec2.iterator();
+		for (int i = 1; it1.hasNext(); i++) {
+			Integer l1 = it1.next();
+			it2=spec2.iterator();
+			for (int j = 1; it2.hasNext(); j++) {
+				Integer l2 = it2.next();
+				if (l1.compareTo(l2)==0) {
+					f[i%2][j] = f[(i - 1)%2][j - 1] + 1;
+				} else if (f[(i - 1)%2][j] <= f[i%2][j - 1]) {// 优先让spec2失配
+					f[i%2][j] = f[i%2][j - 1];
+				} else {
+					f[i%2][j] = f[(i - 1)%2][j];
+				}
+			}
+		}
+		return min - f[spec1.size()%2][spec2.size()];
+	}
+	
+	public static ArrayList<Integer> form(BufferedReader reader) throws IOException{
+		ArrayList<Integer> spec = new ArrayList<Integer>();
+		for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+			line=line.trim();
+			if(line.startsWith("---")){
+				line=line.split(":")[1];
+				spec.add(Integer.valueOf(line));
+			}
+		}
+		return spec;
+	}
+	
+	public static ArrayList<Integer> form(BufferedReader reader, Map<Integer, Integer> LNMap) throws IOException{
+		ArrayList<Integer> spec = new ArrayList<Integer>();
+		for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+			line=line.trim();
+			if(line.startsWith("---")){
+				line=line.split(":")[1];
+				spec.add(LNMap.get(Integer.valueOf(line)));
+			}
+		}
+		return spec;
+	}
+	
+	public static Map<Integer, Integer> getLineMap(int alllines, String filepath) {
+		DiffParser parser = new UnifiedDiffParser();
+		InputStream in = null;
+		try {
+			in = new FileInputStream(filepath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		List<Diff> diff = parser.parse(in);
+		Diff d = diff.get(0);
+		Map<Integer, Integer> lnmap = new HashMap<Integer, Integer>();
+		List<Hunk> hunks = d.getHunks();
+		int fromp = -1, top = -1;
+		for (Iterator<Hunk> it = hunks.iterator(); it.hasNext();) {
+			Hunk h = it.next();
+			List<Line> lines = h.getLines();
+			Iterator<Line> lit = lines.iterator();
+
+			if (fromp != -1) {
+				while (fromp < h.getFromFileRange().getLineStart() - 1) {
+					lnmap.put(++top, ++fromp);
+				}
+			} else {
+				fromp = h.getFromFileRange().getLineStart() - 1;
+				top = h.getToFileRange().getLineStart() - 1;
+			}
+			while (lit.hasNext()) {
+				Line l = lit.next();
+				switch (l.getLineType()) {
+				case FROM:
+					fromp++;
+					break;
+				case TO:
+					lnmap.put(++top, -1);
+					break;
+				case NEUTRAL:
+					lnmap.put(++top, ++fromp);
+					break;
+				}
+			}
+		}
+		while (top < alllines) {
+			lnmap.put(++top, ++fromp);
+		}
+		for(int i=1;i<=alllines;i++)
+		{
+			if(!lnmap.containsKey(i)){
+				lnmap.put(i, i);
+			}
+			
+		}
+		return lnmap;
+	}
 
 	
 	public static void getFilelist(String DirPath, List<String> FileList) {
@@ -89,20 +198,18 @@ public class TraceParser {
 		bugid=args[1];
 		patch_no=args[2];
                 Path_to_d4j=args[5];
-//		
-//		System.out.print("\n"+patch_no+":");
-//		
+                
 		run( project, bugid, patch_no, tracedir, patchdir, verbose);
 //		run( "Chart", "15", "Patch13", tracedir, patchdir, verbose);
 		
-		//run( "Chart", "15", "Patch13", tracedir, patchdir, verbose);
+
 		
 		
 		
 	}
 	
 	public static void run(String project,String bugid,String patch_no,String tracedir,String patchdir,boolean verbose) throws FileNotFoundException, IOException{
-                ModeEnum mode = Spectrum.Mode.ModeEnum.LCS_simple;
+
                 tracedir=new File(tracedir, project+bugid+"b_"+patch_no).toString();
                 
                 List<String>l_buggy=new ArrayList<String>();
@@ -154,28 +261,28 @@ public class TraceParser {
                 }
                 
                 List<Integer>remove_list=new ArrayList<Integer>();
-                Spectrum[] SpecArray_buggy=new Spectrum[len];
-                Spectrum[] SpecArray_patched=new Spectrum[len];
+                ArrayList[] SpecArray_buggy=new ArrayList[len];
+                ArrayList[] SpecArray_patched=new ArrayList[len];
+                
                 for(int i=0;i<len;i++) {
-                        SpecArray_buggy[i]=new Spectrum();
+                        
                         String TraceFile=new File(tracedir_buggy, dict[i]).toString();
-                        //System.out.println(TraceFile);
+                        
                         try {
-                                SpecArray_buggy[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+                                SpecArray_buggy[i]=form(new BufferedReader(new FileReader(TraceFile)));
                         } catch (Exception e) {
                                 e.printStackTrace();
-                                //System.out.println(TraceFile);
-                                //System.exit(1);
                                 remove_list.add(i);
                                 continue;
                         }
                         
+                        Map<Integer, Integer> LNMap = getLineMap(3000,new File(patchdir, patch_no).toString());
                         
-                        SpecArray_patched[i]=new Spectrum(new File(patchdir, patch_no).toString());
+                        
                         TraceFile=new File(tracedir_patched, dict[i]).toString();
                         
                         try {
-                                SpecArray_patched[i].form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+                                SpecArray_patched[i]=form(new BufferedReader(new FileReader(TraceFile)),LNMap);
                         } catch (Exception e) {
                                 e.printStackTrace();
                                 remove_list.add(i);
@@ -191,18 +298,18 @@ public class TraceParser {
                                         continue;
                                 }
                                         
-                                double Length=Math.max(SpecArray_buggy[i].values.size(),SpecArray_buggy[j].values.size());
+                                double Length=Math.max(SpecArray_buggy[i].size(),SpecArray_buggy[j].size());
                                 if(Length==0){
                                         dis[i][j]=1;
                                         continue;
                                 }
                                 double LCS;
-                                if(SpecArray_buggy[i].values.size()*SpecArray_buggy[j].values.size()>2147483647){
+                                if(SpecArray_buggy[i].size()*SpecArray_buggy[j].size()>2147483647){
                                         remove_list.add(i);
                                         continue;
                                 }
                                 try{
-                                        LCS=SpecArray_buggy[i].diff(SpecArray_buggy[j],new Spectrum.Mode(mode, 0, 1, 1));
+                                        LCS=diff(SpecArray_buggy[i],SpecArray_buggy[j]);
                                 } catch(Exception e){
                                         e.printStackTrace();
                                         remove_list.add(i);
@@ -251,11 +358,11 @@ public class TraceParser {
                                 continue;
                         }
                         //System.out.println(dict[i]);
-                        Spectrum spec1=new Spectrum();
+                        ArrayList<Integer> spec1=null;
                         String TraceFile=new File(new File(tracedir, "buggy").toString(), dict[i]).toString();
                         //System.out.println(TraceFile);
                         try{
-                                spec1.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+                                spec1=form(new BufferedReader(new FileReader(TraceFile)));
                         } catch(Exception e){
                                 e.printStackTrace();
                                 System.out.println(i);
@@ -265,22 +372,22 @@ public class TraceParser {
                         }
                         
                         
-                        Spectrum spec2=new Spectrum(new File(patchdir, patch_no).toString());
+                        ArrayList<Integer> spec2=null;
                         TraceFile=new File(new File(tracedir, "patched").toString(), dict[i]).toString();
                         try{
-                                spec2.form(DefectRepairing.parser.parsetrace(new BufferedReader(new FileReader(TraceFile))));
+                                spec2=form(new BufferedReader(new FileReader(TraceFile)),getLineMap(3000,new File(patchdir, patch_no).toString()));
                         } catch(Exception e){
                                 e.printStackTrace();
                                 
                                 remove_list.add(i);
                                 continue;
                         }
-                        if((double)spec1.values.size()*(double)spec2.values.size()>5e9 && ! (fail.contains(i) && fail.size()==1)){
+                        if((double)spec1.size()*(double)spec2.size()>5e9 && ! (fail.contains(i) && fail.size()==1)){
                                 remove_list.add(i);
                                 continue;
                         }
-                        double Length=Math.max(spec1.values.size(),spec2.values.size());
-                        double LCS=spec1.diff(spec2,new Spectrum.Mode(mode, 0, 1, 1));
+                        double Length=Math.max(spec1.size(),spec2.size());
+                        double LCS=diff(spec1,spec2);
                         dis_2[i]=1-LCS/Length;
                         length_array[i]=Length;
                         LCS_array[i]=LCS;
