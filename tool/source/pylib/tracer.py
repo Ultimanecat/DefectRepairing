@@ -58,22 +58,22 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     for test in tests:
         test=test.strip()
         
-        status=os.system('timeout 90 defects4j test -n -t '+test+' -w '+w_buggy+jvmargs)
+        status=os.system('timeout 90 defects4j test -t '+test+' -w '+w_buggy+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy','__'.join(test.split('::'))))
         
-        status=os.system('timeout 90 defects4j test -n -t '+test+' -w  '+w_patched+jvmargs)
+        status=os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
 
     for Test_Case in randoop_tests:
         test='Randoop.'+Test_Case.strip()
 
-        status=os.system('timeout 90 defects4j test -n -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy','__'.join(test.split('::'))))
 
-        status=os.system('timeout 90 defects4j test -n -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched','__'.join(test.split('::'))))
 
@@ -94,21 +94,21 @@ def run(project,bugid,patch_no,tests,randoop_tests=[],tmp_tracefile='tmp_c'):
     for test in tests:
         test=test.strip()
 
-        status=os.system('timeout 90 defects4j test -n -t '+test+' -w '+w_buggy+jvmargs)
+        status=os.system('timeout 90 defects4j test -t '+test+' -w '+w_buggy+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))))
 
-        status=os.system('timeout 90 defects4j test -n -t '+test+' -w  '+w_patched+jvmargs)
+        status=os.system('timeout 90 defects4j test -t '+test+' -w  '+w_patched+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched_e','__'.join(test.split('::'))))
 
     for Test_Case in randoop_tests:
         test='Randoop.'+Test_Case.strip()
 
-        status=os.system('timeout 90 defects4j test -n -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_buggy+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'buggy_e','__'.join(test.split('::'))))
 
-        status=os.system('timeout 90 defects4j test -n -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
+        status=os.system('timeout 90 defects4j test -s '+testfile+' -t '+Test_Case.strip()+' -w '+w_patched+jvmargs)
         if status==0:
             os.system('mv '+tmp_tracefile+' '+os.path.join(dir_path,'patched_e','__'.join(test.split('::'))))
