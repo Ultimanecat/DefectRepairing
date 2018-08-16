@@ -4,6 +4,7 @@ import pylib.run_print_trace
 import pylib.get_randoop_coverage
 import pylib.get_test_coverage
 import pylib.coverage
+import pylib.tracer
 import time
 def checkout(project,bugid,patch_no):
     os.system('defects4j checkout -p '+project+' -v '+bugid+'b -w '+project+bugid+'b')
@@ -36,10 +37,7 @@ def trace(project,bugid,patch_no):
     if not os.path.exists('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"):
         print('error')
         return 0
-    
-    pylib.run_print_trace.run(project,bugid,patch_no,set(list(pylib.coverage.get_trgr_tests(project,bugid))+list(pylib.coverage.process_cover_trace('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"))))
-    pylib.run_trace_randoop.run(project,bugid,patch_no,pylib.coverage.process_cover_trace('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt",20))
-    extract_trace(project,bugid,patch_no)
+    pylib.tracer.run(project,bugid,patch_no,set(list(pylib.coverage.get_trgr_tests(project,bugid))+list(pylib.coverage.process_cover_trace('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"))),pylib.coverage.process_cover_trace('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt",20))
     return 1
 
 def extract_trace(project,bugid,patch_no):
