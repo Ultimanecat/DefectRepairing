@@ -90,7 +90,7 @@ public class classifier {
 	}
 	
 	public static void main(String args[]){
-		boolean verbose=false;
+		boolean verbose= args.length>1;
 		String patch_no=args[0];
 		Set<Integer> pass=(Set<Integer>) load(patch_no+"/pass"); 
 		Set<Integer> gen=(Set<Integer>) load(patch_no+"/gen");

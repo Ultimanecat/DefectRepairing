@@ -44,7 +44,7 @@ def extract_trace(project,bugid,patch_no):
     os.system('cd pylib && python3 call.py ../../traces/'+project+bugid+'b_'+patch_no)
 def parse_trace(project,bugid,patch_no):
     os.system("mkdir "+patch_no)
-    print('parsing traces')
+    print('parsing traces.....................')
     if os.path.exists(os.path.join(patch_no,'LCS_array')):
         return
     val=os.system('timeout 3600 make parse ARGS="'+project+' '+bugid+' '+patch_no+' '+os.path.join(os.getcwd(),'../traces')+' '+os.path.join(os.getcwd(),'../patches')+' '+os.path.join(os.getcwd(),'pylib/projects/')+'" 2>/dev/null >/dev/null')

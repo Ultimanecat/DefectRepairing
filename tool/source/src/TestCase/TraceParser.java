@@ -45,7 +45,7 @@ public class TraceParser {
 				}
 			}
 		}
-		return min - f[spec1.size()%2][spec2.size()];
+		return f[spec1.size()%2][spec2.size()];
 	}
 	
 	public static ArrayList<Integer> form(BufferedReader reader) throws IOException{
@@ -357,7 +357,7 @@ public class TraceParser {
                         if(remove_list.contains(i)){
                                 continue;
                         }
-                        //System.out.println(dict[i]);
+                        if(verbose)System.out.println(dict[i]);
                         ArrayList<Integer> spec1=null;
                         String TraceFile=new File(new File(tracedir, "buggy").toString(), dict[i]).toString();
                         //System.out.println(TraceFile);
@@ -391,7 +391,7 @@ public class TraceParser {
                         dis_2[i]=1-LCS/Length;
                         length_array[i]=Length;
                         LCS_array[i]=LCS;
-                        
+                        if(verbose)System.out.println(LCS);
                         
                 }
                 
