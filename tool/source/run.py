@@ -68,7 +68,7 @@ def classify(patch_id):
 
 def run(project,bugid,patch_no):
     checkout(project,bugid,patch_no)
-    #gen_test_randoop(project,bugid)
+    gen_test_randoop(project,bugid)
     
     trace(project,bugid,patch_no)
     parse_trace(project,bugid,patch_no)
