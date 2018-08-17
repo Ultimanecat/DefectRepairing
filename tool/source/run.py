@@ -30,15 +30,21 @@ def trace(project,bugid,patch_no):
     if not os.path.exists('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt"):
         pylib.get_randoop_coverage.run(project,bugid,patch_no)    
     if not os.path.exists('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt"):
-        print('error')
-        return 0
+        print('Warning: Randoop failed to generate tests')
+        randoop_tests=[]
+    else:
+        randoop_tests=pylib.coverage.process_cover_trace('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt",20)
+    
     if not os.path.exists('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"):
         pylib.get_test_coverage.run(project,bugid,patch_no)
     if not os.path.exists('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"):
         print('error')
-        return 0
-    pylib.tracer.run(project,bugid,patch_no,set(list(pylib.coverage.get_trgr_tests(project,bugid))+list(pylib.coverage.process_cover_trace('../test_coverage/'+project+bugid+'b_'+patch_no+".txt"))),pylib.coverage.process_cover_trace('../randoop_cover/'+project+bugid+'b_'+patch_no+".txt",20))
-    return 1
+        return 1
+    else
+        tests=set(list(pylib.coverage.get_trgr_tests(project,bugid))+list(pylib.coverage.process_cover_trace('../test_coverage/'+project+bugid+'b_'+patch_no+".txt")))
+    
+    pylib.tracer.run(project,bugid,patch_no,tests,randoop_tests)
+    return 0
 
 def extract_trace(project,bugid,patch_no):
     os.system('cd pylib && python3 call.py ../../traces/'+project+bugid+'b_'+patch_no)
