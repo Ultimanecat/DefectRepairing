@@ -1,6 +1,6 @@
-diff -r -u -w Math50b/src/main/java/org/apache/commons/math/analysis/solvers/BaseSecantSolver.java Math50b_PatchHDReapir5/src/main/java/org/apache/commons/math/analysis/solvers/BaseSecantSolver.java
+diff -r -u -w Math50b/src/main/java/org/apache/commons/math/analysis/solvers/BaseSecantSolver.java Math50b_PatchHDRepair5/src/main/java/org/apache/commons/math/analysis/solvers/BaseSecantSolver.java
 --- Math50b/src/main/java/org/apache/commons/math/analysis/solvers/BaseSecantSolver.java	2017-08-23 00:23:20.521150357 +0800
-+++ Math50b_PatchHDReapir5/src/main/java/org/apache/commons/math/analysis/solvers/BaseSecantSolver.java	2017-08-23 12:21:14.710227984 +0800
++++ Math50b_PatchHDRepair5/src/main/java/org/apache/commons/math/analysis/solvers/BaseSecantSolver.java	2017-08-23 12:21:14.710227984 +0800
 @@ -185,7 +185,7 @@
                  case REGULA_FALSI:
                      // Nothing.

@@ -1,6 +1,6 @@
-diff -r -u -w Math85b/src/java/org/apache/commons/math/analysis/solvers/UnivariateRealSolverUtils.java Math85b_PatchHDReapir9/src/java/org/apache/commons/math/analysis/solvers/UnivariateRealSolverUtils.java
+diff -r -u -w Math85b/src/java/org/apache/commons/math/analysis/solvers/UnivariateRealSolverUtils.java Math85b_PatchHDRepair9/src/java/org/apache/commons/math/analysis/solvers/UnivariateRealSolverUtils.java
 --- Math85b/src/java/org/apache/commons/math/analysis/solvers/UnivariateRealSolverUtils.java	2017-08-23 00:24:04.485151456 +0800
-+++ Math85b_PatchHDReapir9/src/java/org/apache/commons/math/analysis/solvers/UnivariateRealSolverUtils.java	2017-08-23 12:22:19.898229615 +0800
++++ Math85b_PatchHDRepair9/src/java/org/apache/commons/math/analysis/solvers/UnivariateRealSolverUtils.java	2017-08-23 12:22:19.898229615 +0800
 @@ -195,7 +195,7 @@
          } while ((fa * fb > 0.0) && (numIterations < maximumIterations) && 
                  ((a > lowerBound) || (b < upperBound)));

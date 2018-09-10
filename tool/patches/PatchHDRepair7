@@ -1,6 +1,6 @@
-diff -r -u -w Math70b/src/main/java/org/apache/commons/math/analysis/solvers/BisectionSolver.java Math70b_PatchHDReapir7/src/main/java/org/apache/commons/math/analysis/solvers/BisectionSolver.java
+diff -r -u -w Math70b/src/main/java/org/apache/commons/math/analysis/solvers/BisectionSolver.java Math70b_PatchHDRepair7/src/main/java/org/apache/commons/math/analysis/solvers/BisectionSolver.java
 --- Math70b/src/main/java/org/apache/commons/math/analysis/solvers/BisectionSolver.java	2017-08-23 00:23:34.805150714 +0800
-+++ Math70b_PatchHDReapir7/src/main/java/org/apache/commons/math/analysis/solvers/BisectionSolver.java	2017-08-23 12:21:50.134228870 +0800
++++ Math70b_PatchHDRepair7/src/main/java/org/apache/commons/math/analysis/solvers/BisectionSolver.java	2017-08-23 12:21:50.134228870 +0800
 @@ -69,7 +69,7 @@
      /** {@inheritDoc} */
      public double solve(final UnivariateRealFunction f, double min, double max, double initial)
