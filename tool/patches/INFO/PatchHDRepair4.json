@@ -1,1 +1,1 @@
-{"ID": "PatchHDRepair4", "tool": "HDRepair", "correctness": "Incorrect", "project": "Math", "bug_id": "34"}
+{"ID": "PatchHDRepair4", "tool": "HDRepair", "correctness": "Correct", "project": "Math", "bug_id": "34"}
