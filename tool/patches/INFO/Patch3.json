@@ -1,1 +1,1 @@
-{"ID": "Patch3", "tool": "jGenprog", "correctness": "Unknown", "bug_id": "3", "project": "Chart"}
+{"ID": "Patch3", "tool": "jGenprog", "correctness": "Correct", "bug_id": "3", "project": "Chart"}
