@@ -39,6 +39,6 @@ HDRepair: [DiffTGen](https://github.com/qixin5/DiffTGen/tree/master/expt0/datase
 
 Note that some of labels have been changed from "Unknown" or "Incorrect" to "Correct" so the statistic may be not identical with the paper [Identifying Patch Correctness in Test-Based Program Repair](https://arxiv.org/abs/1706.09120) because it is difficault to prove a patch correct when the patch is not syntactically identical with human patches.
 
-Patch3: "Unknown" to "Correct". See [PatchCorrectness.pdf](https://github.com/yyxhdy/defects4j-correctness/blob/master/PatchCorrectness.pdf)
+Patch3: "Unknown" to "Correct". See [arja-supplemental.pdf](https://github.com/yyxhdy/arja-supplemental/blob/master/arja-supplemental.pdf)
 
 PatchHDRepair7: "Incorrect" to "Correct". See [dataset](https://github.com/qixin5/DiffTGen/tree/master/expt0/dataset)
