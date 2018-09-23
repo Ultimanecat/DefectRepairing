@@ -1,5 +1,5 @@
 ## Requirement
-Java 1.7
+Java 1.7 (Please set JAVA_HOME before running the script)
 
 Python3
 
