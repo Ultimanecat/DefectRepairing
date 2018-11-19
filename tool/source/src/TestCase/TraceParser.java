@@ -28,9 +28,36 @@ import DefectRepairing.jPickle;
 public class TraceParser {
 	
 	public static int diff(ArrayList<Integer>spec1,ArrayList<Integer>spec2){
-		int f[][]= new int[2][spec2.size()+1];
+		int difftype = 1;
+                Iterator<Integer> it1 = spec1.iterator(), it2 = spec2.iterator();
+                if(difftype == 0)
+                {
+                        Map<Integer,Integer> map1 = new HashMap<Integer,Integer>();
+                        Map<Integer,Integer> map2 = new HashMap<Integer,Integer>();
+                        int ans = 0;
+                        while(it1.hasNext()) {
+                                Integer l1 = it1.next();
+                                if(map1.containsKey(l1))map1.put(l1,map1.get(l1)+1);
+                                else map1.put(l1,1);
+                        }
+                        while(it2.hasNext()) {
+                                Integer l2 = it2.next();
+                                if(map2.containsKey(l2))map2.put(l2,map2.get(l2)+1);
+                                else map2.put(l2,1);
+                        }
+                        for(Integer i : map2.keySet())
+                        {
+                                if(map1.containsKey(i))
+                                {
+                                        if(map1.get(i)<map2.get(i))ans+=map1.get(i);
+                                        else ans+=map2.get(i);
+                                }
+                        }
+                        return ans;
+                }
+                int f[][]= new int[2][spec2.size()+1];
 		int min = spec2.size() < spec1.size() ? spec2.size() : spec1.size();
-		Iterator<Integer> it1 = spec1.iterator(), it2 = spec2.iterator();
+		
 		for (int i = 1; it1.hasNext(); i++) {
 			Integer l1 = it1.next();
 			it2=spec2.iterator();
