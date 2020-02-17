@@ -9,7 +9,7 @@ unidiff (Python3 package)
 pip3 install unidiff
 ```
 
-defects4j 1.2 (Defects4JPath/framework/bin must be in $PATH)
+defects4j 1.3 (Defects4JPath/framework/bin must be in $PATH)
 
 ## Check out the source code
 [destinationPath] must contain no space
